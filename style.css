@@ -1,5 +1,5 @@
 /* =========================================================
-   SKYCAST AI — ENTERPRISE MODERN DESIGN SYSTEM (V3.0)
+   SKYCAST AI — ENTERPRISE MODERN DESIGN SYSTEM (V3.2)
    Designed for High-Impact Hackathon Presentation & Usability
 ========================================================= */
 
@@ -13,8 +13,8 @@
     /* Color Palette (Deep Obsidian & High-Tech Accents) */
     --bg: #060b13;
     --bg-surface: #0a1320;
-    --bg-card: rgba(14, 25, 41, 0.78);
-    --bg-card-hover: rgba(20, 36, 58, 0.85);
+    --bg-card: rgba(14, 25, 41, 0.82);
+    --bg-card-hover: rgba(20, 36, 58, 0.9);
 
     --text-main: #f8fafc;
     --text-muted: #94a3b8;
@@ -32,7 +32,7 @@
     --whatsapp: #25D366;
 
     --border: rgba(255, 255, 255, 0.08);
-    --border-highlight: rgba(0, 242, 254, 0.25);
+    --border-highlight: rgba(0, 242, 254, 0.3);
 
     --radius-sm: 8px;
     --radius-md: 14px;
@@ -40,6 +40,7 @@
     --radius-xl: 26px;
 
     --font-main: "Plus Jakarta Sans", "Inter", "Noto Sans Devanagari", sans-serif;
+    --font-mono: "JetBrains Mono", monospace;
     --shadow-card: 0 15px 35px -5px rgba(0, 0, 0, 0.4), 0 0 1px 1px rgba(255, 255, 255, 0.05);
 }
 
@@ -47,7 +48,7 @@
 body.light {
     --bg: #f8fafc;
     --bg-surface: #f1f5f9;
-    --bg-card: rgba(255, 255, 255, 0.92);
+    --bg-card: rgba(255, 255, 255, 0.94);
     --bg-card-hover: rgba(241, 245, 249, 0.98);
 
     --text-main: #0f172a;
@@ -68,22 +69,22 @@ body {
     font-family: var(--font-main);
     color: var(--text-main);
     background-color: var(--bg);
-    background-image: 
-        radial-gradient(circle at 15% 10%, rgba(0, 242, 254, 0.08), transparent 30%),
-        radial-gradient(circle at 85% 20%, rgba(99, 102, 241, 0.09), transparent 35%),
-        linear-gradient(180deg, #060b13 0%, #08121f 50%, #050a12 100%);
-    background-attachment: fixed;
     line-height: 1.5;
     font-size: 13.5px;
     overflow-x: hidden;
     transition: background 0.3s ease, color 0.3s ease;
 }
 
-body.light {
-    background-image: 
-        radial-gradient(circle at 15% 10%, rgba(0, 242, 254, 0.08), transparent 30%),
-        radial-gradient(circle at 85% 20%, rgba(99, 102, 241, 0.07), transparent 35%),
-        linear-gradient(180deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
+/* Background Ambient Weather Particle Canvas */
+.meteo-bg-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.65;
 }
 
 /* Scrollbars */
@@ -183,6 +184,8 @@ button { cursor: pointer; }
 ========================================================= */
 
 .app-layout {
+    position: relative;
+    z-index: 1;
     display: flex;
     min-height: 100vh;
 }
@@ -444,11 +447,12 @@ body.light .sim-select { background: #ffffff; }
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 6px 0 18px;
+    padding: 6px 0 12px;
     background: linear-gradient(180deg, var(--bg) 75%, transparent);
 }
 
 .search-box {
+    position: relative;
     flex: 1;
     height: 48px;
     display: flex;
@@ -484,6 +488,29 @@ body.light .sim-select { background: #ffffff; }
 
 .search-box input::placeholder {
     color: var(--text-dim);
+}
+
+/* Audio Waveform Animation */
+.voice-waveform {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    height: 20px;
+}
+.voice-waveform span {
+    width: 3px;
+    height: 100%;
+    background: var(--cyan);
+    border-radius: 3px;
+    animation: waveBar 0.8s infinite ease-in-out alternate;
+}
+.voice-waveform span:nth-child(2) { animation-delay: 0.2s; height: 70%; }
+.voice-waveform span:nth-child(3) { animation-delay: 0.4s; height: 90%; }
+.voice-waveform span:nth-child(4) { animation-delay: 0.1s; height: 50%; }
+
+@keyframes waveBar {
+    from { height: 20%; }
+    to { height: 100%; }
 }
 
 .voice-btn {
@@ -561,9 +588,55 @@ body.light .sim-select { background: #ffffff; }
     border-color: rgba(37, 211, 102, 0.3);
 }
 
+.pwa-pill {
+    background: linear-gradient(135deg, rgba(0, 242, 254, 0.15), rgba(99, 102, 241, 0.15));
+    border-color: rgba(0, 242, 254, 0.4);
+    color: var(--cyan);
+}
+
 .topbar-btn:hover, .topbar-icon-btn:hover {
     border-color: var(--border-highlight);
     transform: translateY(-2px);
+}
+
+/* Quick District Chips Bar */
+.quick-district-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+}
+
+.quick-district-label {
+    color: var(--text-dim);
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.quick-pills-list {
+    display: flex;
+    gap: 6px;
+}
+
+.district-chip {
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: all 0.2s;
+}
+
+.district-chip.active, .district-chip:hover {
+    border-color: var(--cyan);
+    color: var(--cyan);
+    background: rgba(0, 242, 254, 0.1);
 }
 
 
@@ -1285,8 +1358,20 @@ body.light .sim-select { background: #ffffff; }
 
 
 /* =========================================================
-   DIGITAL TWIN SIMULATOR
+   DIGITAL TWIN SIMULATOR & 3D CANVAS
 ========================================================= */
+
+.digital-twin-visualizer-card {
+    padding: 20px;
+}
+
+.digital-twin-canvas {
+    width: 100%;
+    height: 240px;
+    border-radius: var(--radius-md);
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border);
+}
 
 .twin-controls-card {
     padding: 26px;
@@ -1381,7 +1466,7 @@ body.light .sim-select { background: #ffffff; }
 
 
 /* =========================================================
-   LIGHTNING RADAR & GAUGE
+   LIGHTNING RADAR CANVAS & GAUGE
 ========================================================= */
 
 .lightning-meter-box {
@@ -1395,32 +1480,37 @@ body.light .sim-select { background: #ffffff; }
     border: 1px solid rgba(245, 158, 11, 0.2);
 }
 
-.meter-circle {
-    width: 130px;
-    height: 130px;
+.radar-container {
+    position: relative;
+    width: 140px;
+    height: 140px;
     flex-shrink: 0;
     border-radius: 50%;
     border: 2px solid var(--amber);
     box-shadow: 0 0 35px rgba(245, 158, 11, 0.25);
+    overflow: hidden;
+}
+
+.lightning-radar-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.meter-circle-overlay {
+    position: absolute;
+    inset: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: radial-gradient(circle, rgba(245, 158, 11, 0.15), transparent 70%);
+    z-index: 2;
+    background: radial-gradient(circle, rgba(0, 0, 0, 0.4), transparent 80%);
 }
 
-.electric-symbol {
-    font-size: 26px;
-    animation: flashIcon 0.8s infinite alternate;
-}
-
-@keyframes flashIcon {
-    from { transform: scale(1); filter: drop-shadow(0 0 2px #f59e0b); }
-    to { transform: scale(1.2); filter: drop-shadow(0 0 12px #f59e0b); }
-}
-
-.meter-circle strong { font-size: 28px; color: var(--amber); }
-.meter-circle small { font-size: 9px; color: var(--text-dim); }
+.meter-circle-overlay strong { font-size: 28px; color: var(--amber); }
+.meter-circle-overlay small { font-size: 9px; color: #cbd5e1; }
 
 .meter-details {
     display: flex;
@@ -1461,6 +1551,86 @@ body.light .sim-select { background: #ffffff; }
 .shelter-info strong { font-size: 13px; display: block; }
 .shelter-info small { color: var(--text-dim); font-size: 11px; }
 .shelter-badge { padding: 4px 8px; border-radius: 6px; background: rgba(16, 185, 129, 0.15); color: var(--emerald); font-size: 10px; font-weight: 700; }
+
+
+/* =========================================================
+   JAL SANRAKSHAN AI & HARVESTING
+========================================================= */
+
+.water-calc-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.water-yield-summary {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 18px;
+}
+
+.yield-stat-box {
+    padding: 16px;
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(0, 242, 254, 0.25);
+    background: linear-gradient(135deg, rgba(0, 242, 254, 0.08), rgba(59, 130, 246, 0.05));
+    text-align: center;
+}
+.yield-stat-box span { color: var(--cyan); font-size: 12px; font-weight: 700; display: block; }
+.yield-stat-box strong { font-size: 24px; color: #ffffff; display: block; margin: 4px 0; }
+.yield-stat-box small { color: var(--text-dim); font-size: 10.5px; }
+
+.hydro-advisory-box {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.hydro-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.02);
+}
+.hydro-icon { font-size: 24px; padding: 8px; border-radius: var(--radius-sm); background: rgba(0, 242, 254, 0.1); }
+.hydro-item strong { font-size: 13px; display: block; }
+.hydro-item p { color: var(--text-muted); font-size: 11.5px; margin-top: 3px; }
+
+
+/* =========================================================
+   MANDI PRICE AI & PMFBY
+========================================================= */
+
+.mandi-price-box {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.mandi-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.02);
+}
+.mandi-item strong { font-size: 13px; display: block; }
+.mandi-item small { color: var(--text-dim); font-size: 11px; }
+
+.pmfby-box {
+    padding: 16px;
+    border-radius: var(--radius-md);
+    border: 1px dashed rgba(16, 185, 129, 0.4);
+    background: rgba(16, 185, 129, 0.04);
+}
+.pmfby-box strong { color: var(--emerald); font-size: 12.5px; display: block; margin-bottom: 4px; }
+.pmfby-box p { color: var(--text-muted); font-size: 11.5px; line-height: 1.6; }
 
 
 /* =========================================================
@@ -2058,7 +2228,7 @@ body.light .kisan-advice-box { color: #065f46; }
     .hero-banner { flex-direction: column; align-items: flex-start; }
     .hero-score-badge { align-self: flex-end; width: 130px; height: 130px; }
     .score-number { font-size: 36px; }
-    .grid-2-col, .grid-3-col, .grid-4-col, .forecast-container, .weather-metrics-grid, .hazard-quick-bar, .mission-timeline {
+    .grid-2-col, .grid-3-col, .grid-4-col, .forecast-container, .weather-metrics-grid, .hazard-quick-bar, .mission-timeline, .water-yield-summary {
         grid-template-columns: 1fr;
     }
     #weatherMap { height: 380px; }

@@ -5,11 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SkyCast AI — Hyperlocal Weather Intelligence & Autonomous Disaster Management</title>
     <meta name="description" content="Enterprise-grade AI District Disaster Management, Digital Twin Simulator, Lightning Prediction Radar, Smart SOS Dispatch, and Autonomous Rescue Team Coordination.">
+    <meta name="theme-color" content="#00f2fe">
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="https://openweathermap.org/img/wn/01d@2x.png">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 
     <!-- Leaflet -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -19,6 +24,9 @@
 </head>
 
 <body>
+
+<!-- Background Weather Ambient Animation Canvas -->
+<canvas id="meteoBackgroundCanvas" class="meteo-bg-canvas"></canvas>
 
 <!-- Fullscreen Emergency Red Flash Overlay (Stage WOW Factor) -->
 <div id="strobeOverlay" class="strobe-overlay hidden"></div>
@@ -105,12 +113,18 @@
                 <b data-i18n="navLeaderboard">District Ranking</b>
             </button>
 
-            <div class="nav-section-title">SECTORS & ANALYTICS</div>
+            <div class="nav-section-title">SECTORS & SUSTAINABILITY</div>
 
             <button class="nav-btn" data-screen="farmerScreen">
                 <span class="nav-icon">🌱</span>
-                <b data-i18n="navFarmer">Kisan Mode (AI)</b>
+                <b data-i18n="navFarmer">Kisan Mode & Mandi</b>
                 <span class="nav-badge green">KRISHI</span>
+            </button>
+
+            <button class="nav-btn" data-screen="waterScreen">
+                <span class="nav-icon">🚰</span>
+                <b data-i18n="navWater">Jal Sanrakshan AI</b>
+                <span class="nav-badge cyan">ECO</span>
             </button>
 
             <button class="nav-btn" data-screen="citizenScreen">
@@ -177,7 +191,7 @@
                 <span class="online">● DISTRICT READY</span>
             </div>
             <div class="sidebar-footer">
-                SkyCast AI v3.0 • District Edition
+                SkyCast AI v3.2 • Enterprise Edition
             </div>
         </div>
 
@@ -196,10 +210,16 @@
                 <input
                     id="city"
                     type="text"
-                    placeholder="Search city or district (e.g. Kanpur, Lucknow, Delhi, Varanasi)..."
+                    placeholder="Search district (e.g. Kanpur, Lucknow, Varanasi, Delhi)..."
                     autocomplete="off"
                 >
-                <button id="voiceSearch" class="voice-btn" title="Voice Search" type="button">
+                
+                <!-- Audio Waveform Indicator -->
+                <div id="voiceWaveform" class="voice-waveform hidden">
+                    <span></span><span></span><span></span><span></span>
+                </div>
+
+                <button id="voiceSearch" class="voice-btn" title="Voice Search (Speak in English / Hindi)" type="button">
                     🎙️
                 </button>
                 <button id="search" class="search-submit" type="button" data-i18n="searchBtn">
@@ -236,10 +256,30 @@
                 💬
             </button>
 
+            <!-- PWA Install Button -->
+            <button id="pwaInstallBtn" class="topbar-btn pwa-pill hidden" type="button" title="Install SkyCast AI on Mobile / Laptop">
+                📲 <b>Install App</b>
+            </button>
+
             <button id="theme" class="topbar-icon-btn" title="Toggle theme" type="button">
                 🌙
             </button>
         </header>
+
+        <!-- QUICK DISTRICT PILLS ROW -->
+        <div class="quick-district-bar">
+            <span class="quick-district-label">⚡ Quick Districts:</span>
+            <div class="quick-pills-list">
+                <button class="district-chip active" data-city="Kanpur">📍 Kanpur</button>
+                <button class="district-chip" data-city="Lucknow">📍 Lucknow</button>
+                <button class="district-chip" data-city="Varanasi">📍 Varanasi</button>
+                <button class="district-chip" data-city="Prayagraj">📍 Prayagraj</button>
+                <button class="district-chip" data-city="Agra">📍 Agra</button>
+                <button class="district-chip" data-city="Gorakhpur">📍 Gorakhpur</button>
+                <button class="district-chip" data-city="Noida">📍 Noida</button>
+                <button class="district-chip" data-city="Delhi">📍 Delhi</button>
+            </div>
+        </div>
 
         <!-- EMERGENCY BANNER (Shown when high risk detected or simulated) -->
         <div id="disasterBanner" class="disaster-banner hidden">
@@ -630,6 +670,18 @@
                 </p>
             </div>
 
+            <!-- Interactive Digital Twin Visualizer Canvas -->
+            <div class="ui-card digital-twin-visualizer-card">
+                <div class="card-header">
+                    <div>
+                        <small class="card-subtitle">INTERACTIVE 2D/3D DISTRICT FLOOD SIMULATION</small>
+                        <h3 class="card-title">Live Topographical Inundation Mesh</h3>
+                    </div>
+                    <span class="status-pill danger" id="twinSimStatusPill">SIMULATING INUNDATION</span>
+                </div>
+                <canvas id="digitalTwinCanvas" class="digital-twin-canvas"></canvas>
+            </div>
+
             <!-- Digital Twin Controls -->
             <div class="ui-card twin-controls-card">
                 <div class="slider-group">
@@ -760,7 +812,7 @@
             </div>
 
             <div class="grid-2-col">
-                <!-- Lightning Gauge Card -->
+                <!-- Lightning Gauge Card with Animated Radar Canvas -->
                 <div class="ui-card lightning-gauge-card">
                     <div class="card-header">
                         <div>
@@ -771,10 +823,12 @@
                     </div>
 
                     <div class="lightning-meter-box">
-                        <div class="meter-circle">
-                            <span class="electric-symbol">⚡</span>
-                            <strong id="lightningProbVal">78%</strong>
-                            <small>Strike Likelihood</small>
+                        <div class="radar-container">
+                            <canvas id="lightningRadarCanvas" class="lightning-radar-canvas"></canvas>
+                            <div class="meter-circle-overlay">
+                                <strong id="lightningProbVal">78%</strong>
+                                <small>Strike Likelihood</small>
+                            </div>
                         </div>
 
                         <div class="meter-details">
@@ -950,7 +1004,101 @@
 
 
         <!-- =================================================
-             SCREEN 6: RESOURCE INVENTORY
+             SCREEN 6: JAL SANRAKSHAN AI (RAINWATER HARVESTING)
+        ================================================== -->
+        <section id="waterScreen" class="screen">
+            <div class="page-title-group">
+                <small data-i18n="waterSub">GROUNDWATER RECHARGE & RAIN HARVESTING INTELLIGENCE</small>
+                <h1 data-i18n="waterTitle">Jal Sanrakshan AI (Rainwater Harvest Yield Estimator)</h1>
+                <p data-i18n="waterDesc">
+                    Calculate harvestable rainwater volume (liters) from 5-day precipitation forecasts, compute groundwater recharging points, and calculate municipal water tanker monetary savings.
+                </p>
+            </div>
+
+            <div class="grid-2-col">
+                <div class="ui-card">
+                    <div class="card-header">
+                        <div>
+                            <small class="card-subtitle">CALCULATION MODEL (JAL SHAKTI ABHIYAN)</small>
+                            <h3 class="card-title">Catchment Area & Surface Parameter</h3>
+                        </div>
+                    </div>
+
+                    <div class="water-calc-form">
+                        <div class="form-group">
+                            <label>Catchment / Roof Area (छत या खेत का क्षेत्रफल):</label>
+                            <div class="slider-header-row">
+                                <span id="roofAreaLabel">1,500 Sq. Feet (Residential Rooftop)</span>
+                            </div>
+                            <input type="range" id="roofAreaSlider" min="200" max="10000" step="100" value="1500" class="custom-slider">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Catchment Surface Runoff Coefficient (सतह का प्रकार):</label>
+                            <select id="surfaceCoeff" class="form-control">
+                                <option value="0.85">Concrete Pucca Rooftop (85% Runoff Efficiency)</option>
+                                <option value="0.75">Corrugated Tin / Metal Sheet (75% Efficiency)</option>
+                                <option value="0.55">Paved Courtyard / Tiles (55% Efficiency)</option>
+                                <option value="0.30">Agricultural Open Farmland (30% Infiltration)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="water-yield-summary">
+                        <div class="yield-stat-box">
+                            <span>💧 Harvestable Rainwater</span>
+                            <strong id="harvestLitersVal">14,200 Liters</strong>
+                            <small>Based on upcoming 5-day rain forecast</small>
+                        </div>
+
+                        <div class="yield-stat-box">
+                            <span>💰 Water Tanker Savings</span>
+                            <strong id="waterSavingsVal">₹ 1,750 Saved</strong>
+                            <small>Equivalent to 3.5 water tankers</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ui-card">
+                    <div class="card-header">
+                        <div>
+                            <small class="card-subtitle">DISTRICT GROUNDWATER ADVISORY</small>
+                            <h3 class="card-title">Hydro-Geological Recharging Directive</h3>
+                        </div>
+                    </div>
+
+                    <div class="hydro-advisory-box">
+                        <div class="hydro-item">
+                            <span class="hydro-icon">🏞️</span>
+                            <div>
+                                <strong>Amrit Sarovar / Village Pond Intake</strong>
+                                <p>Optimal intake velocity: Divert runoff through silt-trap chambers to prevent siltation.</p>
+                            </div>
+                        </div>
+
+                        <div class="hydro-item">
+                            <span class="hydro-icon">🧪</span>
+                            <div>
+                                <strong>First Flush Filtration Efficiency</strong>
+                                <p>Discard first 20 minutes of roof runoff (contains airborne particulate pollution PM2.5/PM10).</p>
+                            </div>
+                        </div>
+
+                        <div class="hydro-item">
+                            <span class="hydro-icon">⚡</span>
+                            <div>
+                                <strong>Borewell Recharging Safety</strong>
+                                <p>Ensure multi-layer sand/gravel filter bed before injecting roof water into shallow aquifers.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- =================================================
+             SCREEN 7: RESOURCE INVENTORY
         ================================================== -->
         <section id="resourcesScreen" class="screen">
             <div class="page-title-group">
@@ -1065,7 +1213,7 @@
 
 
         <!-- =================================================
-             SCREEN 7: DISTRICT COMMAND CENTER
+             SCREEN 8: DISTRICT COMMAND CENTER
         ================================================== -->
         <section id="disasterScreen" class="screen">
             <div class="page-title-group">
@@ -1189,7 +1337,7 @@
 
 
         <!-- =================================================
-             SCREEN 8: DISTRICT LEADERBOARD
+             SCREEN 9: DISTRICT LEADERBOARD
         ================================================== -->
         <section id="leaderboardScreen" class="screen">
             <div class="page-title-group">
@@ -1261,14 +1409,14 @@
 
 
         <!-- =================================================
-             SCREEN 9: KISAN SMART ADVISORY
+             SCREEN 10: KISAN SMART ADVISORY & MANDI AI
         ================================================== -->
         <section id="farmerScreen" class="screen">
             <div class="page-title-group">
                 <small data-i18n="farmerSub">AGRICULTURE INTELLIGENCE & KRISHI COPILOT</small>
-                <h1 data-i18n="farmerTitle">Kisan Smart Advisor (किसान मित्र)</h1>
+                <h1 data-i18n="farmerTitle">Kisan Smart Advisor & Mandi Price AI (किसान मित्र)</h1>
                 <p data-i18n="farmerDesc">
-                    Crop-specific weather intelligence, soil moisture modeling, spraying viability, and mandi forecasts.
+                    Crop-specific weather intelligence, soil moisture modeling, spraying viability, wholesale Mandi price predictions, and PMFBY crop loss claim readiness.
                 </p>
             </div>
 
@@ -1316,33 +1464,36 @@
                     </div>
                 </div>
 
-                <div class="grid-2-col">
-                    <div class="ui-card kpi-card">
-                        <span class="kpi-icon yellow">🌡️</span>
+                <!-- Mandi Price AI & PMFBY Calculator -->
+                <div class="ui-card">
+                    <div class="card-header">
                         <div>
-                            <small data-i18n="farmTempLabel">FIELD TEMPERATURE</small>
-                            <strong id="farmTemp">--</strong>
+                            <small class="card-subtitle">MANDI ECONOMIC IMPACT & PMFBY</small>
+                            <h3 class="card-title">Mandi Price Surge & Crop Insurance AI</h3>
                         </div>
                     </div>
-                    <div class="ui-card kpi-card">
-                        <span class="kpi-icon blue">💧</span>
-                        <div>
-                            <small data-i18n="farmHumLabel">SOIL & AIR HUMIDITY</small>
-                            <strong id="farmHumidity">--</strong>
+
+                    <div class="mandi-price-box">
+                        <div class="mandi-item">
+                            <div>
+                                <strong>Wheat (गेहूं) Mandi Forecast</strong>
+                                <small>Base: ₹ 2,375 / Qtl • Trend: Stable</small>
+                            </div>
+                            <span class="status-pill safe">STABLE (₹2,410)</span>
                         </div>
-                    </div>
-                    <div class="ui-card kpi-card">
-                        <span class="kpi-icon purple">🌧️</span>
-                        <div>
-                            <small data-i18n="farmRainLabel">RAIN PROBABILITY</small>
-                            <strong id="farmRain">--</strong>
+
+                        <div class="mandi-item">
+                            <div>
+                                <strong>Vegetables / Tomato (टमाटर) Volatility</strong>
+                                <small>Heavy rain damage risk on supply corridor</small>
+                            </div>
+                            <span class="status-pill danger">+28% SURGE (₹48/kg)</span>
                         </div>
-                    </div>
-                    <div class="ui-card kpi-card">
-                        <span class="kpi-icon green">💨</span>
-                        <div>
-                            <small data-i18n="farmWindLabel">WIND SPEED</small>
-                            <strong id="farmWind">--</strong>
+
+                        <div class="pmfby-box">
+                            <strong>🌾 PM FASAL BIMA YOJANA (PMFBY) READINESS:</strong>
+                            <p>Automated crop damage eligibility threshold: Active if rainfall exceeds 75mm within 24h. Lekhpal geotagged survey checklist generated.</p>
+                            <button class="btn btn-secondary" style="margin-top: 8px; font-size: 11px;" onclick="alert('✅ PMFBY Claim Eligibility Dossier Generated for District Agriculture Officer!')">📋 Generate Claim Readiness Dossier</button>
                         </div>
                     </div>
                 </div>
@@ -1351,7 +1502,7 @@
 
 
         <!-- =================================================
-             SCREEN 10: CITIZEN HAZARD REPORTING
+             SCREEN 11: CITIZEN HAZARD REPORTING
         ================================================== -->
         <section id="citizenScreen" class="screen">
             <div class="page-title-group">
@@ -1411,7 +1562,7 @@
 
 
         <!-- =================================================
-             SCREEN 11: ANALYTICS
+             SCREEN 12: ANALYTICS
         ================================================== -->
         <section id="analyticsScreen" class="screen">
             <div class="page-title-group">
@@ -1463,7 +1614,7 @@
 
 
         <!-- =================================================
-             SCREEN 12: HAZARD & RESCUE MAP
+             SCREEN 13: HAZARD & RESCUE MAP
         ================================================== -->
         <section id="mapScreen" class="screen">
             <div class="page-title-group">
@@ -1511,7 +1662,7 @@
 
 
         <!-- =================================================
-             SCREEN 13: ALERT CENTER
+             SCREEN 14: ALERT CENTER
         ================================================== -->
         <section id="alertsScreen" class="screen">
             <div class="page-title-group">
@@ -1568,7 +1719,7 @@
 
 
         <!-- =================================================
-             SCREEN 14: AI COPILOT
+             SCREEN 15: AI COPILOT
         ================================================== -->
         <section id="aiScreen" class="screen">
             <div class="page-title-group">
@@ -1630,7 +1781,7 @@
 
 
         <!-- =================================================
-             SCREEN 15: COMPARE
+             SCREEN 16: COMPARE
         ================================================== -->
         <section id="compareScreen" class="screen">
             <div class="page-title-group">
@@ -1666,7 +1817,7 @@
 
 
         <!-- =================================================
-             SCREEN 16: TRAVEL PLANNER
+             SCREEN 17: TRAVEL PLANNER
         ================================================== -->
         <section id="travelScreen" class="screen">
             <div class="page-title-group">

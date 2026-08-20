@@ -1,22 +1,7 @@
 "use strict";
 
 /* =========================================================
-   SKYCAST AI — AUTONOMOUS DISTRICT DISASTER & RESCUE ENGINE (V3.0)
-   =========================================================
-   Complete Implementation of 12 Core Disaster Modules &
-   Smart Rescue Team Coordination System:
-   - 🧬 1. AI Digital Twin of District (Rainfall / Flood Stress Simulator)
-   - ⚡ 2 & 11. Lightning Risk Prediction, CAPE Radar & Safe Shelter Finder
-   - 🗺️ 3. Hyperlocal Multi-Hazard Risk Matrix & Leaflet Map Overlays
-   - 🚨 4. 3-Phase Disaster Lifecycle Manager (Before, During, After)
-   - 🆘 5 & 6. Smart SOS Dispatch & Offline Emergency Mode (GPS Breadcrumbs)
-   - 📊 7. Smart Emergency Resource Management (ICU beds, pumps, rations)
-   - 🤖 8. AI Disaster Copilot with Autonomous Operational Reasoning
-   - 🧭 10. Smart Rescue Team Coordination Center (Live Teams, AI Priority Triage, Equipment Matrix, Field Check-ins & Mission Timelines)
-   - 👥 12. Vulnerable Population & School Alert Generator
-   - 📲 1-Click WhatsApp & SMS Broadcaster for Gram Panchayats
-   - 🚨 Stage Emergency Siren & Visual Strobe FX
-   - 🏆 Regional District Health Leaderboard
+   SKYCAST AI — ENTERPRISE WEATHER & DISASTER ENGINE (V3.2)
    ========================================================= */
 
 let W = null;
@@ -28,7 +13,6 @@ let weatherMap = null;
 let weatherMarker = null;
 let hazardMarkers = [];
 let rescueMarkers = [];
-let shelterMarkers = [];
 let floodOverlayLayer = null;
 let safeRoutePolyline = null;
 
@@ -40,7 +24,7 @@ let skycastUV = null;
 let skycastLightningCape = 450;
 let skycastLightningRisk = 8;
 
-// Audio Siren & Alarm State
+// Web Audio API State
 let audioCtx = null;
 let sirenOsc = null;
 let sirenGain = null;
@@ -56,6 +40,9 @@ let windChartInstance = null;
 // Offline & GPS Breadcrumb State
 let offlineQueue = [];
 let gpsBreadcrumbs = [];
+
+// Deferred PWA Prompt
+let deferredPwaPrompt = null;
 
 // Citizen hazard reports stored in memory
 let citizenReports = [
@@ -81,13 +68,13 @@ let citizenReports = [
     }
 ];
 
-// Pillar B: Smart Rescue Teams State
+// Rescue Teams State
 let rescueTeams = [
     {
         id: "alpha",
         name: "Team Alpha",
         specialty: "Water & Flood Rescue Unit (जल बचाव दल)",
-        status: "on_mission", // available, assigned, on_mission, emergency, offline
+        status: "on_mission",
         members: 12,
         capacity: 30,
         equipment: ["🚤 4 Inflatable Boats", "🦺 35 Life Jackets", "🏊 12 Divers", "🔦 Floodlights"],
@@ -239,7 +226,7 @@ const REGIONAL_DISTRICTS = [
 
 const I18N = {
     en: {
-        brandSub: "HYPERLOCAL DISASTER INTELLIGENCE",
+        brandSub: "DISTRICT DISASTER INTELLIGENCE",
         navDashboard: "Dashboard",
         navDisaster: "District Command",
         navRescue: "Rescue Ops Center",
@@ -248,19 +235,20 @@ const I18N = {
         navSOS: "Smart SOS & Offline",
         navResources: "Resource Inventory",
         navLeaderboard: "District Ranking",
-        navFarmer: "Kisan Mode",
+        navFarmer: "Kisan Mode & Mandi",
+        navWater: "Jal Sanrakshan AI",
         navCitizen: "Citizen Report",
         navAnalytics: "Analytics",
-        navMap: "Weather & Hazard Map",
+        navMap: "Hazard & Rescue Map",
         navAlerts: "Alert Center",
         navAI: "AI Copilot",
         navCompare: "Compare",
         navTravel: "Travel Planner",
         systemTitle: "SkyCast Intelligence",
-        systemDesc: "Autonomous disaster prediction, rescue ops dispatch & hyperlocal climate intelligence.",
+        systemDesc: "Autonomous disaster prediction, rescue ops dispatch & climate intelligence.",
         searchBtn: "Search",
         myLocation: "My Location",
-        heroTag: "✦ AI WEATHER & AUTONOMOUS DISASTER MANAGEMENT SYSTEM",
+        heroTag: "✦ AI WEATHER & AUTONOMOUS DISASTER MANAGEMENT",
         heroTitle1: "Weather & Disaster,",
         heroTitle2: "reimagined.",
         heroDesc: "Hyperlocal risk modeling, District Digital Twins, Lightning Strike Prediction, Smart SOS dispatch, and autonomous Rescue Team coordination.",
@@ -269,38 +257,36 @@ const I18N = {
         quickSos: "Emergency SOS",
         listenBulletin: "Listen Bulletin",
         shareWa: "WhatsApp Alert",
-        scoreLabel: "DISASTER RISK SCORE",
-        currentWeatherLabel: "CURRENT WEATHER",
+        scoreLabel: "SAFETY RISK SCORE",
+        currentWeatherLabel: "CURRENT METEOROLOGY",
         humidityLabel: "💧 Humidity",
-        windLabel: "💨 Wind",
-        pressureLabel: "⏱ Pressure",
-        cloudLabel: "☁ Clouds",
-        riskIntelligence: "INTELLIGENCE",
-        weatherRisk: "Multi-Hazard Risk Engine",
-        riskScoreLabel: "OVERALL SAFETY SCORE",
+        windLabel: "💨 Wind Speed",
+        pressureLabel: "⏱ Air Pressure",
+        cloudLabel: "☁ Cloud Cover",
+        riskIntelligence: "INTELLIGENCE ENGINE",
+        weatherRisk: "Multi-Hazard Risk Assessment",
         aiRecLabel: "AI Autonomous Directive",
         feelsLikeLabel: "FEELS LIKE",
         sensationLabel: "Thermal sensation",
-        humidityStatLabel: "HUMIDITY",
         lightningRiskLabel: "LIGHTNING CAPE",
         uvLabel: "UV INDEX",
-        aqiLabel: "AIR QUALITY",
-        forecastSub: "FORECAST",
+        aqiLabel: "AIR QUALITY (AQI)",
+        forecastSub: "EXTENDED FORECAST",
         fiveDayHeading: "5 Day Meteorological Forecast",
         hourlySub: "NEXT HOURS",
-        hourlyHeading: "Hourly Forecast & Hazard Trend",
+        hourlyHeading: "Hourly Forecast & Trend",
         cmdSub: "DISTRICT ADMINISTRATION & DISASTER CONTROL",
         cmdTitle: "District Command Center",
         cmdDesc: "Automated meteorological hazard monitoring for District Magistrate / DDMA response teams.",
         exportDoc: "Export Official Weather Bulletin (PDF/Print)",
         broadcastBtn: "Broadcast Emergency Sirens",
         gramDispatch: "Gram Pradhan WhatsApp Dispatch",
-        rescueSub: "AUTONOMOUS EMERGENCY DISPATCH & TEAM LOGISTICS",
+        rescueSub: "AUTONOMOUS EMERGENCY DISPATCH & LOGISTICS",
         rescueTitle: "Smart Rescue Team Coordination Center",
         rescueDesc: "Real-time GPS tracking of NDRF/SDRF rescue teams, AI incident triage, equipment load monitoring, safe route navigation, and field check-in synchronization.",
-        totalTeams: "DEPLOYED TEAMS",
-        activeIncidents: "ACTIVE SOS INCIDENTS",
-        evacuatedCivilians: "CIVILIANS EVACUATED",
+        totalTeams: "DEPLOYED UNITS",
+        activeIncidents: "ACTIVE SOS",
+        evacuatedCivilians: "EVACUATED CIVILIANS",
         avgResponseTime: "AVG RESPONSE TIME",
         teamStatusSub: "FIELD DEPLOYMENT UNITS",
         teamStatusHeading: "Live Rescue Teams & Equipment Tracking",
@@ -313,36 +299,39 @@ const I18N = {
         twinDesc: "Simulate extreme weather stress tests (monsoon deluges, flash floods, heatwaves). Analyze flooded surface areas, vulnerable populations, submerged bridges, and compute safe evacuation corridors.",
         phasesSub: "3-PHASE DISASTER LIFECYCLE",
         phasesHeading: "Integrated Preparedness, Response & Recovery Plan",
-        lightningSub: "THERMODYNAMIC ATMOSPHERIC INSTABILITY & SAFETY",
+        lightningSub: "THERMODYNAMIC ATMOSPHERIC INSTABILITY",
         lightningTitle: "Lightning Risk Radar & Safe Zone Finder",
         lightningDesc: "Thermodynamic CAPE analysis, cloud-to-ground strike likelihood prediction, 30/30 safety countdown timer, and nearest verified lightning-safe concrete shelters.",
         sosSub: "CIVIC LIFE-SAFETY & OFFLINE RESILIENCE",
         sosTitle: "Smart SOS & Offline Emergency Hub",
         sosDesc: "Broadcast immediate life-saving SOS requests with automatic routing to nearest emergency services. Works 100% offline during network tower blackouts with GPS breadcrumb tracking.",
+        waterSub: "GROUNDWATER RECHARGE & RAIN HARVESTING INTELLIGENCE",
+        waterTitle: "Jal Sanrakshan AI (Rainwater Harvest Yield Estimator)",
+        waterDesc: "Calculate harvestable rainwater volume (liters) from 5-day precipitation forecasts, compute groundwater recharging points, and calculate municipal water tanker monetary savings.",
         resourcesSub: "INTER-DEPARTMENTAL EMERGENCY INVENTORY",
         resourcesTitle: "Smart Emergency Resource Management",
         resourcesDesc: "Centralized multi-departmental tracking of ambulances, fire tenders, ICU beds, dewatering pumps, NDRF battalions, and community relief camp food rations.",
-        rankSub: "REGIONAL BENCHMARKING & METEOROLOGICAL HEALTH",
+        rankSub: "REGIONAL BENCHMARKING",
         rankTitle: "District Weather Health Leaderboard",
         rankDesc: "Real-time comparative ranking of regional districts across Air Quality, Flood Safety, and Agricultural Viability.",
         cleanestDistrict: "CLEANEST AIR DISTRICT",
         bestFarmDistrict: "BEST AGRI WEATHER",
-        safestDistrict: "SAFEST / LOWEST FLOOD RISK",
+        safestDistrict: "LOWEST FLOOD RISK",
         rankingTableSub: "REGIONAL SCORECARD",
         rankingTableTitle: "Regional Districts Live Health Index",
         farmerSub: "AGRICULTURE INTELLIGENCE & KRISHI COPILOT",
-        farmerTitle: "Kisan Smart Advisor (किसान मित्र)",
-        farmerDesc: "Crop-specific weather intelligence, soil moisture modeling, spraying viability, and mandi forecasts.",
-        selectCrop: "Select Your Crop (फसल चुनें):",
+        farmerTitle: "Kisan Smart Advisor & Mandi Price AI (किसान मित्र)",
+        farmerDesc: "Crop-specific weather intelligence, soil moisture modeling, spraying viability, wholesale Mandi price predictions, and PMFBY crop loss claim readiness.",
+        selectCrop: "Select Crop (फसल चुनें):",
         cropWheat: "Wheat (गेहूं)",
         cropRice: "Paddy (धान)",
         cropMustard: "Mustard (सरसों)",
         cropSugarcane: "Sugarcane (गन्ना)",
         cropVegetables: "Vegetables (सब्जियां)",
         cropAdvisorySub: "CROP-SPECIFIC AI GUIDANCE",
-        sprayWindow: "Pesticide Spray Window (स्प्रे का सही समय)",
+        sprayWindow: "Spray Window (स्प्रे का सही समय)",
         irrigationNeed: "Irrigation Need (सिंचाई की जरूरत)",
-        diseaseRisk: "Pest & Fungus Risk (कीट / रोग खतरा)",
+        diseaseRisk: "Pest & Fungus Risk (रोग खतरा)",
         farmTempLabel: "FIELD TEMPERATURE",
         farmHumLabel: "SOIL & AIR HUMIDITY",
         farmRainLabel: "RAIN PROBABILITY",
@@ -357,17 +346,17 @@ const I18N = {
         submitBtn: "📍 Pin Hazard on Map & Alert District",
         liveCitizenFeed: "LIVE VERIFIED FEED",
         recentReports: "Recent District Incidents",
-        analyticsSub: "DATA INTELLIGENCE",
+        analyticsSub: "METEOROLOGICAL TRENDS",
         analyticsTitle: "Weather Analytics",
-        analyticsDesc: "Understand the upcoming hours through real-time meteorological trends.",
+        analyticsDesc: "Understand upcoming hours through interactive real-time trend charts.",
         tempTrend: "Temperature Trend (°C)",
         rainTrend: "Rain Probability (%)",
         humTrend: "Relative Humidity (%)",
         windTrend: "Wind Speed (km/h)",
-        mapSub: "GEOSPATIAL WEATHER & HAZARD TRACKER",
+        mapSub: "GEOSPATIAL HAZARD & RESCUE RADAR",
         mapTitle: "Weather, Rescue Teams & Hazard Map",
         mapDesc: "Live geospatial tracking of deployed rescue units (🚤 🚑 🚒), lightning storm paths, citizen hazard pins, and safe evacuation corridors.",
-        locationLabel: "LOCATION",
+        locationLabel: "CENTER LOCATION",
         locateMe: "Locate",
         streetMap: "Street",
         satMap: "Satellite",
@@ -378,7 +367,6 @@ const I18N = {
         alertsDesc: "Real-time severe weather hazard detection and safety warnings for your location.",
         activeAlerts: "ACTIVE ALERTS",
         rainRiskLabel: "RAIN RISK",
-        heatRiskLabel: "HEAT RISK",
         airRiskLabel: "AIR QUALITY",
         liveMonitoring: "LIVE MONITORING",
         currentAlerts: "Current Hazard Bulletins",
@@ -426,7 +414,7 @@ const I18N = {
         copySMS: "Copy SMS Text"
     },
     hi: {
-        brandSub: "हाइपरलोकल आपदा एवं मौसम प्रणाली",
+        brandSub: "जिला आपदा एवं मौसम प्रणाली",
         navDashboard: "डैशबोर्ड",
         navDisaster: "जिला आपदा नियंत्रण",
         navRescue: "रेस्क्यू ऑपरेशन केंद्र",
@@ -435,7 +423,8 @@ const I18N = {
         navSOS: "स्मार्ट SOS व ऑफलाइन",
         navResources: "संसाधन इन्वेंटरी",
         navLeaderboard: "जिला रैंकिंग सूचकांक",
-        navFarmer: "किसान मित्र (AI)",
+        navFarmer: "किसान मित्र व मंडी AI",
+        navWater: "जल संरक्षण AI",
         navCitizen: "आपदा रिपोर्टिंग",
         navAnalytics: "मौसम विश्लेषण",
         navMap: "मौसम व रेस्क्यू मानचित्र",
@@ -444,7 +433,7 @@ const I18N = {
         navCompare: "तुलना करें",
         navTravel: "यात्रा योजना",
         systemTitle: "स्काईकास्ट इंटेलिजेंस",
-        systemDesc: "स्वचालित आपदा पूर्वानुमान, रेस्क्यू टीम समन्वय एवं ग्रामीण कृषि मॉडल।",
+        systemDesc: "स्वचालित आपदा पूर्वानुमान, रेस्क्यू टीम समन्वय एवं जल संरक्षण मॉडल।",
         searchBtn: "खोजें",
         myLocation: "मेरा स्थान",
         heroTag: "✦ AI मौसम एवं स्वचालित आपदा प्रबंधन प्रणाली",
@@ -456,7 +445,7 @@ const I18N = {
         quickSos: "आपातकालीन SOS",
         listenBulletin: "बुलेटिन सुनें",
         shareWa: "व्हाट्सएप अलर्ट",
-        scoreLabel: "आपदा सुरक्षा स्कोर",
+        scoreLabel: "सुरक्षा जोखिम स्कोर",
         currentWeatherLabel: "वर्तमान मौसम",
         humidityLabel: "💧 नमी (Humidity)",
         windLabel: "💨 हवा की गति",
@@ -464,25 +453,23 @@ const I18N = {
         cloudLabel: "☁ बादल",
         riskIntelligence: "सुरक्षा विश्लेषण",
         weatherRisk: "बहु-आपदा जोखिम इंजन",
-        riskScoreLabel: "समग्र सुरक्षा स्कोर",
         aiRecLabel: "AI प्रशासनिक निर्देश",
         feelsLikeLabel: "महसूस तापमान",
         sensationLabel: "वास्तविक अहसास",
-        humidityStatLabel: "नमी प्रतिशत",
         lightningRiskLabel: "वज्रपात CAPE",
         uvLabel: "यूवी इंडेक्स",
         aqiLabel: "वायु गुणवत्ता (AQI)",
-        forecastSub: "पूर्वानुमान",
+        forecastSub: "विस्तृत पूर्वानुमान",
         fiveDayHeading: "5 दिवसीय मौसम पूर्वानुमान",
         hourlySub: "आगामी घंटे",
         hourlyHeading: "घंटेवार मौसम पूर्वानुमान",
-        cmdSub: "जिला प्रशासन एवं आपदा प्रबंधन केंद्र",
+        cmdSub: "जिला प्रशासन एवं आपदा नियंत्रण केंद्र",
         cmdTitle: "जिला आपदा नियंत्रण केंद्र",
         cmdDesc: "जिलाधिकारी / डीडीएमए टीमों के लिए स्वचालित मौसम संबंधी आपदा निगरानी प्रणाली।",
         exportDoc: "आधिकारिक मौसम बुलेटिन डाउनलोड करें (PDF/Print)",
         broadcastBtn: "आपातकालीन चेतावनी सायरन बजाएं",
         gramDispatch: "ग्राम प्रधान व्हाट्सएप प्रसारण",
-        rescueSub: "स्वचालित आपातकालीन प्रेषण एवं फील्ड लॉजिस्टिक्स",
+        rescueSub: "स्वचालित आपातकालीन प्रेषण एवं लॉजिस्टिक्स",
         rescueTitle: "स्मार्ट रेस्क्यू टीम नियंत्रण केंद्र",
         rescueDesc: "NDRF/SDRF बचाव दलों की लाइव जीपीएस ट्रैकिंग, AI प्राथमिकता निर्धारण, सुरक्षित मार्ग नेविगेशन और फील्ड चेक-इन समन्वय।",
         totalTeams: "सक्रिय बचाव दल",
@@ -506,6 +493,9 @@ const I18N = {
         sosSub: "नागरिक जीवन-रक्षा एवं ऑफलाइन कनेक्टिविटी",
         sosTitle: "स्मार्ट SOS एवं ऑफलाइन इमरजेंसी हब",
         sosDesc: "नेटवर्क टावर बंद होने पर भी GPS ब्रेडक्रम्ब्स के साथ ऑफलाइन SOS अनुरोध दर्ज करें जो कनेक्टिविटी आने पर स्वतः सिंक होंगे।",
+        waterSub: "भूजल पुनर्भरण एवं वर्षा जल संचयन",
+        waterTitle: "जल संरक्षण AI (वर्षा जल संचयन कैलकुलेटर)",
+        waterDesc: "5-दिवसीय वर्षा पूर्वानुमान से संचयन योग्य जल की मात्रा (लीटर), भूजल पुनर्भरण क्षमता और पानी के टैंकरों की आर्थिक बचत की गणना।",
         resourcesSub: "विभागवार आपातकालीन संसाधन इन्वेंटरी",
         resourcesTitle: "स्मार्ट आपातकालीन संसाधन प्रबंधन",
         resourcesDesc: "एम्बुलेंस, फायर टेंडर, आईसीयू बेड, जल निकासी पंप, एनडीआरएफ बल और राहत शिविर राशन का केंद्रीकृत प्रबंधन।",
@@ -518,8 +508,8 @@ const I18N = {
         rankingTableSub: "क्षेत्रीय स्कोरकार्ड",
         rankingTableTitle: "क्षेत्रीय जिलों का लाइव स्वास्थ्य सूचकांक",
         farmerSub: "स्मार्ट कृषि प्रणाली एवं कृषक कोपायलट",
-        farmerTitle: "किसान स्मार्ट मित्र (Kisan Mode)",
-        farmerDesc: "फसल-विशिष्ट मौसम पूर्वानुमान, मिट्टी की नमी, कीटनाशक स्प्रे का सही समय और मंडी सलाह।",
+        farmerTitle: "किसान स्मार्ट मित्र एवं मंडी भाव AI",
+        farmerDesc: "फसल-विशिष्ट मौसम पूर्वानुमान, मिट्टी की नमी, कीटनाशक स्प्रे का सही समय, मंडी भाव रुझान और पीएमएफबीवाई फसल बीमा क्लेम सलाह।",
         selectCrop: "अपनी फसल चुनें:",
         cropWheat: "गेहूं (Wheat)",
         cropRice: "धान (Paddy)",
@@ -554,7 +544,7 @@ const I18N = {
         mapSub: "भू-स्थानिक मौसम एवं आपदा ट्रैकर",
         mapTitle: "मौसम, रेस्क्यू टीम एवं आपदा मानचित्र",
         mapDesc: "लाइव मौसम, तैनात रेस्क्यू यूनिट्स (🚤 🚑 🚒), आकाशीय बिजली खतरा क्षेत्र और सुरक्षित निकासी गलियारे।",
-        locationLabel: "स्थान",
+        locationLabel: "केंद्र स्थान",
         locateMe: "मेरा स्थान",
         streetMap: "सड़क मानचित्र",
         satMap: "सैटेलाइट",
@@ -565,7 +555,6 @@ const I18N = {
         alertsDesc: "आपके क्षेत्र के लिए मौसम संबंधी गंभीर चेतावनियां और सुरक्षा निर्देश।",
         activeAlerts: "सक्रिय चेतावनियां",
         rainRiskLabel: "बारिश जोखिम",
-        heatRiskLabel: "लू जोखिम",
         airRiskLabel: "वायु गुणवत्ता",
         liveMonitoring: "लाइव निगरानी",
         currentAlerts: "वर्तमान आपदा बुलेटिन",
@@ -663,6 +652,7 @@ function updateLanguageUI() {
         updateFarmer(W.current, W.forecast);
         updateCommandCenter(W.current, W.forecast);
         updateFiveDayForecast(W.forecast, W.daily);
+        updateRainwaterHarvesting();
     }
 
     renderRescueOps();
@@ -682,6 +672,285 @@ function loadLanguage() {
         currentLanguage = saved;
     }
     updateLanguageUI();
+}
+
+
+/* =========================================================
+   FEATURE: AMBIENT WEATHER PARTICLE CANVAS ENGINE
+========================================================= */
+
+let meteoCanvas = null;
+let meteoCtx = null;
+let meteoParticles = [];
+let meteoAnimId = null;
+
+function initMeteoCanvas() {
+    meteoCanvas = $("meteoBackgroundCanvas");
+    if (!meteoCanvas) return;
+    meteoCtx = meteoCanvas.getContext("2d");
+
+    const resize = () => {
+        meteoCanvas.width = window.innerWidth;
+        meteoCanvas.height = window.innerHeight;
+    };
+    window.addEventListener("resize", resize);
+    resize();
+
+    // Create 45 ambient floating particles
+    meteoParticles = [];
+    for (let i = 0; i < 45; i++) {
+        meteoParticles.push({
+            x: Math.random() * meteoCanvas.width,
+            y: Math.random() * meteoCanvas.height,
+            radius: Math.random() * 2.5 + 1,
+            speedY: Math.random() * 0.8 + 0.3,
+            speedX: (Math.random() - 0.5) * 0.5,
+            opacity: Math.random() * 0.5 + 0.15
+        });
+    }
+
+    const animate = () => {
+        if (!meteoCtx) return;
+        meteoCtx.clearRect(0, 0, meteoCanvas.width, meteoCanvas.height);
+
+        meteoParticles.forEach(p => {
+            meteoCtx.beginPath();
+            meteoCtx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+            meteoCtx.fillStyle = `rgba(0, 242, 254, ${p.opacity})`;
+            meteoCtx.fill();
+
+            p.y += p.speedY;
+            p.x += p.speedX;
+
+            if (p.y > meteoCanvas.height) {
+                p.y = 0;
+                p.x = Math.random() * meteoCanvas.width;
+            }
+            if (p.x > meteoCanvas.width) p.x = 0;
+            if (p.x < 0) p.x = meteoCanvas.width;
+        });
+
+        meteoAnimId = requestAnimationFrame(animate);
+    };
+
+    if (meteoAnimId) cancelAnimationFrame(meteoAnimId);
+    animate();
+}
+
+
+/* =========================================================
+   FEATURE: LIGHTNING RADAR CANVAS SWEEP ENGINE
+========================================================= */
+
+let radarCanvas = null;
+let radarCtx = null;
+let radarAngle = 0;
+let radarAnimId = null;
+
+function initLightningRadarCanvas() {
+    radarCanvas = $("lightningRadarCanvas");
+    if (!radarCanvas) return;
+    radarCtx = radarCanvas.getContext("2d");
+    radarCanvas.width = 140;
+    radarCanvas.height = 140;
+
+    const draw = () => {
+        if (!radarCtx) return;
+        radarCtx.clearRect(0, 0, 140, 140);
+
+        const cx = 70;
+        const cy = 70;
+        const radius = 65;
+
+        // Concentric radar circles
+        radarCtx.strokeStyle = "rgba(245, 158, 11, 0.3)";
+        radarCtx.lineWidth = 1;
+        radarCtx.beginPath();
+        radarCtx.arc(cx, cy, 20, 0, Math.PI * 2);
+        radarCtx.arc(cx, cy, 40, 0, Math.PI * 2);
+        radarCtx.arc(cx, cy, 60, 0, Math.PI * 2);
+        radarCtx.stroke();
+
+        // Crosshairs
+        radarCtx.beginPath();
+        radarCtx.moveTo(cx, 5); radarCtx.lineTo(cx, 135);
+        radarCtx.moveTo(5, cy); radarCtx.lineTo(135, cy);
+        radarCtx.stroke();
+
+        // Spinning Sweep Line
+        radarCtx.save();
+        radarCtx.translate(cx, cy);
+        radarCtx.rotate(radarAngle);
+
+        const grad = radarCtx.createLinearGradient(0, 0, radius, 0);
+        grad.addColorStop(0, "rgba(245, 158, 11, 0.9)");
+        grad.addColorStop(1, "rgba(245, 158, 11, 0.0)");
+
+        radarCtx.beginPath();
+        radarCtx.moveTo(0, 0);
+        radarCtx.arc(0, 0, radius, 0, Math.PI / 4);
+        radarCtx.lineTo(0, 0);
+        radarCtx.fillStyle = "rgba(245, 158, 11, 0.15)";
+        radarCtx.fill();
+
+        radarCtx.strokeStyle = "rgba(245, 158, 11, 0.85)";
+        radarCtx.lineWidth = 2;
+        radarCtx.beginPath();
+        radarCtx.moveTo(0, 0);
+        radarCtx.lineTo(radius, 0);
+        radarCtx.stroke();
+
+        radarCtx.restore();
+
+        radarAngle += 0.04;
+        radarAnimId = requestAnimationFrame(draw);
+    };
+
+    if (radarAnimId) cancelAnimationFrame(radarAnimId);
+    draw();
+}
+
+
+/* =========================================================
+   FEATURE: DIGITAL TWIN 2D/3D INUNDATION CANVAS
+========================================================= */
+
+let twinCanvas = null;
+let twinCtx = null;
+let twinWaterWave = 0;
+
+function drawDigitalTwinCanvas(rainfallMm = 120) {
+    twinCanvas = $("digitalTwinCanvas");
+    if (!twinCanvas) return;
+    twinCtx = twinCanvas.getContext("2d");
+
+    const w = twinCanvas.clientWidth || 600;
+    const h = 240;
+    twinCanvas.width = w;
+    twinCanvas.height = h;
+
+    twinCtx.clearRect(0, 0, w, h);
+
+    // Draw stylized district terrain grid
+    twinCtx.strokeStyle = "rgba(255, 255, 255, 0.08)";
+    twinCtx.lineWidth = 1;
+    for (let x = 0; x < w; x += 30) {
+        twinCtx.beginPath();
+        twinCtx.moveTo(x, 0);
+        twinCtx.lineTo(x, h);
+        twinCtx.stroke();
+    }
+    for (let y = 0; y < h; y += 30) {
+        twinCtx.beginPath();
+        twinCtx.moveTo(0, y);
+        twinCtx.lineTo(w, y);
+        twinCtx.stroke();
+    }
+
+    // Draw Simulated Inundation Water Level
+    const waterHeight = Math.min(160, (rainfallMm / 250) * 160);
+    const waterY = h - waterHeight;
+
+    const grad = twinCtx.createLinearGradient(0, waterY, 0, h);
+    grad.addColorStop(0, "rgba(225, 29, 72, 0.65)");
+    grad.addColorStop(1, "rgba(15, 23, 42, 0.95)");
+
+    twinCtx.fillStyle = grad;
+    twinCtx.beginPath();
+    twinCtx.moveTo(0, waterY);
+    for (let x = 0; x <= w; x += 20) {
+        const yOffset = Math.sin((x / 30) + twinWaterWave) * 6;
+        twinCtx.lineTo(x, waterY + yOffset);
+    }
+    twinCtx.lineTo(w, h);
+    twinCtx.lineTo(0, h);
+    twinCtx.closePath();
+    twinCtx.fill();
+
+    // Draw Rescue Node Markers
+    twinCtx.fillStyle = "#34d399";
+    twinCtx.beginPath();
+    twinCtx.arc(w * 0.25, h * 0.35, 7, 0, Math.PI * 2);
+    twinCtx.fill();
+    twinCtx.fillStyle = "#ffffff";
+    twinCtx.font = "10px Inter, sans-serif";
+    twinCtx.fillText("🛡️ High Ground Node #1", w * 0.25 + 10, h * 0.35 + 4);
+
+    twinCtx.fillStyle = "#34d399";
+    twinCtx.beginPath();
+    twinCtx.arc(w * 0.7, h * 0.28, 7, 0, Math.PI * 2);
+    twinCtx.fill();
+    twinCtx.fillStyle = "#ffffff";
+    twinCtx.fillText("🛡️ Hospital Safe Node #2", w * 0.7 + 10, h * 0.28 + 4);
+
+    // Draw moving boat/ambulance icon
+    const vehX = (w * 0.45) + Math.sin(twinWaterWave) * 30;
+    const vehY = waterY - 5;
+    twinCtx.font = "18px Inter, sans-serif";
+    twinCtx.fillText("🚤", vehX, vehY);
+}
+
+
+/* =========================================================
+   FEATURE: JAL SANRAKSHAN AI (RAINWATER HARVESTING)
+========================================================= */
+
+function updateRainwaterHarvesting() {
+    const slider = $("roofAreaSlider");
+    const coeffSelect = $("surfaceCoeff");
+    const areaLabel = $("roofAreaLabel");
+
+    if (!slider || !coeffSelect) return;
+
+    const sqFt = Number(slider.value || 1500);
+    const coeff = Number(coeffSelect.value || 0.85);
+
+    if (areaLabel) {
+        areaLabel.textContent = `${sqFt.toLocaleString()} Sq. Feet (${sqFt <= 2000 ? 'Residential Rooftop' : sqFt <= 5000 ? 'Institutional Building' : 'Commercial / Farmland'})`;
+    }
+
+    // Convert Sq Ft to Sq Meters
+    const sqMeters = sqFt * 0.0929;
+    const rainForecastMm = W?.daily?.precipitation_sum?.[0] ?? (getRainProbability(W?.forecast) * 0.8) ?? 45;
+
+    // Harvested Liters = Area (sq m) * Rainfall (mm) * Runoff Coefficient
+    const harvestLiters = Math.round(sqMeters * Math.max(25, rainForecastMm) * coeff);
+    const tankerSavings = Math.round((harvestLiters / 4000) * 500);
+
+    setText("harvestLitersVal", `${harvestLiters.toLocaleString()} Liters`);
+    setText("waterSavingsVal", `₹ ${tankerSavings.toLocaleString()} Saved`);
+}
+
+
+/* =========================================================
+   PWA & SERVICE WORKER ENGINE
+========================================================= */
+
+function setupPWA() {
+    if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("./sw.js").then(() => {
+            console.log("✅ SkyCast AI PWA Service Worker Registered.");
+        }).catch(err => {
+            console.log("PWA Service Worker registration skipped:", err);
+        });
+    }
+
+    window.addEventListener("beforeinstallprompt", (e) => {
+        e.preventDefault();
+        deferredPwaPrompt = e;
+        const btn = $("pwaInstallBtn");
+        if (btn) btn.classList.remove("hidden");
+    });
+
+    $("pwaInstallBtn")?.addEventListener("click", async () => {
+        if (!deferredPwaPrompt) return;
+        deferredPwaPrompt.prompt();
+        const { outcome } = await deferredPwaPrompt.userChoice;
+        if (outcome === "accepted") {
+            $("pwaInstallBtn")?.classList.add("hidden");
+        }
+        deferredPwaPrompt = null;
+    });
 }
 
 
@@ -708,7 +977,7 @@ function renderRescueOps() {
                             <span class="team-status-dot ${t.status}"></span>
                             <div>
                                 <strong>${t.name}</strong>
-                                <small style="display:block; color:var(--muted2); font-size:8px;">${t.specialty}</small>
+                                <small style="display:block; color:var(--text-dim); font-size:10px;">${t.specialty}</small>
                             </div>
                         </div>
                         <span class="status-pill ${t.status === 'available' ? 'safe' : t.status === 'on_mission' ? 'danger' : 'warning'}">${statusLabel}</span>
@@ -721,7 +990,7 @@ function renderRescueOps() {
                     <div class="team-meta">
                         <div>📍 <b>Location:</b> ${t.locationName}</div>
                         <div>👥 <b>Personnel:</b> ${t.members} Rescuers | <b>Capacity:</b> ${t.capacity} Civilians</div>
-                        <div>🎯 <b>Mission:</b> <span style="color:var(--text); font-weight:600;">${t.activeMission}</span></div>
+                        <div>🎯 <b>Mission:</b> <span style="color:var(--text-main); font-weight:600;">${t.activeMission}</span></div>
                         <div style="color:var(--cyan); margin-top:4px;">📡 <b>Last Check-In:</b> ${t.lastCheckIn}</div>
                     </div>
                 </div>
@@ -742,11 +1011,11 @@ function renderRescueOps() {
                     <td><span class="status-pill ${pClass}">${pMedal}</span></td>
                     <td><b>${inc.category}</b></td>
                     <td>📍 ${inc.location}</td>
-                    <td><b>${inc.people} Persons</b> <small style="color:var(--muted2);">(${inc.vulnerable})</small></td>
+                    <td><b>${inc.people} Persons</b> <small style="color:var(--text-dim);">(${inc.vulnerable})</small></td>
                     <td><span class="status-pill ${pClass}">${inc.severity}</span></td>
-                    <td><b>${recTeam.name}</b> <small style="color:var(--muted2);">(${recTeam.specialty.split('(')[0]})</small></td>
+                    <td><b>${recTeam.name}</b></td>
                     <td>
-                        <button class="primary" style="padding:5px 10px; font-size:9px;" onclick="assignRescueTeam('${inc.id}', '${recTeam.id}')">
+                        <button class="btn btn-primary" style="padding:6px 12px; font-size:11px;" onclick="assignRescueTeam('${inc.id}', '${recTeam.id}')">
                             Dispatch ${recTeam.name} →
                         </button>
                     </td>
@@ -825,6 +1094,8 @@ function updateDigitalTwin(rainfallMm) {
         setText("twinAltRouteText", "Standard Flow");
     }
 
+    drawDigitalTwinCanvas(rainfallMm);
+
     // Update Digital Twin overlay on Leaflet Map
     if (weatherMap && W?.current) {
         const lat = W.current.coord.lat;
@@ -834,7 +1105,6 @@ function updateDigitalTwin(rainfallMm) {
         if (safeRoutePolyline) weatherMap.removeLayer(safeRoutePolyline);
 
         if (rainfallMm >= 50) {
-            // Draw simulated flooded zone
             const radius = rainfallMm * 45;
             floodOverlayLayer = L.circle([lat + 0.01, lon - 0.01], {
                 color: "#e11d48",
@@ -843,7 +1113,6 @@ function updateDigitalTwin(rainfallMm) {
                 radius: radius
             }).addTo(weatherMap).bindPopup(`<b>🌊 DIGITAL TWIN SIMULATED FLOOD ZONE</b><br>Rainfall: ${rainfallMm}mm<br>Estimated Inundation: ${depth}m`);
 
-            // Draw safe evacuation corridor
             const safePath = [
                 [lat - 0.02, lon - 0.02],
                 [lat - 0.01, lon],
@@ -870,7 +1139,6 @@ function calculateLightningRisk(current, forecast) {
     const rain = forecast ? getRainProbability(forecast) : 20;
     const clouds = current?.clouds?.all || 40;
 
-    // Thermodynamic CAPE approximation (J/kg)
     let cape = Math.round((temp * 45) + (hum * 18) + (clouds * 8));
     if (activeSimulation === "lightning" || activeSimulation === "storm") cape = 2850;
 
@@ -915,9 +1183,9 @@ function renderLightningShelters() {
                 <strong>🏛️ ${s.name}</strong>
                 <small>${s.type} • Distance: <b>${s.distance}</b> • Capacity: <b>${s.capacity}</b></small>
             </div>
-            <div style="display:flex; align-items:center; gap:6px;">
+            <div style="display:flex; align-items:center; gap:8px;">
                 <span class="shelter-badge">${s.safetyGrade.split('(')[0]}</span>
-                <button class="primary" style="padding:6px 10px; font-size:9px;" onclick="navigateShelter(${s.latOffset}, ${s.lonOffset}, '${s.name}')">Route →</button>
+                <button class="btn btn-primary" style="padding:6px 12px; font-size:11px;" onclick="navigateShelter(${s.latOffset}, ${s.lonOffset}, '${s.name}')">Route →</button>
             </div>
         </div>
     `).join("");
@@ -929,11 +1197,10 @@ function navigateShelter(latOff, lonOff, name) {
         const pinLon = W.current.coord.lon + lonOff;
         weatherMap.setView([pinLat, pinLon], 14, { animate: true });
 
-        const shelterMarker = L.marker([pinLat, pinLon]).addTo(weatherMap)
+        L.marker([pinLat, pinLon]).addTo(weatherMap)
             .bindPopup(`<b>🛡️ VERIFIED LIGHTNING SAFE SHELTER</b><br>📍 ${name}<br>Grade A Lightning Protection Active`)
             .openPopup();
 
-        // Switch to Map screen
         const mapBtn = document.querySelector('[data-screen="mapScreen"]');
         if (mapBtn) mapBtn.click();
     }
@@ -951,7 +1218,7 @@ function setupOfflineEngine() {
         const banner = $("offlineBanner");
 
         if (isOnline) {
-            if (badge) { badge.textContent = "● ONLINE"; badge.className = "online"; }
+            if (badge) { badge.textContent = "● ONLINE"; badge.className = "badge-live"; }
             if (banner) banner.classList.add("hidden");
             syncOfflineQueue();
         } else {
@@ -1124,7 +1391,7 @@ function stopEmergencySiren() {
    FEATURE #3: 1-CLICK WHATSAPP / SMS EMERGENCY BROADCASTER
 ========================================================= */
 
-function generateEmergencyBroadcastText(target = "general") {
+function generateEmergencyBroadcastText() {
     const cur = W?.current || { name: "Kanpur", main: { temp: 28, feels_like: 30, humidity: 75 }, wind: { speed: 3.5 }, weather: [{ description: "Partly Cloudy" }] };
     const rain = W?.forecast ? getRainProbability(W.forecast) : 25;
     const aqi = skycastAQI || 85;
@@ -1163,7 +1430,7 @@ function copySmsText() {
 
 
 /* =========================================================
-   FEATURE #5: DISTRICT WEATHER & HEALTH RANKING LEADERBOARD
+   DISTRICT LEADERBOARD
 ========================================================= */
 
 function renderDistrictLeaderboard() {
@@ -1217,15 +1484,10 @@ function renderDistrictLeaderboard() {
                 <td><b class="rank-medal">${medal}</b></td>
                 <td><b>📍 ${d.name}</b></td>
                 <td>
-                    <div class="score-bar-wrapper">
-                        <b>${d.totalScore}/100</b>
-                        <div class="score-bar">
-                            <div class="score-bar-fill" style="width: ${d.totalScore}%;"></div>
-                        </div>
-                    </div>
+                    <b>${d.totalScore}/100</b>
                 </td>
                 <td>${d.baseTemp}°C</td>
-                <td><b style="color: ${d.aqi <= 50 ? 'var(--green)' : d.aqi <= 100 ? 'var(--cyan)' : 'var(--red)'};">${d.aqi}</b></td>
+                <td><b style="color: ${d.aqi <= 50 ? 'var(--emerald)' : d.aqi <= 100 ? 'var(--cyan)' : 'var(--rose)'};">${d.aqi}</b></td>
                 <td>${d.rainRisk}%</td>
                 <td><span class="status-pill ${ratingClass}">${rating}</span></td>
             </tr>
@@ -1250,6 +1512,7 @@ function playVoiceBulletin(textToSpeak = null) {
         window.speechSynthesis.cancel();
         isSpeaking = false;
         $("audioBtn")?.classList.remove("speaking");
+        $("voiceWaveform")?.classList.add("hidden");
         return;
     }
 
@@ -1292,16 +1555,19 @@ function playVoiceBulletin(textToSpeak = null) {
     utterance.onstart = () => {
         isSpeaking = true;
         $("audioBtn")?.classList.add("speaking");
+        $("voiceWaveform")?.classList.remove("hidden");
     };
 
     utterance.onend = () => {
         isSpeaking = false;
         $("audioBtn")?.classList.remove("speaking");
+        $("voiceWaveform")?.classList.add("hidden");
     };
 
     utterance.onerror = () => {
         isSpeaking = false;
         $("audioBtn")?.classList.remove("speaking");
+        $("voiceWaveform")?.classList.add("hidden");
     };
 
     window.speechSynthesis.speak(utterance);
@@ -1333,7 +1599,7 @@ function wmoToOpenWeather(code, isDay = 1) {
 
 
 /* =========================================================
-   SIMULATION ENGINE (FOR HACKATHON LIVE JUDGE DEMOS)
+   SIMULATION ENGINE (HACKATHON LIVE DEMOS)
 ========================================================= */
 
 function getSimulatedWeatherData(scenario, baseCity = "District Center") {
@@ -1429,7 +1695,8 @@ function getSimulatedWeatherData(scenario, baseCity = "District Center") {
         temperature_2m_max: [temp, temp + 1, temp - 2, temp + 2, temp],
         temperature_2m_min: [temp - 5, temp - 4, temp - 6, temp - 5, temp - 4],
         weather_code: [scenario === "flood" ? 65 : scenario === "heatwave" ? 0 : scenario === "smog" ? 45 : 95, 80, 80, 2, 1],
-        precipitation_probability_max: [Math.round(rainPop * 100), Math.round(rainPop * 80), 30, 15, 5]
+        precipitation_probability_max: [Math.round(rainPop * 100), Math.round(rainPop * 80), 30, 15, 5],
+        precipitation_sum: [rainfallMmForScenario(scenario), 20, 10, 5, 0]
     };
 
     return {
@@ -1447,6 +1714,14 @@ function getSimulatedWeatherData(scenario, baseCity = "District Center") {
         simulatedAQI: aqi,
         simulatedUV: uv
     };
+}
+
+function rainfallMmForScenario(scenario) {
+    if (scenario === "flood") return 180;
+    if (scenario === "storm") return 120;
+    if (scenario === "lightning") return 90;
+    if (scenario === "smog") return 10;
+    return 0;
 }
 
 
@@ -1557,6 +1832,12 @@ async function loadWeather(city) {
     setText("temp", "--°");
     setText("cond", currentLanguage === "hi" ? "मौसम डेटा प्राप्त किया जा रहा है..." : "Fetching weather...");
 
+    // Update active district chip UI
+    document.querySelectorAll(".district-chip").forEach(chip => {
+        if (chip.dataset.city.toLowerCase() === city.toLowerCase()) chip.classList.add("active");
+        else chip.classList.remove("active");
+    });
+
     try {
         let data = null;
 
@@ -1614,6 +1895,7 @@ async function loadWeather(city) {
         updateFarmer(current, forecast);
         updateAlerts(current, forecast);
         updateCommandCenter(current, forecast);
+        updateRainwaterHarvesting();
         renderRescueOps();
         renderDistrictLeaderboard();
         updateDigitalTwin(Number($("twinRainSlider")?.value || 120));
@@ -1720,7 +2002,6 @@ function updateCommandCenter(current, forecast) {
     const floodCard = $("floodThreatCard");
     const heatCard = $("heatThreatCard");
     const smogCard = $("smogThreatCard");
-    const stormCard = $("stormThreatCard");
 
     if (rain >= 70) {
         setText("floodLevel", currentLanguage === "hi" ? "गंभीर चेतावनी (HIGH)" : "HIGH THREAT");
@@ -1969,19 +2250,19 @@ function renderCitizenFeed() {
     if (!listEl) return;
 
     if (!citizenReports.length) {
-        listEl.innerHTML = `<div style="padding: 15px; color: var(--muted); text-align: center;">No citizen hazards reported currently.</div>`;
+        listEl.innerHTML = `<div style="padding: 15px; color: var(--text-dim); text-align: center;">No citizen hazards reported currently.</div>`;
         return;
     }
 
     listEl.innerHTML = citizenReports.map(r => `
-        <div class="hazard-item">
-            <div class="hazard-item-icon">
+        <div class="hazard-item" style="display:flex; align-items:center; gap:12px; padding:12px; border-radius:10px; background:rgba(255,255,255,0.02); border:1px solid var(--border); margin-bottom:8px;">
+            <div style="font-size:22px;">
                 ${r.type === "waterlog" ? "🌊" : r.type === "tree" ? "🌳" : r.type === "wire" ? "⚡" : r.type === "hail" ? "❄️" : "🔥"}
             </div>
-            <div class="hazard-item-content">
-                <strong>${r.typeName} — ${r.location}</strong>
-                <small>Reported: ${r.time}</small>
-                <p>${r.details}</p>
+            <div style="flex:1;">
+                <strong style="font-size:12.5px; display:block;">${r.typeName} — ${r.location}</strong>
+                <small style="color:var(--text-dim); font-size:10.5px;">Reported: ${r.time}</small>
+                <p style="color:var(--text-muted); font-size:11.5px; margin-top:2px;">${r.details}</p>
             </div>
         </div>
     `).join("");
@@ -2070,7 +2351,6 @@ function updateRisk(current, forecast) {
             : (currentLanguage === "hi" ? "उच्च जोखिम (HIGH RISK)" : "HIGH RISK");
 
     setText("score", score);
-    setText("riskScore", score);
     setText("risk", status);
     setText("riskStatus", status);
 
@@ -2123,24 +2403,23 @@ function updateAlerts(current, forecast) {
     if (box) {
         if (!alerts.length) {
             box.innerHTML = `
-                <div class="alert-item">
-                    <div class="alert-icon" style="background: rgba(52,211,153,.1); color: var(--green);">✅</div>
+                <div style="display:flex; align-items:center; gap:12px; padding:14px; border-radius:12px; background:rgba(16, 185, 129, 0.08); border:1px solid rgba(16, 185, 129, 0.2);">
+                    <div style="font-size:22px;">✅</div>
                     <div>
-                        <b>${currentLanguage === "hi" ? "सभी स्थितियां सुरक्षित" : "All Clear"}</b>
-                        <p>${currentLanguage === "hi" ? "इस क्षेत्र के लिए कोई गंभीर मौसम संबंधी चेतावनी सक्रिय नहीं है।" : "No severe meteorological hazards active for this region."}</p>
+                        <strong style="font-size:13px; display:block;">${currentLanguage === "hi" ? "सभी स्थितियां सुरक्षित" : "All Clear"}</strong>
+                        <p style="color:var(--text-muted); font-size:12px; margin-top:2px;">${currentLanguage === "hi" ? "इस क्षेत्र के लिए कोई गंभीर मौसम संबंधी चेतावनी सक्रिय नहीं है।" : "No severe meteorological hazards active for this region."}</p>
                     </div>
-                    <span class="alert-level" style="color: var(--green);">${currentLanguage === "hi" ? "सुरक्षित" : "SAFE"}</span>
                 </div>
             `;
         } else {
             box.innerHTML = alerts.map(alert => `
-                <div class="alert-item">
-                    <div class="alert-icon">${alert.icon}</div>
-                    <div>
-                        <b>${alert.title}</b>
-                        <p>${alert.desc}</p>
+                <div style="display:flex; align-items:center; gap:12px; padding:14px; border-radius:12px; background:rgba(255, 255, 255, 0.02); border:1px solid var(--border); margin-bottom:8px;">
+                    <div style="font-size:22px;">${alert.icon}</div>
+                    <div style="flex:1;">
+                        <strong style="font-size:13px; display:block;">${alert.title}</strong>
+                        <p style="color:var(--text-muted); font-size:12px; margin-top:2px;">${alert.desc}</p>
                     </div>
-                    <span class="alert-level" style="${alert.level === 'CRITICAL' || alert.level === 'HIGH' ? 'color: var(--red);' : ''}">${alert.level}</span>
+                    <span class="status-pill ${alert.level === 'CRITICAL' || alert.level === 'HIGH' ? 'danger' : 'warning'}">${alert.level}</span>
                 </div>
             `).join("");
         }
@@ -2148,7 +2427,6 @@ function updateAlerts(current, forecast) {
 
     setText("alertCount", alerts.length);
     setText("rainAlertStatus", rain >= 70 ? "HIGH" : rain >= 40 ? "MEDIUM" : "LOW");
-    setText("heatAlertStatus", current.main.temp >= 40 ? "HIGH" : current.main.temp >= 35 ? "MEDIUM" : "LOW");
 }
 
 
@@ -2178,7 +2456,7 @@ function updateFiveDayForecast(forecast, daily) {
                 <div class="day">
                     <small>${formattedDate}</small>
                     <img src="https://openweathermap.org/img/wn/${wInfo.icon}@2x.png" alt="Forecast icon">
-                    <b>${maxT}° <span style="font-size: 13px; font-weight: 500; color: var(--muted);">${minT}°</span></b>
+                    <b>${maxT}° <span style="font-size: 13px; font-weight: 500; color: var(--text-dim);">${minT}°</span></b>
                     <span>💧 ${rainP}%</span>
                     <span>${wInfo.desc}</span>
                 </div>
@@ -2264,18 +2542,18 @@ function updateAnalyticsCharts(forecast) {
         plugins: {
             legend: { display: false },
             tooltip: {
-                backgroundColor: "rgba(7, 24, 38, 0.9)",
-                titleFont: { family: "Inter", size: 11 },
-                bodyFont: { family: "Inter", size: 12 },
-                borderColor: "rgba(34, 211, 238, 0.3)",
+                backgroundColor: "rgba(10, 19, 32, 0.95)",
+                titleFont: { family: "Plus Jakarta Sans", size: 12 },
+                bodyFont: { family: "Plus Jakarta Sans", size: 13 },
+                borderColor: "rgba(0, 242, 254, 0.3)",
                 borderWidth: 1,
                 padding: 10,
                 displayColors: false
             }
         },
         scales: {
-            x: { grid: { color: "rgba(255,255,255,0.04)" }, ticks: { color: "#8ba3b5", font: { size: 10 } } },
-            y: { grid: { color: "rgba(255,255,255,0.04)" }, ticks: { color: "#8ba3b5", font: { size: 10 } } }
+            x: { grid: { color: "rgba(255,255,255,0.04)" }, ticks: { color: "#94a3b8", font: { size: 11 } } },
+            y: { grid: { color: "rgba(255,255,255,0.04)" }, ticks: { color: "#94a3b8", font: { size: 11 } } }
         }
     };
 
@@ -2283,8 +2561,8 @@ function updateAnalyticsCharts(forecast) {
     if (tempCtx) {
         if (tempChartInstance) tempChartInstance.destroy();
         const gradient = tempCtx.createLinearGradient(0, 0, 0, 200);
-        gradient.addColorStop(0, "rgba(34, 211, 238, 0.4)");
-        gradient.addColorStop(1, "rgba(34, 211, 238, 0.0)");
+        gradient.addColorStop(0, "rgba(0, 242, 254, 0.4)");
+        gradient.addColorStop(1, "rgba(0, 242, 254, 0.0)");
 
         tempChartInstance = new Chart(tempCtx, {
             type: "line",
@@ -2293,13 +2571,13 @@ function updateAnalyticsCharts(forecast) {
                 datasets: [{
                     label: "Temperature (°C)",
                     data: temps,
-                    borderColor: "#22d3ee",
+                    borderColor: "#00f2fe",
                     backgroundColor: gradient,
                     fill: true,
                     tension: 0.4,
                     pointRadius: 4,
                     pointHoverRadius: 6,
-                    pointBackgroundColor: "#22d3ee"
+                    pointBackgroundColor: "#00f2fe"
                 }]
             },
             options: baseOptions
@@ -2316,8 +2594,8 @@ function updateAnalyticsCharts(forecast) {
                 datasets: [{
                     label: "Rain Chance (%)",
                     data: rains,
-                    backgroundColor: "rgba(99, 102, 241, 0.7)",
-                    hoverBackgroundColor: "rgba(99, 102, 241, 0.9)",
+                    backgroundColor: "rgba(99, 102, 241, 0.75)",
+                    hoverBackgroundColor: "rgba(99, 102, 241, 0.95)",
                     borderRadius: 6
                 }]
             },
@@ -2329,8 +2607,8 @@ function updateAnalyticsCharts(forecast) {
     if (humCtx) {
         if (humChartInstance) humChartInstance.destroy();
         const gradientHum = humCtx.createLinearGradient(0, 0, 0, 200);
-        gradientHum.addColorStop(0, "rgba(52, 211, 153, 0.4)");
-        gradientHum.addColorStop(1, "rgba(52, 211, 153, 0.0)");
+        gradientHum.addColorStop(0, "rgba(16, 185, 129, 0.4)");
+        gradientHum.addColorStop(1, "rgba(16, 185, 129, 0.0)");
 
         humChartInstance = new Chart(humCtx, {
             type: "line",
@@ -2339,13 +2617,13 @@ function updateAnalyticsCharts(forecast) {
                 datasets: [{
                     label: "Humidity (%)",
                     data: hums,
-                    borderColor: "#34d399",
+                    borderColor: "#10b981",
                     backgroundColor: gradientHum,
                     fill: true,
                     tension: 0.4,
                     pointRadius: 4,
                     pointHoverRadius: 6,
-                    pointBackgroundColor: "#34d399"
+                    pointBackgroundColor: "#10b981"
                 }]
             },
             options: { ...baseOptions, scales: { ...baseOptions.scales, y: { ...baseOptions.scales.y, min: 0, max: 100 } } }
@@ -2362,13 +2640,13 @@ function updateAnalyticsCharts(forecast) {
                 datasets: [{
                     label: "Wind Speed (km/h)",
                     data: winds,
-                    borderColor: "#fbbf24",
-                    backgroundColor: "rgba(251, 191, 36, 0.1)",
+                    borderColor: "#f59e0b",
+                    backgroundColor: "rgba(245, 158, 11, 0.1)",
                     fill: true,
                     tension: 0.4,
                     pointRadius: 4,
                     pointHoverRadius: 6,
-                    pointBackgroundColor: "#fbbf24"
+                    pointBackgroundColor: "#f59e0b"
                 }]
             },
             options: baseOptions
@@ -2556,7 +2834,6 @@ function synthesizeAIResponse(question, weather) {
     const cur = weather.current;
     const place = cur.name;
     const temp = Math.round(cur.main.temp);
-    const feel = Math.round(cur.main.feels_like);
     const hum = cur.main.humidity;
     const desc = cur.weather[0].description;
     const wind = Math.round(cur.wind.speed * 3.6);
@@ -2632,7 +2909,7 @@ async function compareCities() {
     const result = $("compareResult");
 
     if (!city1 || !city2) {
-        if (result) result.innerHTML = `<div style="grid-column: 1/-1; padding: 10px; color: var(--yellow);">Please enter both city/district names.</div>`;
+        if (result) result.innerHTML = `<div style="grid-column: 1/-1; padding: 10px; color: var(--amber);">Please enter both city/district names.</div>`;
         return;
     }
 
@@ -2673,7 +2950,7 @@ async function compareCities() {
             `;
         }
     } catch (error) {
-        if (result) result.innerHTML = `<div style="grid-column: 1/-1; padding: 10px; color: var(--red);">⚠️ ${error.message}</div>`;
+        if (result) result.innerHTML = `<div style="grid-column: 1/-1; padding: 10px; color: var(--rose);">⚠️ ${error.message}</div>`;
     }
 }
 
@@ -2693,14 +2970,14 @@ async function checkTravel() {
         const wind = Math.round(cur.wind.speed * 3.6);
 
         let riskLevel = "LOW RISK";
-        let color = "var(--green)";
+        let color = "var(--emerald)";
 
         if (rain >= 70 || temp >= 42 || wind >= 50) {
             riskLevel = "HIGH RISK";
-            color = "var(--red)";
+            color = "var(--rose)";
         } else if (rain >= 40 || temp >= 36 || wind >= 35) {
             riskLevel = "MODERATE";
-            color = "var(--yellow)";
+            color = "var(--amber)";
         }
 
         const travelRiskEl = $("travelRisk");
@@ -2735,11 +3012,13 @@ function startVoiceSearch() {
 
     const voiceBtn = $("voiceSearch");
     if (voiceBtn) voiceBtn.classList.add("listening");
+    $("voiceWaveform")?.classList.remove("hidden");
 
     showError(currentLanguage === "hi" ? "🎙️ सुन रहा हूँ... जिले या शहर का नाम बोलें।" : "🎙️ Listening... Speak city or district name.");
 
     recognition.onresult = event => {
         if (voiceBtn) voiceBtn.classList.remove("listening");
+        $("voiceWaveform")?.classList.add("hidden");
         hideError();
         const text = event.results[0][0].transcript.trim().replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, "");
         const input = $("city");
@@ -2749,11 +3028,13 @@ function startVoiceSearch() {
 
     recognition.onerror = () => {
         if (voiceBtn) voiceBtn.classList.remove("listening");
+        $("voiceWaveform")?.classList.add("hidden");
         showError("Voice search timed out. Please try again.");
     };
 
     recognition.onend = () => {
         if (voiceBtn) voiceBtn.classList.remove("listening");
+        $("voiceWaveform")?.classList.add("hidden");
     };
 
     recognition.start();
@@ -2855,6 +3136,15 @@ function setupNavigation() {
 
             if (screenId === "lightningScreen") {
                 renderLightningShelters();
+                initLightningRadarCanvas();
+            }
+
+            if (screenId === "digitalTwinScreen") {
+                drawDigitalTwinCanvas(Number($("twinRainSlider")?.value || 120));
+            }
+
+            if (screenId === "waterScreen") {
+                updateRainwaterHarvesting();
             }
         });
     });
@@ -2866,12 +3156,14 @@ function setupNavigation() {
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
-    console.log("☁️ SkyCast AI — Autonomous District Disaster & Rescue Engine v3.0 Initialized");
+    console.log("☁️ SkyCast AI — Enterprise District Disaster & Rescue Engine v3.2 Initialized");
 
     loadTheme();
     loadLanguage();
     setupNavigation();
     setupOfflineEngine();
+    setupPWA();
+    initMeteoCanvas();
     renderCitizenFeed();
     renderRescueOps();
     renderDistrictLeaderboard();
@@ -2918,14 +3210,28 @@ document.addEventListener("DOMContentLoaded", () => {
         updateDigitalTwin(Number(e.target.value));
     });
 
-    document.querySelectorAll(".preset-btn").forEach(btn => {
+    document.querySelectorAll(".btn-preset").forEach(btn => {
         btn.addEventListener("click", () => {
-            document.querySelectorAll(".preset-btn").forEach(b => b.classList.remove("active"));
+            document.querySelectorAll(".btn-preset").forEach(b => b.classList.remove("active"));
             btn.classList.add("active");
             const rain = Number(btn.dataset.rain || 120);
             const slider = $("twinRainSlider");
             if (slider) slider.value = rain;
             updateDigitalTwin(rain);
+        });
+    });
+
+    // Jal Sanrakshan AI (Rainwater Slider & Select)
+    $("roofAreaSlider")?.addEventListener("input", updateRainwaterHarvesting);
+    $("surfaceCoeff")?.addEventListener("change", updateRainwaterHarvesting);
+
+    // Quick District Chips Listeners
+    document.querySelectorAll(".district-chip").forEach(chip => {
+        chip.addEventListener("click", () => {
+            const city = chip.dataset.city;
+            const input = $("city");
+            if (input) input.value = city;
+            loadWeather(city);
         });
     });
 
@@ -2992,9 +3298,9 @@ document.addEventListener("DOMContentLoaded", () => {
     $("exportBulletinBtn")?.addEventListener("click", exportDistrictBulletin);
 
     // Crop Selector Buttons
-    document.querySelectorAll(".crop-btn").forEach(btn => {
+    document.querySelectorAll(".crop-pill").forEach(btn => {
         btn.addEventListener("click", () => {
-            document.querySelectorAll(".crop-btn").forEach(b => b.classList.remove("active"));
+            document.querySelectorAll(".crop-pill").forEach(b => b.classList.remove("active"));
             btn.classList.add("active");
             currentCrop = btn.dataset.crop;
             if (W?.current) updateFarmer(W.current, W.forecast);
@@ -3015,14 +3321,23 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     $("exploreBtn")?.addEventListener("click", () => $("city")?.focus());
-    $("heroLocBtn")?.addEventListener("click", getMyLocation);
     $("loc")?.addEventListener("click", getMyLocation);
     $("mapLocationBtn")?.addEventListener("click", getMyLocation);
+    $("sosGetCoordsBtn")?.addEventListener("click", getMyLocation);
     $("voiceSearch")?.addEventListener("click", startVoiceSearch);
     $("theme")?.addEventListener("click", toggleTheme);
 
-    $("streetBtn")?.addEventListener("click", () => switchMapLayer("street"));
-    $("satelliteBtn")?.addEventListener("click", () => switchMapLayer("satellite"));
+    $("streetBtn")?.addEventListener("click", () => {
+        $("streetBtn")?.classList.add("active");
+        $("satelliteBtn")?.classList.remove("active");
+        switchMapLayer("street");
+    });
+
+    $("satelliteBtn")?.addEventListener("click", () => {
+        $("satelliteBtn")?.classList.add("active");
+        $("streetBtn")?.classList.remove("active");
+        switchMapLayer("satellite");
+    });
 
     // AI quick questions
     document.querySelectorAll("[data-q]").forEach(btn => {

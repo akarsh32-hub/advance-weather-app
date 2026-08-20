@@ -1,0 +1,1870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkyCast AI — Hyperlocal Weather Intelligence & Autonomous Disaster Management</title>
+    <meta name="description" content="AI-powered Hyperlocal Weather Intelligence, District Digital Twin, Lightning Risk Radar, Smart SOS, Autonomous Rescue Team Coordination, and Emergency Management Platform.">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <!-- Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<!-- Fullscreen Emergency Red Flash Overlay (For Stage Demo WOW Factor) -->
+<div id="strobeOverlay" class="strobe-overlay hidden"></div>
+
+<!-- Offline Network Status Notification Banner -->
+<div id="offlineBanner" class="offline-banner hidden">
+    <div class="offline-content">
+        <span class="offline-dot"></span>
+        <strong id="offlineTitle">📡 OFFLINE EMERGENCY MODE ACTIVE</strong>
+        <p id="offlineDesc">Network disconnected. Recording GPS breadcrumbs. SOS requests are queued locally and will auto-sync upon reconnection.</p>
+    </div>
+    <div class="offline-actions">
+        <span class="queue-badge" id="offlineQueueBadge">0 Queued</span>
+        <button id="forceSyncBtn" class="offline-sync-btn" type="button">🔄 Retry Sync</button>
+    </div>
+</div>
+
+<div class="app">
+
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
+
+    <aside class="sidebar">
+
+        <div class="brand">
+            <div class="brand-logo">
+                ☁️
+            </div>
+            <div>
+                <h2>SkyCast <span>AI</span></h2>
+                <small data-i18n="brandSub">HYPERLOCAL DISASTER INTELLIGENCE</small>
+            </div>
+        </div>
+
+        <nav class="navigation">
+            <button class="nav-btn active" data-screen="dashboardScreen">
+                <span>⌂</span>
+                <b data-i18n="navDashboard">Dashboard</b>
+            </button>
+
+            <button class="nav-btn" data-screen="disasterScreen">
+                <span>🏛️</span>
+                <b data-i18n="navDisaster">District Command</b>
+                <span class="nav-badge">DDMA</span>
+            </button>
+
+            <!-- Pillar B: Rescue Ops Center -->
+            <button class="nav-btn" data-screen="rescueScreen">
+                <span>🧭</span>
+                <b data-i18n="navRescue">Rescue Ops Center</b>
+                <span class="nav-badge red">NDRF</span>
+            </button>
+
+            <!-- Pillar A1: AI Digital Twin of District -->
+            <button class="nav-btn" data-screen="digitalTwinScreen">
+                <span>🧬</span>
+                <b data-i18n="navTwin">AI Digital Twin</b>
+                <span class="nav-badge purple">3D SIM</span>
+            </button>
+
+            <!-- Pillar A2 & A11: Lightning Risk & Safe Zone -->
+            <button class="nav-btn" data-screen="lightningScreen">
+                <span>⚡</span>
+                <b data-i18n="navLightning">Lightning Radar</b>
+                <span class="nav-badge yellow">RADAR</span>
+            </button>
+
+            <!-- Pillar A5 & A6: Smart SOS & Offline Emergency -->
+            <button class="nav-btn" data-screen="sosScreen">
+                <span>🆘</span>
+                <b data-i18n="navSOS">Smart SOS & Offline</b>
+                <span class="nav-badge red">24x7</span>
+            </button>
+
+            <!-- Pillar A7: Smart Emergency Resource Management -->
+            <button class="nav-btn" data-screen="resourcesScreen">
+                <span>📊</span>
+                <b data-i18n="navResources">Resource Inventory</b>
+                <span class="nav-badge green">LIVE</span>
+            </button>
+
+            <button class="nav-btn" data-screen="leaderboardScreen">
+                <span>🏆</span>
+                <b data-i18n="navLeaderboard">District Ranking</b>
+            </button>
+
+            <button class="nav-btn" data-screen="farmerScreen">
+                <span>🌱</span>
+                <b data-i18n="navFarmer">Kisan Mode</b>
+                <span class="nav-badge green">AI</span>
+            </button>
+
+            <button class="nav-btn" data-screen="citizenScreen">
+                <span>📍</span>
+                <b data-i18n="navCitizen">Citizen Report</b>
+            </button>
+
+            <button class="nav-btn" data-screen="analyticsScreen">
+                <span>◈</span>
+                <b data-i18n="navAnalytics">Analytics</b>
+            </button>
+
+            <button class="nav-btn" data-screen="mapScreen">
+                <span>⌖</span>
+                <b data-i18n="navMap">Weather & Hazard Map</b>
+            </button>
+
+            <button class="nav-btn" data-screen="alertsScreen">
+                <span>⚠</span>
+                <b data-i18n="navAlerts">Alert Center</b>
+            </button>
+
+            <button class="nav-btn" data-screen="aiScreen">
+                <span>✦</span>
+                <b data-i18n="navAI">AI Copilot</b>
+            </button>
+
+            <button class="nav-btn" data-screen="compareScreen">
+                <span>⇄</span>
+                <b data-i18n="navCompare">Compare</b>
+            </button>
+
+            <button class="nav-btn" data-screen="travelScreen">
+                <span>✈</span>
+                <b data-i18n="navTravel">Travel Planner</b>
+            </button>
+        </nav>
+
+        <!-- Hackathon Demo Simulation Box -->
+        <div class="simulation-box">
+            <div class="sim-header">
+                <small>🎭 HACKATHON DEMO</small>
+                <span class="sim-tag" id="currentSimBadge">LIVE</span>
+            </div>
+            <select id="simScenario" class="sim-select" title="Simulate weather hazards for judges">
+                <option value="live">🟢 Live Real Weather</option>
+                <option value="flood">🔴 Flash Flood / Heavy Rain (120mm)</option>
+                <option value="heatwave">🔥 Extreme Heatwave (46.5°C)</option>
+                <option value="smog">🌫️ Toxic Smog Emergency (AQI 385)</option>
+                <option value="storm">💨 Cyclone / Severe Gale (75 km/h)</option>
+                <option value="lightning">⚡ Severe Lightning & Thunderstorm</option>
+            </select>
+        </div>
+
+        <div class="sidebar-bottom">
+            <div class="system-card">
+                <div class="system-icon">✦</div>
+                <strong data-i18n="systemTitle">SkyCast Intelligence</strong>
+                <p data-i18n="systemDesc">
+                    Autonomous disaster prediction, rescue ops dispatch & hyperlocal climate intelligence.
+                </p>
+                <span class="online">● DISTRICT READY</span>
+            </div>
+
+            <div class="sidebar-footer">
+                SkyCast AI v3.0 • Autonomous Disaster Edition
+            </div>
+        </div>
+
+    </aside>
+
+
+    <!-- =====================================================
+         MAIN
+    ====================================================== -->
+
+    <main class="main">
+
+        <!-- TOP BAR -->
+        <header class="topbar">
+            <div class="search">
+                <span>⌕</span>
+                <input
+                    id="city"
+                    type="text"
+                    placeholder="Search city or district (e.g. Kanpur, Lucknow, Delhi, Varanasi)..."
+                    autocomplete="off"
+                >
+                <button id="voiceSearch" title="Voice Search" type="button">
+                    🎙
+                </button>
+                <button id="search" type="button" data-i18n="searchBtn">
+                    Search
+                </button>
+            </div>
+
+            <button id="loc" class="top-action" type="button">
+                📍 <span data-i18n="myLocation">My Location</span>
+            </button>
+
+            <!-- Language Switcher (English / Hindi) -->
+            <button id="langToggle" class="top-action lang-btn" type="button" title="Switch Language (English / हिंदी)">
+                🌐 <b id="langLabel">हिन्दी</b>
+            </button>
+
+            <!-- Quick SOS Trigger in Topbar -->
+            <button id="topSosBtn" class="top-action sos-top-btn" type="button" title="Broadcast Immediate Emergency SOS">
+                🆘 <b>SOS</b>
+            </button>
+
+            <!-- Text-to-Speech Audio Weather Bulletin -->
+            <button id="audioBtn" class="icon-button" title="Listen to Voice Weather Bulletin" type="button">
+                🔊
+            </button>
+
+            <!-- Live SOS Siren Sound Button (WOW Factor) -->
+            <button id="sirenBtn" class="icon-button siren-btn" title="Trigger Emergency Siren Alarm" type="button">
+                🚨
+            </button>
+
+            <!-- 1-Click WhatsApp / SMS Dispatch Button -->
+            <button id="whatsappTopBtn" class="icon-button wa-btn" title="1-Click WhatsApp Emergency Dispatch" type="button">
+                💬
+            </button>
+
+            <button id="theme" class="icon-button" title="Toggle theme" type="button">
+                🌙
+            </button>
+        </header>
+
+        <!-- EMERGENCY BANNER (Shown when high risk detected or simulated) -->
+        <div id="disasterBanner" class="disaster-banner hidden">
+            <div class="banner-icon">🚨</div>
+            <div class="banner-content">
+                <strong id="disasterTitle">DISTRICT SEVERE WEATHER WARNING</strong>
+                <p id="disasterDesc">High meteorological hazard detected. Public advisory active.</p>
+            </div>
+            <div class="banner-btns">
+                <button class="banner-action" id="viewDisasterBtn">Command Center →</button>
+                <button class="banner-action wa-share" id="bannerWaBtn">📲 WhatsApp Dispatch</button>
+            </div>
+        </div>
+
+        <!-- ERROR -->
+        <div id="error" class="error hidden"></div>
+
+        <!-- =================================================
+             DASHBOARD
+        ================================================== -->
+        <section id="dashboardScreen" class="screen active">
+
+            <div class="hero">
+                <div class="hero-content">
+                    <span class="hero-tag" data-i18n="heroTag">
+                        ✦ AI WEATHER & AUTONOMOUS DISASTER MANAGEMENT SYSTEM
+                    </span>
+                    <h1>
+                        <span data-i18n="heroTitle1">Weather & Disaster,</span>
+                        <span class="grad-text" data-i18n="heroTitle2">reimagined.</span>
+                    </h1>
+                    <p data-i18n="heroDesc">
+                        Hyperlocal risk modeling, District Digital Twins, Lightning Strike Prediction, Smart SOS dispatch, and autonomous Rescue Team coordination.
+                    </p>
+
+                    <div class="hero-buttons">
+                        <button class="primary" id="exploreBtn" type="button" data-i18n="exploreBtn">
+                            Explore Weather →
+                        </button>
+                        <button class="secondary hero-rescue" id="heroRescueBtn" type="button">
+                            🧭 <span data-i18n="rescueOpsBtn">Rescue Ops</span>
+                        </button>
+                        <button class="secondary hero-sos" id="heroSosBtn" type="button">
+                            🆘 <span data-i18n="quickSos">Emergency SOS</span>
+                        </button>
+                        <button class="secondary hero-audio" id="heroAudioBtn" type="button">
+                            🔊 <span data-i18n="listenBulletin">Listen Bulletin</span>
+                        </button>
+                        <button class="secondary hero-wa" id="heroWaBtn" type="button">
+                            💬 <span data-i18n="shareWa">WhatsApp Alert</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="score-circle">
+                    <small data-i18n="scoreLabel">DISASTER RISK SCORE</small>
+                    <strong id="score">--</strong>
+                    <span>/ 100</span>
+                    <em id="risk">--</em>
+                </div>
+            </div>
+
+            <!-- CURRENT WEATHER -->
+            <div class="dashboard-grid">
+                <div class="weather-card">
+                    <div class="card-top">
+                        <div>
+                            <small data-i18n="currentWeatherLabel">CURRENT WEATHER</small>
+                            <h2 id="place">Search a city</h2>
+                        </div>
+                        <span class="live">● LIVE SYNC</span>
+                    </div>
+
+                    <div class="current-weather">
+                        <img
+                            id="icon"
+                            src="https://openweathermap.org/img/wn/01d@2x.png"
+                            alt="Weather Icon"
+                        >
+                        <div>
+                            <div id="temp" class="big-temp">--°</div>
+                            <div id="cond" class="condition">Search for weather</div>
+                            <div id="feel" class="feels">Feels like --°</div>
+                        </div>
+                    </div>
+
+                    <div class="metric-grid">
+                        <div>
+                            <span data-i18n="humidityLabel">💧 Humidity</span>
+                            <strong id="hum">--</strong>
+                        </div>
+                        <div>
+                            <span data-i18n="windLabel">💨 Wind</span>
+                            <strong id="wind">--</strong>
+                        </div>
+                        <div>
+                            <span data-i18n="pressureLabel">⏱ Pressure</span>
+                            <strong id="press">--</strong>
+                        </div>
+                        <div>
+                            <span data-i18n="cloudLabel">☁ Clouds</span>
+                            <strong id="cloud">--</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RISK & FAST ACTION -->
+                <div class="risk-card">
+                    <div class="card-title">
+                        <span>◉</span>
+                        <div>
+                            <small data-i18n="riskIntelligence">INTELLIGENCE</small>
+                            <h3 data-i18n="weatherRisk">Multi-Hazard Risk Engine</h3>
+                        </div>
+                    </div>
+
+                    <div class="risk-score">
+                        <div>
+                            <small data-i18n="riskScoreLabel">OVERALL SAFETY SCORE</small>
+                            <strong id="riskScore">--</strong>
+                        </div>
+                        <div id="riskStatus" class="risk-status">
+                            WAITING
+                        </div>
+                    </div>
+
+                    <!-- Quick Pillar Indicators on Dashboard -->
+                    <div class="hazard-quick-strip">
+                        <div class="strip-item">
+                            <span>⚡</span>
+                            <small>Lightning</small>
+                            <b id="quickLightningRisk">Low (8%)</b>
+                        </div>
+                        <div class="strip-item">
+                            <span>🌊</span>
+                            <small>Flood Risk</small>
+                            <b id="quickFloodRisk">Low (12%)</b>
+                        </div>
+                        <div class="strip-item">
+                            <span>🔥</span>
+                            <small>Heatstroke</small>
+                            <b id="quickHeatRisk">Safe</b>
+                        </div>
+                        <div class="strip-item">
+                            <span>🧭</span>
+                            <small>Active Teams</small>
+                            <b id="quickActiveTeams">4 Ready</b>
+                        </div>
+                    </div>
+
+                    <div id="risks" class="risk-list">
+                        <div>Search a city to analyze weather risks.</div>
+                    </div>
+
+                    <div class="smart-advice">
+                        <span>✦</span>
+                        <div>
+                            <strong data-i18n="aiRecLabel">AI Autonomous Directive</strong>
+                            <p id="farmer">Disaster and safety intelligence will appear here.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SMART STATS -->
+            <div class="smart-grid">
+                <div class="smart-card">
+                    <div class="smart-icon">🌡️</div>
+                    <div>
+                        <small data-i18n="feelsLikeLabel">FEELS LIKE</small>
+                        <strong id="insightFeel">--°</strong>
+                        <span data-i18n="sensationLabel">Thermal sensation</span>
+                    </div>
+                </div>
+
+                <div class="smart-card">
+                    <div class="smart-icon">⚡</div>
+                    <div>
+                        <small data-i18n="lightningRiskLabel">LIGHTNING CAPE</small>
+                        <strong id="dashLightningCape">-- J/kg</strong>
+                        <span id="dashLightningStatus">Normal</span>
+                    </div>
+                </div>
+
+                <div class="smart-card">
+                    <div class="smart-icon">☀️</div>
+                    <div>
+                        <small data-i18n="uvLabel">UV INDEX</small>
+                        <strong id="uvValue">--</strong>
+                        <span id="uvStatus">--</span>
+                    </div>
+                </div>
+
+                <div class="smart-card">
+                    <div class="smart-icon">🌫️</div>
+                    <div>
+                        <small data-i18n="aqiLabel">AIR QUALITY</small>
+                        <strong id="aqiValue">--</strong>
+                        <span id="aqiStatus">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FORECAST -->
+            <div class="section-card">
+                <div class="section-heading">
+                    <div>
+                        <small data-i18n="forecastSub">FORECAST</small>
+                        <h3 data-i18n="fiveDayHeading">5 Day Meteorological Forecast</h3>
+                    </div>
+                </div>
+                <div id="forecast" class="forecast"></div>
+            </div>
+
+            <!-- HOURLY -->
+            <div class="section-card">
+                <div class="section-heading">
+                    <div>
+                        <small data-i18n="hourlySub">NEXT HOURS</small>
+                        <h3 data-i18n="hourlyHeading">Hourly Forecast & Hazard Trend</h3>
+                    </div>
+                </div>
+                <div id="hourly" class="hourly"></div>
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             PILLAR B: SMART RESCUE TEAM COORDINATION CENTER
+        ================================================== -->
+        <section id="rescueScreen" class="screen">
+            <div class="page-heading">
+                <small data-i18n="rescueSub">AUTONOMOUS EMERGENCY DISPATCH & TEAM LOGISTICS</small>
+                <h1 data-i18n="rescueTitle">Smart Rescue Team Coordination Center</h1>
+                <p data-i18n="rescueDesc">
+                    Real-time GPS tracking of NDRF/SDRF rescue teams, AI incident triage, equipment load monitoring, safe route navigation, and field check-in synchronization.
+                </p>
+            </div>
+
+            <!-- Rescue KPI Metrics -->
+            <div class="rescue-kpi-grid">
+                <div class="kpi-card">
+                    <span class="kpi-icon">👥</span>
+                    <div>
+                        <small data-i18n="totalTeams">DEPLOYED TEAMS</small>
+                        <strong id="kpiTotalTeams">4 Active</strong>
+                        <span class="kpi-sub">NDRF & Civil Defense</span>
+                    </div>
+                </div>
+
+                <div class="kpi-card">
+                    <span class="kpi-icon">🆘</span>
+                    <div>
+                        <small data-i18n="activeIncidents">ACTIVE SOS INCIDENTS</small>
+                        <strong id="kpiActiveIncidents">3 Pending</strong>
+                        <span class="kpi-sub red" id="kpiHighPriorityCount">1 Critical Triage</span>
+                    </div>
+                </div>
+
+                <div class="kpi-card">
+                    <span class="kpi-icon">🛟</span>
+                    <div>
+                        <small data-i18n="evacuatedCivilians">CIVILIANS EVACUATED</small>
+                        <strong id="kpiEvacuated">64 Rescued</strong>
+                        <span class="kpi-sub green">Today's Missions</span>
+                    </div>
+                </div>
+
+                <div class="kpi-card">
+                    <span class="kpi-icon">⏱️</span>
+                    <div>
+                        <small data-i18n="avgResponseTime">AVG RESPONSE TIME</small>
+                        <strong>14.2 Mins</strong>
+                        <span class="kpi-sub green">AI Route Optimization</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rescue Flow Banner (For Teachers & Judges) -->
+            <div class="rescue-flow-bar">
+                <strong>🔥 COMPLETE RESCUE FLOW:</strong>
+                <span>SOS Alert ➔ AI Severity Analysis ➔ Priority Triage ➔ Best Team Selection ➔ Safe Route ➔ Field Check-in ➔ Evacuation Complete</span>
+            </div>
+
+            <!-- Live Rescue Teams Grid -->
+            <div class="section-card">
+                <div class="section-heading">
+                    <div>
+                        <small data-i18n="teamStatusSub">FIELD DEPLOYMENT UNITS</small>
+                        <h3 data-i18n="teamStatusHeading">Live Rescue Teams & Equipment Tracking</h3>
+                    </div>
+                    <button class="secondary checkin-trigger-btn" id="openCheckInModalBtn" type="button">
+                        📡 Submit Field Check-In
+                    </button>
+                </div>
+
+                <div class="rescue-teams-grid" id="rescueTeamsGrid">
+                    <!-- Loaded dynamically by app.js -->
+                </div>
+            </div>
+
+            <!-- AI Rescue Incident Priority Engine Table -->
+            <div class="section-card">
+                <div class="section-heading">
+                    <div>
+                        <small data-i18n="incidentTriageSub">AUTONOMOUS TRIAGE ENGINE</small>
+                        <h3 data-i18n="incidentTriageHeading">Active Incident AI Priority Queue</h3>
+                    </div>
+                    <span class="live">● LIVE AI TRIAGE</span>
+                </div>
+
+                <div class="tehsil-table-wrapper">
+                    <table class="tehsil-table" id="incidentTriageTable">
+                        <thead>
+                            <tr>
+                                <th>Priority</th>
+                                <th>Incident Category</th>
+                                <th>Location</th>
+                                <th>Affected Persons</th>
+                                <th>Severity Threat</th>
+                                <th>Recommended Team</th>
+                                <th>Mission Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="incidentTriageBody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Active Mission Timeline Tracker -->
+            <div class="section-card">
+                <div class="section-heading">
+                    <div>
+                        <small data-i18n="missionTimelineSub">MISSION LIFECYCLE MONITOR</small>
+                        <h3 data-i18n="missionTimelineHeading">Live Rescue Mission Timeline (Team Alpha — Mission #104)</h3>
+                    </div>
+                    <span class="status-pill danger">ON MISSION</span>
+                </div>
+
+                <div class="mission-timeline">
+                    <div class="timeline-step completed">
+                        <div class="step-dot">✓</div>
+                        <strong>1. SOS Received</strong>
+                        <small>10:15 AM • Severe Flood</small>
+                    </div>
+                    <div class="timeline-step completed">
+                        <div class="step-dot">✓</div>
+                        <strong>2. Team Assigned</strong>
+                        <small>10:18 AM • Team Alpha</small>
+                    </div>
+                    <div class="timeline-step completed">
+                        <div class="step-dot">✓</div>
+                        <strong>3. Departed Base</strong>
+                        <small>10:22 AM • Route 4A Clear</small>
+                    </div>
+                    <div class="timeline-step active">
+                        <div class="step-dot">⏳</div>
+                        <strong>4. On-Site Operations</strong>
+                        <small>10:38 AM • Inflatable Boats</small>
+                    </div>
+                    <div class="timeline-step">
+                        <div class="step-dot">○</div>
+                        <strong>5. Evacuation Complete</strong>
+                        <small>Pending Transfer</small>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- =================================================
+             PILLAR A1: DISTRICT DIGITAL TWIN SIMULATOR
+        ================================================== -->
+        <section id="digitalTwinScreen" class="screen">
+            <div class="page-heading">
+                <small data-i18n="twinSub">DISTRICT VIRTUAL REPLICA & IMPACT MODELING</small>
+                <h1 data-i18n="twinTitle">District AI Digital Twin Simulator</h1>
+                <p data-i18n="twinDesc">
+                    Simulate extreme weather stress tests (monsoon deluges, flash floods, heatwaves). Analyze flooded surface areas, vulnerable populations, submerged bridges, and compute safe evacuation corridors.
+                </p>
+            </div>
+
+            <!-- Interactive Digital Twin Simulation Controls -->
+            <div class="twin-controls-card">
+                <div class="twin-slider-group">
+                    <div class="slider-header">
+                        <label for="twinRainSlider">🌧️ Simulated Precipitation Stress Test (सिमुलेटेड वर्षा):</label>
+                        <strong id="twinRainVal">120 mm</strong>
+                    </div>
+                    <input type="range" id="twinRainSlider" min="0" max="250" step="10" value="120" class="twin-slider">
+                    <div class="slider-ticks">
+                        <span>0 mm (Dry)</span>
+                        <span>50 mm (Moderate)</span>
+                        <span>100 mm (Heavy)</span>
+                        <span>150 mm (Severe)</span>
+                        <span>250 mm (Cloudburst)</span>
+                    </div>
+                </div>
+
+                <div class="twin-quick-presets">
+                    <button class="preset-btn" data-rain="20">Normal Rain (20mm)</button>
+                    <button class="preset-btn" data-rain="80">Waterlogging (80mm)</button>
+                    <button class="preset-btn active" data-rain="120">Monsoon Deluge (120mm)</button>
+                    <button class="preset-btn" data-rain="220">Catastrophic Flood (220mm)</button>
+                </div>
+            </div>
+
+            <!-- Digital Twin Impact Matrix -->
+            <div class="twin-impact-grid">
+                <div class="twin-stat-card">
+                    <span class="twin-icon">🌊</span>
+                    <div>
+                        <small>SUBMERGED SURFACE AREA</small>
+                        <strong id="twinSubmergedArea">38.4 sq km</strong>
+                        <span class="twin-sub red" id="twinInundationLevel">Inundation: 2.2 meters</span>
+                    </div>
+                </div>
+
+                <div class="twin-stat-card">
+                    <span class="twin-icon">👥</span>
+                    <div>
+                        <small>POPULATION AT HIGH RISK</small>
+                        <strong id="twinAtRiskPop">42,500 Civilians</strong>
+                        <span class="twin-sub yellow">Low-lying Wards & Slums</span>
+                    </div>
+                </div>
+
+                <div class="twin-stat-card">
+                    <span class="twin-icon">⚡</span>
+                    <div>
+                        <small>POWER & GRID RISK</small>
+                        <strong id="twinGridRisk">3 Substations Alert</strong>
+                        <span class="twin-sub red">Automatic Cutoff Triggered</span>
+                    </div>
+                </div>
+
+                <div class="twin-stat-card">
+                    <span class="twin-icon">🛣️</span>
+                    <div>
+                        <small>SUBMERGED HIGHWAYS / ROADS</small>
+                        <strong id="twinRoadsCount">6 Key Corridors</strong>
+                        <span class="twin-sub green" id="twinAltRouteText">4 Alternate Routes Generated</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3-Phase Disaster Lifecycle Manager (Before, During, After) -->
+            <div class="section-card">
+                <div class="section-heading">
+                    <div>
+                        <small data-i18n="phasesSub">3-PHASE DISASTER LIFECYCLE</small>
+                        <h3 data-i18n="phasesHeading">Integrated Preparedness, Response & Recovery Plan</h3>
+                    </div>
+                </div>
+
+                <div class="phases-grid">
+                    <div class="phase-card before">
+                        <div class="phase-header">
+                            <span>1️⃣ BEFORE DISASTER</span>
+                            <small>Pre-Disaster Intelligence</small>
+                        </div>
+                        <ul>
+                            <li>✓ Hyperlocal CAPE Lightning Prediction</li>
+                            <li>✓ Targeted Primary School Suspension Orders</li>
+                            <li>✓ Dewatering Pumps Pre-positioned at Underpasses</li>
+                            <li>✓ Gram Pradhan WhatsApp Weather Bulletins</li>
+                        </ul>
+                    </div>
+
+                    <div class="phase-card during">
+                        <div class="phase-header">
+                            <span>2️⃣ DURING DISASTER</span>
+                            <small>Real-Time Crisis Management</small>
+                        </div>
+                        <ul>
+                            <li>✓ Smart SOS Dispatch & Auto-Triage</li>
+                            <li>✓ Live Rescue Team GPS & Equipment Tracking</li>
+                            <li>✓ Emergency Sirens & Visual Strobe Warning</li>
+                            <li>✓ Safe Weather-Aware Evacuation Routes</li>
+                        </ul>
+                    </div>
+
+                    <div class="phase-card after">
+                        <div class="phase-header">
+                            <span>3️⃣ AFTER DISASTER</span>
+                            <small>Damage Assessment & Relief</small>
+                        </div>
+                        <ul>
+                            <li>✓ Crowdsourced Citizen Damage Reports</li>
+                            <li>✓ PMFBY Crop Damage Loss Estimation</li>
+                            <li>✓ Hospital Bed & Vector Disease (Dengue) Index</li>
+                            <li>✓ Relief Camps Food & Drinking Water Logistics</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- =================================================
+             PILLAR A2 & A11: LIGHTNING RISK RADAR & SAFE ZONE
+        ================================================== -->
+        <section id="lightningScreen" class="screen">
+            <div class="page-heading">
+                <small data-i18n="lightningSub">THERMODYNAMIC ATMOSPHERIC INSTABILITY & SAFETY</small>
+                <h1 data-i18n="lightningTitle">Lightning Risk Radar & Safe Zone Finder</h1>
+                <p data-i18n="lightningDesc">
+                    Thermodynamic CAPE analysis, cloud-to-ground strike likelihood prediction, 30/30 safety countdown timer, and nearest verified lightning-safe concrete shelters.
+                </p>
+            </div>
+
+            <div class="lightning-dashboard-grid">
+                <!-- Lightning Risk Gauge Card -->
+                <div class="lightning-gauge-card">
+                    <div class="section-heading">
+                        <div>
+                            <small>CONVECTIVE INSTABILITY</small>
+                            <h3>Atmospheric Lightning Threat Index</h3>
+                        </div>
+                        <span class="status-pill danger" id="lightningAlertPill">HIGH RISK</span>
+                    </div>
+
+                    <div class="lightning-meter-box">
+                        <div class="meter-circle">
+                            <span class="electric-symbol">⚡</span>
+                            <strong id="lightningProbVal">78%</strong>
+                            <small>Strike Likelihood</small>
+                        </div>
+
+                        <div class="meter-details">
+                            <div>
+                                <small>Convective CAPE:</small>
+                                <strong id="lightningCapeVal">2,450 J/kg</strong>
+                            </div>
+                            <div>
+                                <small>Lifted Index (LI):</small>
+                                <strong id="lightningLiVal">-5.2 (Unstable)</strong>
+                            </div>
+                            <div>
+                                <small>Estimated Thunderstorm ETA:</small>
+                                <strong id="lightningEtaVal">Within 25–40 Mins</strong>
+                            </div>
+                            <div>
+                                <small>Safety Advisory:</small>
+                                <span class="threat-note red" id="lightningActionNote">🚨 Take shelter in pucca concrete building immediately! Avoid open fields and tall trees.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 30/30 Lightning Safety Rule Countdown -->
+                    <div class="rule-box">
+                        <strong>⏱️ 30/30 LIGHTNING SAFETY RULE:</strong>
+                        <p>If time between lightning flash and thunder is under 30 seconds, seek shelter immediately. Wait 30 minutes after last thunder before resuming outdoor activities.</p>
+                    </div>
+                </div>
+
+                <!-- Lightning Safe Zone & Shelter Finder -->
+                <div class="section-card safe-shelter-card">
+                    <div class="section-heading">
+                        <div>
+                            <small>CIVIL PROTECTION DIRECTORY</small>
+                            <h3>Nearest Verified Lightning Safe Shelters</h3>
+                        </div>
+                        <button class="secondary" id="findNearbyShelterBtn" type="button">📍 Scan Nearby</button>
+                    </div>
+
+                    <div class="shelters-list" id="safeSheltersList">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- =================================================
+             PILLAR A5 & A6: SMART SOS & OFFLINE EMERGENCY HUB
+        ================================================== -->
+        <section id="sosScreen" class="screen">
+            <div class="page-heading">
+                <small data-i18n="sosSub">CIVIC LIFE-SAFETY & OFFLINE RESILIENCE</small>
+                <h1 data-i18n="sosTitle">Smart SOS & Offline Emergency Hub</h1>
+                <p data-i18n="sosDesc">
+                    Broadcast immediate life-saving SOS requests with automatic routing to nearest emergency services. Works 100% offline during network tower blackouts with GPS breadcrumb tracking.
+                </p>
+            </div>
+
+            <div class="sos-layout">
+                <!-- SOS Trigger Form -->
+                <div class="sos-card">
+                    <div class="sos-header">
+                        <div class="sos-badge">🆘 SOS</div>
+                        <div>
+                            <h2>Emergency SOS Broadcast</h2>
+                            <span>Direct Dispatch to District Control Room & NDRF Base</span>
+                        </div>
+                    </div>
+
+                    <form id="smartSosForm" class="sos-form">
+                        <div>
+                            <label>Emergency Category (आपदा का प्रकार):</label>
+                            <select id="sosCategory" required>
+                                <option value="flood_trapped">🌊 Trapped in Severe Flood / Waterlogging</option>
+                                <option value="medical_trauma">🚑 Medical Emergency / Critical Injury</option>
+                                <option value="building_collapse">🏚️ Structure / Building Collapse</option>
+                                <option value="lightning_fire">⚡ Lightning Strike / Electrocution</option>
+                                <option value="cyclone_stranded">💨 High Wind / Road Cutoff</option>
+                            </select>
+                        </div>
+
+                        <div class="sos-inputs-row">
+                            <div>
+                                <label>Number of Affected Persons (फंसे लोगों की संख्या):</label>
+                                <input type="number" id="sosPeopleCount" min="1" max="500" value="4" required>
+                            </div>
+                            <div>
+                                <label>Vulnerable Persons (बुजुर्ग / बच्चे / मरीज):</label>
+                                <select id="sosVulnerable">
+                                    <option value="yes">Yes (Infants / Elderly / Patients)</option>
+                                    <option value="no">No (Adults only)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label>Current Location / Landmark (स्थान):</label>
+                            <div class="loc-input-group">
+                                <input id="sosLocation" placeholder="e.g. Village Shivrajpur near Primary School" required>
+                                <button id="sosGetCoordsBtn" class="secondary" type="button">📍 GPS</button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label>Emergency Details & Immediate Need (विवरण):</label>
+                            <textarea id="sosDetails" rows="3" placeholder="Describe water level, medical needs, or nearest landmark..."></textarea>
+                        </div>
+
+                        <button type="submit" class="sos-submit-btn" id="broadcastSosBtn">
+                            🚨 BROADCAST EMERGENCY SOS NOW
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Offline GPS Breadcrumbs & Local Emergency Services -->
+                <div class="sos-side-card">
+                    <!-- Offline Queue Status -->
+                    <div class="offline-sync-card">
+                        <div class="section-heading">
+                            <div>
+                                <small>OFFLINE LOCALSTORAGE ENGINE</small>
+                                <h3>Offline Queue & GPS Breadcrumbs</h3>
+                            </div>
+                            <span class="online" id="netStatusBadge">● ONLINE</span>
+                        </div>
+                        <p>When disconnected from internet, your GPS coordinates and SOS distress requests are securely queued locally. Search and rescue teams can scan recent breadcrumb paths.</p>
+                        
+                        <div class="breadcrumb-tracker">
+                            <span>📍 Recent GPS Breadcrumbs:</span>
+                            <strong id="gpsBreadcrumbCount">8 Location Points Logged</strong>
+                        </div>
+                    </div>
+
+                    <!-- Nearest District Hospital & Police Station -->
+                    <div class="section-card emergency-contacts-card">
+                        <div class="section-heading">
+                            <div>
+                                <small>NEARBY EMERGENCY FACILITIES</small>
+                                <h3>First Responder Nodes</h3>
+                            </div>
+                        </div>
+
+                        <div class="responder-items">
+                            <div class="responder-item">
+                                <span>🏥</span>
+                                <div>
+                                    <strong>District Civil Hospital</strong>
+                                    <small>2.4 km away • 18 ICU Beds Available</small>
+                                </div>
+                                <a href="tel:108" class="contact-btn">📞 108</a>
+                            </div>
+
+                            <div class="responder-item">
+                                <span>🚓</span>
+                                <div>
+                                    <strong>Central Police Control Room</strong>
+                                    <small>1.8 km away • Response Unit #4</small>
+                                </div>
+                                <a href="tel:112" class="contact-btn">📞 112</a>
+                            </div>
+
+                            <div class="responder-item">
+                                <span>🚒</span>
+                                <div>
+                                    <strong>District Fire & Rescue Station</strong>
+                                    <small>3.1 km away • 4 Fire Tenders Ready</small>
+                                </div>
+                                <a href="tel:101" class="contact-btn">📞 101</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- =================================================
+             PILLAR A7: SMART EMERGENCY RESOURCE INVENTORY
+        ================================================== -->
+        <section id="resourcesScreen" class="screen">
+            <div class="page-heading">
+                <small data-i18n="resourcesSub">INTER-DEPARTMENTAL EMERGENCY INVENTORY</small>
+                <h1 data-i18n="resourcesTitle">Smart Emergency Resource Management</h1>
+                <p data-i18n="resourcesDesc">
+                    Centralized multi-departmental tracking of ambulances, fire tenders, ICU beds, dewatering pumps, NDRF battalions, and community relief camp food rations.
+                </p>
+            </div>
+
+            <!-- Resource Cards Grid -->
+            <div class="resources-grid">
+                <div class="resource-box">
+                    <div class="res-head">
+                        <span>🚑</span>
+                        <div>
+                            <strong>Ambulances & Mobile ICUs</strong>
+                            <small>Health Dept & Red Cross</small>
+                        </div>
+                    </div>
+                    <div class="res-body">
+                        <div class="res-meter">
+                            <div class="res-fill" style="width: 75%;"></div>
+                        </div>
+                        <div class="res-nums">
+                            <b>24 Deployed</b>
+                            <span>8 Standby (Total 32)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="resource-box">
+                    <div class="res-head">
+                        <span>🚜</span>
+                        <div>
+                            <strong>Heavy Dewatering Pumps</strong>
+                            <small>Municipal Drainage Cell</small>
+                        </div>
+                    </div>
+                    <div class="res-body">
+                        <div class="res-meter">
+                            <div class="res-fill" style="width: 60%;"></div>
+                        </div>
+                        <div class="res-nums">
+                            <b>18 Running</b>
+                            <span>12 Available (Total 30)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="resource-box">
+                    <div class="res-head">
+                        <span>🛏️</span>
+                        <div>
+                            <strong>Hospital Emergency & ICU Beds</strong>
+                            <small>District Hospital & CHCs</small>
+                        </div>
+                    </div>
+                    <div class="res-body">
+                        <div class="res-meter">
+                            <div class="res-fill" style="width: 42%;"></div>
+                        </div>
+                        <div class="res-nums">
+                            <b>145 Occupied</b>
+                            <span class="green">205 Available</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="resource-box">
+                    <div class="res-head">
+                        <span>⛺</span>
+                        <div>
+                            <strong>Relief Shelters & Community Food</strong>
+                            <small>Revenue Dept & NGOs</small>
+                        </div>
+                    </div>
+                    <div class="res-body">
+                        <div class="res-meter">
+                            <div class="res-fill" style="width: 85%;"></div>
+                        </div>
+                        <div class="res-nums">
+                            <b>12 Camps Active</b>
+                            <span>15,000 Food Rations Ready</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Resource Allocation Suggestion -->
+            <div class="section-card">
+                <div class="section-heading">
+                    <div>
+                        <small>AI STRATEGIC DISPATCH</small>
+                        <h3>AI Optimal Resource Rebalancing Advisory</h3>
+                    </div>
+                    <span class="live">● AUTONOMOUS REALLOCATION</span>
+                </div>
+
+                <div class="allocation-items">
+                    <div class="alloc-item">
+                        <span class="alloc-icon">⚡</span>
+                        <div>
+                            <strong>Reallocate 4 Dewatering Pumps to River Basin Sector</strong>
+                            <p>Simulated rainfall exceeding 110mm in North Tehsil creates 85% waterlogging likelihood in low-lying underpasses.</p>
+                        </div>
+                        <button class="primary" onclick="alert('✅ Transfer orders dispatched to Public Works Dept!')">Authorize Transfer</button>
+                    </div>
+
+                    <div class="alloc-item">
+                        <span class="alloc-icon">🏥</span>
+                        <div>
+                            <strong>Pre-position 2 Mobile Medical Vans at Central Stadium Relief Camp</strong>
+                            <p>Anticipated influx of 850 evacuated citizens requiring ORS, first-aid, and anti-pyretic medications.</p>
+                        </div>
+                        <button class="primary" onclick="alert('✅ Health Officer notified for deployment!')">Authorize Transfer</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- =================================================
+             DISTRICT COMMAND & DISASTER MANAGEMENT
+        ================================================== -->
+        <section id="disasterScreen" class="screen">
+            <div class="page-heading">
+                <small data-i18n="cmdSub">DISTRICT ADMINISTRATION & DISASTER CONTROL</small>
+                <h1 data-i18n="cmdTitle">District Command Center</h1>
+                <p data-i18n="cmdDesc">
+                    Automated meteorological hazard monitoring for District Magistrate / DDMA response teams.
+                </p>
+            </div>
+
+            <div class="command-grid">
+                <!-- Action Bar -->
+                <div class="command-actions">
+                    <button class="primary export-btn" id="exportBulletinBtn" type="button">
+                        📄 <span data-i18n="exportDoc">Export Official Weather Bulletin (PDF/Print)</span>
+                    </button>
+                    <button class="secondary siren-trigger-btn" id="broadcastAlertBtn" type="button">
+                        🚨 <span data-i18n="broadcastBtn">Broadcast Emergency Sirens</span>
+                    </button>
+                    <button class="secondary wa-trigger-btn" id="cmdWaBtn" type="button">
+                        💬 <span data-i18n="gramDispatch">Gram Pradhan WhatsApp Dispatch</span>
+                    </button>
+                </div>
+
+                <!-- Executive Threat Dashboard -->
+                <div class="threat-cards-grid">
+                    <div class="threat-card" id="floodThreatCard">
+                        <div class="threat-icon">🌊</div>
+                        <div>
+                            <small data-i18n="floodRisk">FLOOD & WATERLOGGING</small>
+                            <strong id="floodLevel">LOW RISK</strong>
+                            <p id="floodNote">Drainage & river basin levels normal.</p>
+                        </div>
+                    </div>
+
+                    <div class="threat-card" id="heatThreatCard">
+                        <div class="threat-icon">🔥</div>
+                        <div>
+                            <small data-i18n="heatRisk">HEATWAVE & SUNSTROKE</small>
+                            <strong id="heatLevel">NORMAL</strong>
+                            <p id="heatNote">Safe for daytime outdoor labour.</p>
+                        </div>
+                    </div>
+
+                    <div class="threat-card" id="smogThreatCard">
+                        <div class="threat-icon">🌫️</div>
+                        <div>
+                            <small data-i18n="smogRisk">AIR QUALITY HAZARD</small>
+                            <strong id="smogLevel">MODERATE</strong>
+                            <p id="smogNote">AQI acceptable for public schools.</p>
+                        </div>
+                    </div>
+
+                    <div class="threat-card" id="stormThreatCard">
+                        <div class="threat-icon">⚡</div>
+                        <div>
+                            <small data-i18n="stormRisk">GALE & THUNDERSTORM</small>
+                            <strong id="stormLevel">NO WARNING</strong>
+                            <p id="stormNote">Power grid & poles secure.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Administrative Tehsils & Blocks Heatmap -->
+                <div class="section-card">
+                    <div class="section-heading">
+                        <div>
+                            <small data-i18n="tehsilSub">BLOCK-LEVEL SURVEILLANCE</small>
+                            <h3 data-i18n="tehsilHeading">District Block Vulnerability Matrix</h3>
+                        </div>
+                        <span class="live">● LIVE SYNC</span>
+                    </div>
+
+                    <div class="tehsil-table-wrapper">
+                        <table class="tehsil-table">
+                            <thead>
+                                <tr>
+                                    <th data-i18n="thBlock">Block / Tehsil</th>
+                                    <th data-i18n="thTemp">Temp (°C)</th>
+                                    <th data-i18n="thRain">Rain Risk</th>
+                                    <th data-i18n="thAQI">AQI</th>
+                                    <th data-i18n="thStatus">Public Health / School Advisory</th>
+                                    <th data-i18n="thAction">Admin Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tehsilTableBody">
+                                <!-- Dynamic block rows loaded by app.js -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Pillar A12: Vulnerable Population Alert Generator -->
+                <div class="section-card">
+                    <div class="section-heading">
+                        <div>
+                            <small>PILLAR A12: VULNERABLE POPULATION SURVEILLANCE</small>
+                            <h3>Targeted School & Healthcare Directives</h3>
+                        </div>
+                    </div>
+
+                    <div class="vulnerable-cards-grid">
+                        <div class="vulnerable-box">
+                            <span class="vul-icon">🏫</span>
+                            <div>
+                                <strong>Primary & Secondary Schools Advisory</strong>
+                                <p id="schoolAdvisoryText">Normal school schedule permitted. Ensure access to clean drinking water.</p>
+                                <span class="status-pill safe" id="schoolAdvisoryBadge">SCHEDULE NORMAL</span>
+                            </div>
+                        </div>
+
+                        <div class="vulnerable-box">
+                            <span class="vul-icon">🏥</span>
+                            <div>
+                                <strong>Civil Hospitals & Geriatric Wards</strong>
+                                <p id="hospitalAdvisoryText">Standard casualty operations active. 18 ICU beds on standby.</p>
+                                <span class="status-pill safe" id="hospitalAdvisoryBadge">HOSPITALS READY</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- =================================================
+             DISTRICT RANKING LEADERBOARD
+        ================================================== -->
+        <section id="leaderboardScreen" class="screen">
+            <div class="page-heading">
+                <small data-i18n="rankSub">REGIONAL BENCHMARKING & METEOROLOGICAL HEALTH</small>
+                <h1 data-i18n="rankTitle">District Weather Health Leaderboard</h1>
+                <p data-i18n="rankDesc">
+                    Real-time comparative ranking of regional districts across Air Quality, Flood Safety, and Agricultural Viability.
+                </p>
+            </div>
+
+            <!-- Top Performing District Cards -->
+            <div class="leader-highlights-grid">
+                <div class="highlight-card clean-air">
+                    <span class="badge-icon">🌿</span>
+                    <div>
+                        <small data-i18n="cleanestDistrict">CLEANEST AIR DISTRICT</small>
+                        <strong id="cleanestDistrictName">Varanasi</strong>
+                        <span id="cleanestDistrictAqi">AQI 42 (Good)</span>
+                    </div>
+                </div>
+
+                <div class="highlight-card best-agri">
+                    <span class="badge-icon">🌾</span>
+                    <div>
+                        <small data-i18n="bestFarmDistrict">BEST AGRI WEATHER</small>
+                        <strong id="bestFarmDistrictName">Kanpur</strong>
+                        <span id="bestFarmDistrictScore">Agri Score 94/100</span>
+                    </div>
+                </div>
+
+                <div class="highlight-card safest-flood">
+                    <span class="badge-icon">🛡️</span>
+                    <div>
+                        <small data-i18n="safestDistrict">SAFEST / LOWEST FLOOD RISK</small>
+                        <strong id="safestDistrictName">Lucknow</strong>
+                        <span id="safestDistrictRisk">Flood Risk: 5%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comprehensive District Ranking Table -->
+            <div class="section-card">
+                <div class="section-heading">
+                    <div>
+                        <small data-i18n="rankingTableSub">REGIONAL SCORECARD</small>
+                        <h3 data-i18n="rankingTableTitle">Regional Districts Live Health Index</h3>
+                    </div>
+                    <span class="live">● LIVE BENCHMARK</span>
+                </div>
+
+                <div class="tehsil-table-wrapper">
+                    <table class="tehsil-table" id="districtLeaderboardTable">
+                        <thead>
+                            <tr>
+                                <th data-i18n="thRank">Rank</th>
+                                <th data-i18n="thDistrict">District Name</th>
+                                <th data-i18n="thScore">Weather Health Score</th>
+                                <th data-i18n="thTemp">Temp (°C)</th>
+                                <th data-i18n="thAQI">AQI</th>
+                                <th data-i18n="thRain">Rain Risk</th>
+                                <th data-i18n="thRating">Status Rating</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaderboardBody">
+                            <!-- Populated dynamically by app.js -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- =================================================
+             FARMER MODE (KISAN SMART ADVISORY)
+        ================================================== -->
+        <section id="farmerScreen" class="screen">
+            <div class="page-heading">
+                <small data-i18n="farmerSub">AGRICULTURE INTELLIGENCE & KRISHI COPILOT</small>
+                <h1 data-i18n="farmerTitle">Kisan Smart Advisor (किसान मित्र)</h1>
+                <p data-i18n="farmerDesc">
+                    Crop-specific weather intelligence, soil moisture modeling, spraying viability, and mandi forecasts.
+                </p>
+            </div>
+
+            <!-- Crop Selector Bar -->
+            <div class="crop-bar">
+                <span class="crop-label" data-i18n="selectCrop">Select Your Crop (फसल चुनें):</span>
+                <div class="crop-buttons">
+                    <button class="crop-btn active" data-crop="wheat">🌾 <span data-i18n="cropWheat">Wheat (गेहूं)</span></button>
+                    <button class="crop-btn" data-crop="rice">🌱 <span data-i18n="cropRice">Paddy (धान)</span></button>
+                    <button class="crop-btn" data-crop="mustard">🌼 <span data-i18n="cropMustard">Mustard (सरसों)</span></button>
+                    <button class="crop-btn" data-crop="sugarcane">🎋 <span data-i18n="cropSugarcane">Sugarcane (गन्ना)</span></button>
+                    <button class="crop-btn" data-crop="vegetables">🥦 <span data-i18n="cropVegetables">Vegetables (सब्जियां)</span></button>
+                </div>
+            </div>
+
+            <div class="farmer-layout">
+                <div class="farmer-card">
+                    <div class="section-heading">
+                        <div>
+                            <small data-i18n="cropAdvisorySub">CROP-SPECIFIC AI GUIDANCE</small>
+                            <h3 id="cropTitle">Wheat (गेहूं) Agriculture Advisory</h3>
+                        </div>
+                        <div class="farmer-actions">
+                            <button class="icon-button" id="readFarmerAudio" title="Listen in Hindi" type="button">
+                                🔊
+                            </button>
+                            <button class="icon-button wa-farmer-btn" id="shareFarmerWaBtn" title="Share on Kisan WhatsApp" type="button">
+                                💬
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="farmerAdvice" class="farmer-advice">
+                        Search a city to receive customized farming recommendations.
+                    </div>
+
+                    <!-- Spraying & Irrigation Indicators -->
+                    <div class="farm-badges">
+                        <div class="badge-item">
+                            <small data-i18n="sprayWindow">Pesticide Spray Window (स्प्रे का सही समय)</small>
+                            <strong id="sprayStatus">✅ IDEAL</strong>
+                        </div>
+                        <div class="badge-item">
+                            <small data-i18n="irrigationNeed">Irrigation Need (सिंचाई की जरूरत)</small>
+                            <strong id="irrigationStatus">MODERATE</strong>
+                        </div>
+                        <div class="badge-item">
+                            <small data-i18n="diseaseRisk">Pest & Fungus Risk (कीट / रोग खतरा)</small>
+                            <strong id="diseaseStatus">LOW RISK</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="farm-stats">
+                    <div>
+                        <span>🌡️</span>
+                        <small data-i18n="farmTempLabel">FIELD TEMPERATURE</small>
+                        <strong id="farmTemp">--</strong>
+                    </div>
+
+                    <div>
+                        <span>💧</span>
+                        <small data-i18n="farmHumLabel">SOIL & AIR HUMIDITY</small>
+                        <strong id="farmHumidity">--</strong>
+                    </div>
+
+                    <div>
+                        <span>🌧️</span>
+                        <small data-i18n="farmRainLabel">RAIN PROBABILITY</small>
+                        <strong id="farmRain">--</strong>
+                    </div>
+
+                    <div>
+                        <span>💨</span>
+                        <small data-i18n="farmWindLabel">WIND SPEED</small>
+                        <strong id="farmWind">--</strong>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- =================================================
+             CITIZEN HAZARD REPORTING (CROWDSOURCING)
+        ================================================== -->
+        <section id="citizenScreen" class="screen">
+            <div class="page-heading">
+                <small data-i18n="citizenSub">CIVIC DISASTER CROWDSOURCING</small>
+                <h1 data-i18n="citizenTitle">Citizen Weather & Hazard Report</h1>
+                <p data-i18n="citizenDesc">
+                    Report real-time local hazards (Waterlogging, Fallen Trees, Hail, Power Outages) to alert district teams.
+                </p>
+            </div>
+
+            <div class="citizen-layout">
+                <div class="citizen-form-card">
+                    <h3 data-i18n="submitHazard">Submit Incident Report</h3>
+
+                    <form id="hazardForm" class="hazard-form">
+                        <div>
+                            <label data-i18n="hazardTypeLabel">Hazard Category (आपदा का प्रकार):</label>
+                            <select id="hazardType" required>
+                                <option value="waterlog">🌊 Road Waterlogging / Flood</option>
+                                <option value="tree">🌳 Fallen Tree / Blocked Road</option>
+                                <option value="wire">⚡ Fallen Power Line / Pole</option>
+                                <option value="hail">❄️ Severe Hailstorm / Crop Damage</option>
+                                <option value="fire">🔥 Transformer Spark / Heat Fire</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label data-i18n="hazardLocLabel">Location / Landmark / Ward:</label>
+                            <input id="hazardLocation" placeholder="e.g. Civil Lines near District Hospital" required>
+                        </div>
+
+                        <div>
+                            <label data-i18n="hazardDescLabel">Brief Details:</label>
+                            <textarea id="hazardDetails" rows="3" placeholder="Describe the hazard and severity..."></textarea>
+                        </div>
+
+                        <button type="submit" class="primary" data-i18n="submitBtn">
+                            📍 Pin Hazard on Map & Alert District
+                        </button>
+                    </form>
+                </div>
+
+                <div class="citizen-recent-card">
+                    <div class="section-heading">
+                        <div>
+                            <small data-i18n="liveCitizenFeed">LIVE VERIFIED FEED</small>
+                            <h3 data-i18n="recentReports">Recent District Incidents</h3>
+                        </div>
+                    </div>
+
+                    <div id="recentHazardsList" class="hazards-list">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- =================================================
+             ANALYTICS
+        ================================================== -->
+        <section id="analyticsScreen" class="screen">
+            <div class="page-heading">
+                <small data-i18n="analyticsSub">DATA INTELLIGENCE</small>
+                <h1 data-i18n="analyticsTitle">Weather Analytics</h1>
+                <p data-i18n="analyticsDesc">
+                    Understand the upcoming hours through real-time meteorological trends.
+                </p>
+            </div>
+
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <div class="chart-title">
+                        🌡️ <span data-i18n="tempTrend">Temperature Trend (°C)</span>
+                    </div>
+                    <canvas id="temperatureChart"></canvas>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-title">
+                        🌧️ <span data-i18n="rainTrend">Rain Probability (%)</span>
+                    </div>
+                    <canvas id="rainChart"></canvas>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-title">
+                        💧 <span data-i18n="humTrend">Relative Humidity (%)</span>
+                    </div>
+                    <canvas id="humidityChart"></canvas>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-title">
+                        💨 <span data-i18n="windTrend">Wind Speed (km/h)</span>
+                    </div>
+                    <canvas id="windChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- =================================================
+             MAP
+        ================================================== -->
+        <section id="mapScreen" class="screen">
+            <div class="page-heading">
+                <small data-i18n="mapSub">GEOSPATIAL WEATHER & HAZARD TRACKER</small>
+                <h1 data-i18n="mapTitle">Weather, Rescue Teams & Hazard Map</h1>
+                <p data-i18n="mapDesc">
+                    Live geospatial tracking of deployed rescue units (🚤 🚑 🚒), lightning storm paths, citizen hazard pins, and safe evacuation corridors.
+                </p>
+            </div>
+
+            <div class="map-toolbar">
+                <div class="map-location">
+                    <span>📍</span>
+                    <div>
+                        <small data-i18n="locationLabel">LOCATION</small>
+                        <strong id="mapPlace">--</strong>
+                    </div>
+                </div>
+
+                <div class="map-buttons">
+                    <button id="mapLocationBtn" type="button">
+                        📍 <span data-i18n="locateMe">Locate</span>
+                    </button>
+                    <button id="streetBtn" type="button">
+                        🗺 <span data-i18n="streetMap">Street</span>
+                    </button>
+                    <button id="satelliteBtn" type="button">
+                        🛰 <span data-i18n="satMap">Satellite</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="map-card">
+                <div id="weatherMap"></div>
+                <div class="map-info">
+                    <div>
+                        <small data-i18n="conditionLabel">CONDITION</small>
+                        <strong id="mapWeather">--</strong>
+                    </div>
+                    <div>
+                        <small data-i18n="tempLabel">TEMPERATURE</small>
+                        <strong id="mapTemp">--</strong>
+                    </div>
+                    <div>
+                        <small data-i18n="windLabel">WIND</small>
+                        <strong id="mapWind">--</strong>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- =================================================
+             ALERTS
+        ================================================== -->
+        <section id="alertsScreen" class="screen">
+            <div class="page-heading">
+                <small data-i18n="alertsSub">SAFETY INTELLIGENCE</small>
+                <h1 data-i18n="alertsTitle">Alert Center</h1>
+                <p data-i18n="alertsDesc">
+                    Real-time severe weather hazard detection and safety warnings for your location.
+                </p>
+            </div>
+
+            <div class="alert-grid">
+                <div class="alert-stat">
+                    <span>⚠️</span>
+                    <strong id="alertCount">0</strong>
+                    <small data-i18n="activeAlerts">ACTIVE ALERTS</small>
+                </div>
+
+                <div class="alert-stat">
+                    <span>🌧️</span>
+                    <strong id="rainAlertStatus">LOW</strong>
+                    <small data-i18n="rainRiskLabel">RAIN RISK</small>
+                </div>
+
+                <div class="alert-stat">
+                    <span>⚡</span>
+                    <strong id="lightningAlertStatus">NORMAL</strong>
+                    <small data-i18n="lightningRiskLabel">LIGHTNING</small>
+                </div>
+
+                <div class="alert-stat">
+                    <span>🌫️</span>
+                    <strong id="airAlertStatus">--</strong>
+                    <small data-i18n="airRiskLabel">AIR QUALITY</small>
+                </div>
+            </div>
+
+            <div class="section-card">
+                <div class="section-heading">
+                    <div>
+                        <small data-i18n="liveMonitoring">LIVE MONITORING</small>
+                        <h3 data-i18n="currentAlerts">Current Hazard Bulletins</h3>
+                    </div>
+                </div>
+                <div id="alertList" class="alert-list">
+                    <div class="empty">
+                        Search a city to see alerts.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- =================================================
+             AI COPILOT
+        ================================================== -->
+        <section id="aiScreen" class="screen">
+            <div class="page-heading">
+                <small data-i18n="aiSub">ARTIFICIAL INTELLIGENCE</small>
+                <h1 data-i18n="aiTitle">SkyCast AI Disaster Copilot</h1>
+                <p data-i18n="aiDesc">
+                    Ask intelligent questions about disaster triage, high-risk zones, rescue deployment priorities, travel viability, and agriculture.
+                </p>
+            </div>
+
+            <div class="ai-layout">
+                <div class="ai-card">
+                    <div class="ai-header">
+                        <div class="ai-avatar">✦</div>
+                        <div>
+                            <h2 data-i18n="copilotTitle">Disaster & Weather Copilot</h2>
+                            <span data-i18n="copilotSub">Powered by SkyCast Intelligence Engine</span>
+                        </div>
+                    </div>
+
+                    <div id="answer" class="ai-answer">
+                        Search a city first, then ask me anything about disaster management, rescue priorities, or weather intelligence.
+                    </div>
+
+                    <div class="ask-box">
+                        <input
+                            id="question"
+                            placeholder="Ask: 'Sabse high-risk area kaunsa hai?' or 'Rescue team pehle kahan bhejni chahiye?'"
+                        >
+                        <button id="ask" type="button" data-i18n="askBtn">
+                            Ask AI
+                        </button>
+                    </div>
+
+                    <div class="quick-actions">
+                        <button data-q="Sabse high-risk area kaunsa hai?" type="button">
+                            🚨 <span data-i18n="qHighRisk">Highest Risk Area?</span>
+                        </button>
+                        <button data-q="Rescue team pehle kahan bhejni chahiye?" type="button">
+                            🧭 <span data-i18n="qRescuePriority">Rescue Priority?</span>
+                        </button>
+                        <button data-q="Where is the nearest safe shelter for lightning?" type="button">
+                            ⚡ <span data-i18n="qLightningShelter">Lightning Shelter?</span>
+                        </button>
+                        <button data-q="Give me a comprehensive farming and spray advisory." type="button">
+                            🌾 <span data-i18n="quickKisan">Krishi Guide</span>
+                        </button>
+                        <button data-q="Is it safe to travel on expressways today?" type="button">
+                            ✈️ <span data-i18n="quickTravel">Travel Safety</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="ai-info">
+                    <div class="ai-glow">✦</div>
+                    <h2 data-i18n="aiHeading">Autonomous disaster reasoning.</h2>
+                    <p data-i18n="aiParagraph">
+                        SkyCast AI synthesizes thermodynamic atmospheric modeling with geospatial rescue logistics to deliver instant operational clarity to District Magistrates and field commanders.
+                    </p>
+
+                    <div class="ai-feature">✓ <span data-i18n="feat1">Autonomous incident triage by lives at risk</span></div>
+                    <div class="ai-feature">✓ <span data-i18n="feat2">Weather-aware safe evacuation route generation</span></div>
+                    <div class="ai-feature">✓ <span data-i18n="feat3">Thermodynamic CAPE lightning strike prediction</span></div>
+                    <div class="ai-feature">✓ <span data-i18n="feat4">Bilingual natural speech response in English & Hindi</span></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- =================================================
+             COMPARE
+        ================================================== -->
+        <section id="compareScreen" class="screen">
+            <div class="page-heading">
+                <small data-i18n="compareSub">WEATHER COMPARISON</small>
+                <h1 data-i18n="compareTitle">Compare Cities & Districts</h1>
+                <p data-i18n="compareDesc">
+                    Head-to-head comparison of temperature, humidity, wind, and overall atmospheric comfort.
+                </p>
+            </div>
+
+            <div class="compare-card">
+                <div class="compare-inputs">
+                    <div>
+                        <small data-i18n="cityOne">DISTRICT ONE</small>
+                        <input id="compareCity1" placeholder="e.g. Kanpur" value="Kanpur">
+                    </div>
+
+                    <div class="versus">VS</div>
+
+                    <div>
+                        <small data-i18n="cityTwo">DISTRICT TWO</small>
+                        <input id="compareCity2" placeholder="e.g. Lucknow" value="Lucknow">
+                    </div>
+                </div>
+
+                <button id="compareBtn" class="primary" type="button" data-i18n="compareButton">
+                    Compare Weather
+                </button>
+
+                <div id="compareResult" class="compare-result"></div>
+            </div>
+        </section>
+
+        <!-- =================================================
+             TRAVEL
+        ================================================== -->
+        <section id="travelScreen" class="screen">
+            <div class="page-heading">
+                <small data-i18n="travelSub">TRAVEL INTELLIGENCE</small>
+                <h1 data-i18n="travelTitle">Travel & Highway Planner</h1>
+                <p data-i18n="travelDesc">
+                    Evaluate route and destination meteorological hazards before you embark.
+                </p>
+            </div>
+
+            <div class="travel-layout">
+                <div class="travel-card">
+                    <div class="route">
+                        <div>
+                            <small data-i18n="fromLabel">FROM</small>
+                            <strong id="fromCity">Search city first</strong>
+                        </div>
+
+                        <span>→</span>
+
+                        <div>
+                            <small data-i18n="destLabel">DESTINATION</small>
+                            <input id="dest" placeholder="Enter destination (e.g. Delhi, Varanasi)">
+                        </div>
+                    </div>
+
+                    <button id="travel" class="primary" type="button" data-i18n="checkRouteBtn">
+                        Check Route Weather
+                    </button>
+
+                    <div class="travel-result">
+                        <small data-i18n="travelRiskLabel">TRAVEL RISK</small>
+                        <strong id="travelRisk">--</strong>
+                        <p id="travelOut">
+                            Enter a destination to check travel conditions.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="travel-tips">
+                    <h3 data-i18n="travelChecklist">Travel Checklist</h3>
+                    <div>✓ <span data-i18n="tip1">Real-time rain and highway flood risk</span></div>
+                    <div>✓ <span data-i18n="tip2">Temperature and thermal comfort index</span></div>
+                    <div>✓ <span data-i18n="tip3">Wind gusts and high-speed driving safety</span></div>
+                    <div>✓ <span data-i18n="tip4">Visibility and smog conditions on expressway</span></div>
+                    <div>✓ <span data-i18n="tip5">Ask SkyCast AI for custom route guidance</span></div>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            SkyCast AI • Hyperlocal Weather Intelligence & Autonomous Disaster Management Platform
+        </footer>
+
+    </main>
+
+</div>
+
+<!-- FIELD TEAM CHECK-IN MODAL (PILLAR B7) -->
+<div id="checkInModal" class="bulletin-modal hidden">
+    <div class="bulletin-sheet dispatch-sheet">
+        <button class="modal-close-x" id="closeCheckInModalBtn" title="Close" type="button">✕</button>
+        <div class="sheet-header">
+            <div class="sheet-logo" style="color: #6366f1;">📡</div>
+            <div>
+                <h2>RESCUE TEAM FIELD STATUS CHECK-IN</h2>
+                <h3>Field Commander Status Synchronization</h3>
+                <small>Manual offline & online status checkpoint update.</small>
+            </div>
+        </div>
+        <hr>
+        <form id="checkInForm" class="sheet-body">
+            <div>
+                <label style="font-weight: 700; display: block; margin-bottom: 5px;">Select Rescue Team (यूनिट चुनें):</label>
+                <select id="checkInTeamSelect" required>
+                    <option value="alpha">Team Alpha — Water & Flood Rescue Unit</option>
+                    <option value="bravo">Team Bravo — Paramedic & Trauma Unit</option>
+                    <option value="charlie">Team Charlie — Structural Debris & Gas Cutting</option>
+                    <option value="delta">Team Delta — Evacuation & Relief Supplies</option>
+                </select>
+            </div>
+
+            <div style="margin-top: 12px;">
+                <label style="font-weight: 700; display: block; margin-bottom: 5px;">Current Operational Status (वर्तमान स्थिति):</label>
+                <select id="checkInStatusSelect" required>
+                    <option value="available">🟢 Available / Standby at Base</option>
+                    <option value="on_mission">🟠 On Mission / Active in Field</option>
+                    <option value="assigned">🟡 Assigned / En Route to Incident</option>
+                    <option value="emergency">🔴 Assistance Required / Unit in Danger</option>
+                </select>
+            </div>
+
+            <div style="margin-top: 12px;">
+                <label style="font-weight: 700; display: block; margin-bottom: 5px;">Civilians Evacuated / Rescued in this leg (सुरक्षित निकाले गए लोग):</label>
+                <input type="number" id="checkInEvacCount" min="0" value="8" style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #cbd5e1;">
+            </div>
+
+            <div style="margin-top: 12px;">
+                <label style="font-weight: 700; display: block; margin-bottom: 5px;">Field Report / Situation Notes (फील्ड रिपोर्ट):</label>
+                <textarea id="checkInNotes" class="wa-textarea" rows="3" placeholder="e.g. Successfully evacuated 8 citizens from ground floor flooding. Moving to Ward 4..."></textarea>
+            </div>
+
+            <div class="sheet-footer" style="margin-top: 15px;">
+                <button type="submit" class="primary" style="width: 100%;">
+                    ✓ Submit & Broadcast Status Check-In
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 1-CLICK WHATSAPP / SMS DISPATCH MODAL -->
+<div id="whatsappModal" class="bulletin-modal hidden">
+    <div class="bulletin-sheet dispatch-sheet">
+        <button class="modal-close-x" id="closeWaModalBtn" title="Close" type="button">✕</button>
+        <div class="sheet-header">
+            <div class="sheet-logo" style="color: #25D366;">💬</div>
+            <div>
+                <h2 data-i18n="waModalTitle">DISTRICT EMERGENCY BROADCAST DISPATCH</h2>
+                <h3 data-i18n="waModalSub">Gram Pradhan & Farmer Community Early Warning</h3>
+                <small data-i18n="waModalNote">Pre-formatted bilingual emergency message for WhatsApp groups and SMS gateway.</small>
+            </div>
+        </div>
+        <hr>
+        <div class="sheet-body">
+            <label style="font-weight: 700; display: block; margin-bottom: 6px;" data-i18n="broadcastMsgLabel">Broadcast Alert Message (प्रसारण संदेश):</label>
+            <textarea id="waMessageText" class="wa-textarea" rows="6"></textarea>
+            
+            <div class="wa-target-chips">
+                <span class="target-chip active">👥 Gram Pradhans (ग्राम प्रधान)</span>
+                <span class="target-chip active">🌾 Kisan WhatsApp Groups (किसान ग्रुप)</span>
+                <span class="target-chip active">🚨 District Control Cell (डीडीएमए)</span>
+            </div>
+        </div>
+        <div class="sheet-footer">
+            <div class="sheet-actions" style="width: 100%; justify-content: space-between;">
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button id="sendWhatsAppBtn" class="primary wa-send-btn" type="button">
+                        📲 <span data-i18n="openWhatsApp">Send on WhatsApp</span>
+                    </button>
+                    <button id="copySmsBtn" class="secondary" type="button">
+                        📋 <span data-i18n="copySMS">Copy SMS Text</span>
+                    </button>
+                </div>
+                <button id="waModalBottomCloseBtn" class="secondary modal-close-action" type="button">✕ Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Printable District Bulletin Container -->
+<div id="printBulletinModal" class="bulletin-modal hidden">
+    <div class="bulletin-sheet" id="bulletinSheet">
+        <button class="modal-close-x no-print" id="closeBulletinModalBtn" title="Close" type="button">✕</button>
+        <div class="sheet-header">
+            <div class="sheet-logo">🏛️</div>
+            <div>
+                <h2>OFFICE OF THE DISTRICT DISASTER MANAGEMENT AUTHORITY (DDMA)</h2>
+                <h3>DAILY METEOROLOGICAL & PUBLIC SAFETY BULLETIN</h3>
+                <small id="bulletinDateTime">Date: 20-Aug-2026 | Ref: SKYCAST-DDMA/2026/08</small>
+            </div>
+        </div>
+        <hr>
+        <div class="sheet-body" id="bulletinContent">
+            <!-- Populated dynamically -->
+        </div>
+        <div class="sheet-footer">
+            <div>
+                <p>Issued by: SkyCast AI Autonomous Meteorological Engine</p>
+                <small>Approved for District Administrative Response & Public Dissemination</small>
+            </div>
+            <div class="sheet-actions no-print">
+                <button onclick="window.print()" class="primary" type="button">🖨️ Print / Save as PDF</button>
+                <button id="bulletinBottomCloseBtn" class="secondary modal-close-action" type="button">✕ Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Leaflet -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- App Script -->
+<script src="app.js"></script>
+
+</body>
+</html>

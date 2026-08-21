@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SkyCast AI — Hyperlocal Weather Intelligence & Autonomous Disaster Management</title>
-    <meta name="description" content="Enterprise-grade AI District Disaster Management, Digital Twin Simulator, Lightning Prediction Radar, Smart SOS Dispatch, and Autonomous Rescue Team Coordination.">
+    <title>SkyCast AI — District Disaster Management Authority (DDMA) Executive Command Portal</title>
+    <meta name="description" content="Official Enterprise District Disaster Intelligence, AI Digital Twin Simulator, Lightning Prediction Radar, Smart SOS Dispatch, and NDRF Rescue Team Coordination System.">
     <meta name="theme-color" content="#00f2fe">
 
     <!-- PWA Manifest -->
@@ -14,7 +14,7 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Noto+Sans+Devanagari:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
 
     <!-- Leaflet -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -47,39 +47,33 @@
 <div class="app-layout">
 
     <!-- =====================================================
-         SIDEBAR (PROFESSIONAL CATEGORIZED NAVIGATION)
+         SIDEBAR (EXECUTIVE DDMA & NDRF COMMAND HIERARCHY)
     ====================================================== -->
     <aside class="sidebar">
 
         <div class="brand">
-            <div class="brand-logo">
-                ☁️
+            <div class="brand-emblem">
+                🏛️
             </div>
             <div class="brand-text">
                 <h2>SkyCast <span>AI</span></h2>
-                <small data-i18n="brandSub">DISTRICT DISASTER INTELLIGENCE</small>
+                <small data-i18n="brandSub">DISTRICT DISASTER COMMAND • DDMA</small>
             </div>
         </div>
 
         <nav class="navigation">
             
-            <div class="nav-section-title">CORE COMMAND</div>
+            <div class="nav-section-title">🏛️ DISTRICT COMMAND</div>
 
             <button class="nav-btn active" data-screen="dashboardScreen">
                 <span class="nav-icon">⌂</span>
-                <b data-i18n="navDashboard">Dashboard</b>
+                <b data-i18n="navDashboard">Executive Dashboard</b>
             </button>
 
             <button class="nav-btn" data-screen="disasterScreen">
                 <span class="nav-icon">🏛️</span>
-                <b data-i18n="navDisaster">District Command</b>
-                <span class="nav-badge red">DDMA</span>
-            </button>
-
-            <button class="nav-btn" data-screen="rescueScreen">
-                <span class="nav-icon">🧭</span>
-                <b data-i18n="navRescue">Rescue Ops Center</b>
-                <span class="nav-badge purple">NDRF</span>
+                <b data-i18n="navDisaster">DDMA Control Room</b>
+                <span class="nav-badge red">DM CELL</span>
             </button>
 
             <button class="nav-btn" data-screen="digitalTwinScreen">
@@ -88,58 +82,59 @@
                 <span class="nav-badge cyan">3D SIM</span>
             </button>
 
-            <div class="nav-section-title">LIFE-SAFETY & RADAR</div>
+            <button class="nav-btn" data-screen="mapScreen">
+                <span class="nav-icon">🗺️</span>
+                <b data-i18n="navMap">Hazard & Rescue Map</b>
+                <span class="nav-badge green">LIVE GPS</span>
+            </button>
+
+            <div class="nav-section-title">⚡ LIFE-SAFETY & RESCUE</div>
+
+            <button class="nav-btn" data-screen="rescueScreen">
+                <span class="nav-icon">🧭</span>
+                <b data-i18n="navRescue">NDRF Rescue Ops Center</b>
+                <span class="nav-badge purple">SDRF/NDRF</span>
+            </button>
 
             <button class="nav-btn" data-screen="lightningScreen">
                 <span class="nav-icon">⚡</span>
-                <b data-i18n="navLightning">Lightning Radar</b>
-                <span class="nav-badge yellow">CAPE</span>
+                <b data-i18n="navLightning">Lightning Radar & Shelters</b>
+                <span class="nav-badge yellow">CAPE RADAR</span>
             </button>
 
             <button class="nav-btn" data-screen="sosScreen">
                 <span class="nav-icon">🆘</span>
-                <b data-i18n="navSOS">Smart SOS & Offline</b>
-                <span class="nav-badge red">24x7</span>
+                <b data-i18n="navSOS">Smart SOS & Offline Hub</b>
+                <span class="nav-badge red">24x7 DISPATCH</span>
             </button>
 
             <button class="nav-btn" data-screen="resourcesScreen">
                 <span class="nav-icon">📊</span>
                 <b data-i18n="navResources">Resource Inventory</b>
-                <span class="nav-badge green">LIVE</span>
+                <span class="nav-badge green">ICU / PUMPS</span>
             </button>
 
-            <button class="nav-btn" data-screen="leaderboardScreen">
-                <span class="nav-icon">🏆</span>
-                <b data-i18n="navLeaderboard">District Ranking</b>
-            </button>
-
-            <div class="nav-section-title">SECTORS & SUSTAINABILITY</div>
+            <div class="nav-section-title">🌾 SECTORS & CIVIC ANALYTICS</div>
 
             <button class="nav-btn" data-screen="farmerScreen">
                 <span class="nav-icon">🌱</span>
-                <b data-i18n="navFarmer">Kisan Mode & Mandi</b>
+                <b data-i18n="navFarmer">Kisan Mode & Mandi AI</b>
                 <span class="nav-badge green">KRISHI</span>
-            </button>
-
-            <button class="nav-btn" data-screen="waterScreen">
-                <span class="nav-icon">🚰</span>
-                <b data-i18n="navWater">Jal Sanrakshan AI</b>
-                <span class="nav-badge cyan">ECO</span>
             </button>
 
             <button class="nav-btn" data-screen="citizenScreen">
                 <span class="nav-icon">📍</span>
-                <b data-i18n="navCitizen">Citizen Report</b>
+                <b data-i18n="navCitizen">Citizen Incident Reports</b>
             </button>
 
             <button class="nav-btn" data-screen="analyticsScreen">
                 <span class="nav-icon">📈</span>
-                <b data-i18n="navAnalytics">Analytics</b>
+                <b data-i18n="navAnalytics">Meteorological Trends</b>
             </button>
 
-            <button class="nav-btn" data-screen="mapScreen">
-                <span class="nav-icon">🗺️</span>
-                <b data-i18n="navMap">Hazard & Rescue Map</b>
+            <button class="nav-btn" data-screen="leaderboardScreen">
+                <span class="nav-icon">🏆</span>
+                <b data-i18n="navLeaderboard">District Health Ranking</b>
             </button>
 
             <button class="nav-btn" data-screen="alertsScreen">
@@ -149,49 +144,49 @@
 
             <button class="nav-btn" data-screen="aiScreen">
                 <span class="nav-icon">✦</span>
-                <b data-i18n="navAI">AI Copilot</b>
+                <b data-i18n="navAI">AI Copilot (DM Advisory)</b>
             </button>
 
             <button class="nav-btn" data-screen="compareScreen">
                 <span class="nav-icon">⇄</span>
-                <b data-i18n="navCompare">Compare</b>
+                <b data-i18n="navCompare">District Compare</b>
             </button>
 
             <button class="nav-btn" data-screen="travelScreen">
                 <span class="nav-icon">✈️</span>
-                <b data-i18n="navTravel">Travel Planner</b>
+                <b data-i18n="navTravel">Highway Route Safety</b>
             </button>
         </nav>
 
         <!-- Hackathon Demo Simulation Box -->
         <div class="simulation-box">
             <div class="sim-header">
-                <small>🎭 HACKATHON STAGE DEMO</small>
+                <small>🎭 CRISIS STRESS SIMULATOR</small>
                 <span class="sim-tag" id="currentSimBadge">LIVE</span>
             </div>
-            <select id="simScenario" class="sim-select" title="Simulate weather hazards for judges">
-                <option value="live">🟢 Live Real Weather</option>
-                <option value="flood">🔴 Flash Flood / Rain (120mm)</option>
-                <option value="heatwave">🔥 Extreme Heatwave (46.5°C)</option>
+            <select id="simScenario" class="sim-select" title="Simulate weather hazards for presentation">
+                <option value="live">🟢 Live Real Weather (Live Data)</option>
+                <option value="flood">🔴 Flash Flood Inundation (180mm Rain)</option>
+                <option value="heatwave">🔥 Extreme Heatwave Red Alert (46.5°C)</option>
                 <option value="smog">🌫️ Toxic Smog Emergency (AQI 385)</option>
                 <option value="storm">💨 Cyclone / Severe Gale (75 km/h)</option>
-                <option value="lightning">⚡ Severe Lightning & Storm</option>
+                <option value="lightning">⚡ Severe Lightning & Thunderstorm</option>
             </select>
         </div>
 
         <div class="sidebar-bottom">
             <div class="system-card">
                 <div class="system-card-top">
-                    <span class="system-icon">✦</span>
-                    <strong>SkyCast Intelligence</strong>
+                    <span class="system-icon">🇮🇳</span>
+                    <strong>DDMA Command Cell</strong>
                 </div>
                 <p data-i18n="systemDesc">
                     Autonomous disaster prediction, rescue ops dispatch & climate intelligence.
                 </p>
-                <span class="online">● DISTRICT READY</span>
+                <span class="online">● ZERO LATENCY • ONLINE</span>
             </div>
             <div class="sidebar-footer">
-                SkyCast AI v3.2 • Enterprise Edition
+                SkyCast AI • Enterprise DDMA Edition
             </div>
         </div>
 
@@ -203,14 +198,29 @@
     ====================================================== -->
     <main class="main-content">
 
-        <!-- TOP BAR -->
+        <!-- OFFICIAL EXECUTIVE HEADER BAR -->
+        <div class="official-top-header">
+            <div class="official-header-left">
+                <span class="gov-flag">🇮🇳</span>
+                <div>
+                    <strong>DISTRICT DISASTER MANAGEMENT AUTHORITY (DDMA)</strong>
+                    <small>GOVERNMENT OF UTTAR PRADESH • EMERGENCY OPERATIONS COMMAND CENTER</small>
+                </div>
+            </div>
+            <div class="official-header-right">
+                <span class="live-clock-badge" id="liveIstClock">🕒 21-Aug-2026 | --:--:-- IST</span>
+                <span class="system-ready-pill">● 24x7 CONTROL ACTIVE</span>
+            </div>
+        </div>
+
+        <!-- TOP BAR (SEARCH & ACTIONS) -->
         <header class="topbar">
             <div class="search-box">
                 <span class="search-icon">⌕</span>
                 <input
                     id="city"
                     type="text"
-                    placeholder="Search district (e.g. Kanpur, Lucknow, Varanasi, Delhi)..."
+                    placeholder="Search district headquarters (e.g. Kanpur, Lucknow, Varanasi, Prayagraj, Agra)..."
                     autocomplete="off"
                 >
                 
@@ -223,12 +233,12 @@
                     🎙️
                 </button>
                 <button id="search" class="search-submit" type="button" data-i18n="searchBtn">
-                    Search
+                    Search District
                 </button>
             </div>
 
             <button id="loc" class="topbar-btn" type="button" title="Get GPS Location">
-                📍 <span data-i18n="myLocation">My Location</span>
+                📍 <span data-i18n="myLocation">GPS</span>
             </button>
 
             <!-- Language Switcher -->
@@ -281,7 +291,7 @@
             </div>
         </div>
 
-        <!-- EMERGENCY BANNER (Shown when high risk detected or simulated) -->
+        <!-- EMERGENCY BANNER (STRICTLY HIDDEN BY DEFAULT — ONLY POPS UP DURING REAL HIGH HAZARDS OR SIMULATIONS) -->
         <div id="disasterBanner" class="disaster-banner hidden">
             <div class="banner-icon">🚨</div>
             <div class="banner-content">
@@ -299,30 +309,30 @@
 
 
         <!-- =================================================
-             SCREEN 1: DASHBOARD
+             SCREEN 1: EXECUTIVE DASHBOARD
         ================================================== -->
         <section id="dashboardScreen" class="screen active">
 
-            <!-- HERO CARD -->
+            <!-- HERO CARD (EXECUTIVE DDMA HUD) -->
             <div class="hero-banner">
                 <div class="hero-text">
                     <span class="hero-badge" data-i18n="heroTag">
-                        ✦ AI WEATHER & AUTONOMOUS DISASTER MANAGEMENT
+                        ✦ DISTRICT DISASTER INTELLIGENCE & CRISIS COMMAND SYSTEM
                     </span>
                     <h1>
-                        <span data-i18n="heroTitle1">Weather & Disaster,</span>
-                        <span class="grad-text" data-i18n="heroTitle2">reimagined.</span>
+                        <span data-i18n="heroTitle1">District Command &</span>
+                        <span class="grad-text" data-i18n="heroTitle2">Disaster AI.</span>
                     </h1>
                     <p data-i18n="heroDesc">
-                        Hyperlocal risk modeling, District Digital Twins, Lightning Strike Prediction, Smart SOS dispatch, and autonomous Rescue Team coordination.
+                        Hyperlocal risk modeling, District Digital Twins, Lightning Strike Prediction, Smart SOS dispatch, and autonomous Rescue Team coordination for District Magistrates and Emergency Responders.
                     </p>
 
                     <div class="hero-actions">
                         <button class="btn btn-primary" id="exploreBtn" type="button" data-i18n="exploreBtn">
-                            Explore Weather →
+                            Explore Meteorology →
                         </button>
                         <button class="btn btn-secondary hero-rescue-btn" id="heroRescueBtn" type="button">
-                            🧭 <span data-i18n="rescueOpsBtn">Rescue Ops</span>
+                            🧭 <span data-i18n="rescueOpsBtn">NDRF Rescue Ops</span>
                         </button>
                         <button class="btn btn-secondary hero-sos-btn" id="heroSosBtn" type="button">
                             🆘 <span data-i18n="quickSos">Emergency SOS</span>
@@ -331,13 +341,13 @@
                             🔊 <span data-i18n="listenBulletin">Listen Bulletin</span>
                         </button>
                         <button class="btn btn-secondary hero-wa-btn" id="heroWaBtn" type="button">
-                            💬 <span data-i18n="shareWa">WhatsApp Alert</span>
+                            💬 <span data-i18n="shareWa">WhatsApp Dispatch</span>
                         </button>
                     </div>
                 </div>
 
                 <div class="hero-score-badge">
-                    <small data-i18n="scoreLabel">SAFETY RISK SCORE</small>
+                    <small data-i18n="scoreLabel">DISTRICT SAFETY INDEX</small>
                     <div class="score-number" id="score">--</div>
                     <span class="score-scale">/ 100</span>
                     <div class="score-status" id="risk">--</div>
@@ -352,9 +362,9 @@
                     <div class="card-header">
                         <div>
                             <small class="card-subtitle" data-i18n="currentWeatherLabel">CURRENT METEOROLOGY</small>
-                            <h2 class="card-title" id="place">Search a city</h2>
+                            <h2 class="card-title" id="place">Search a district</h2>
                         </div>
-                        <span class="badge-live">● LIVE SYNC</span>
+                        <span class="badge-live">● LIVE SATELLITE SYNC</span>
                     </div>
 
                     <div class="weather-display">
@@ -366,7 +376,7 @@
                         >
                         <div class="weather-temp-group">
                             <div id="temp" class="weather-temp">--°</div>
-                            <div id="cond" class="weather-cond">Search for weather</div>
+                            <div id="cond" class="weather-cond">Search for district</div>
                             <div id="feel" class="weather-feels">Feels like --°</div>
                         </div>
                     </div>
@@ -408,7 +418,7 @@
                         <div class="hazard-quick-chip">
                             <span>⚡</span>
                             <div>
-                                <small>Lightning</small>
+                                <small>Lightning CAPE</small>
                                 <b id="quickLightningRisk">Low (8%)</b>
                             </div>
                         </div>
@@ -436,13 +446,13 @@
                     </div>
 
                     <div id="risks" class="risk-bulletins-list">
-                        <div>Search a city to analyze real-time hazards.</div>
+                        <div>Search a district to analyze real-time hazards.</div>
                     </div>
 
                     <div class="ai-directive-box">
                         <span class="directive-icon">✦</span>
                         <div>
-                            <strong data-i18n="aiRecLabel">AI Autonomous Directive</strong>
+                            <strong data-i18n="aiRecLabel">DM Executive Directive (AI Recommended)</strong>
                             <p id="farmer">Disaster and safety intelligence will appear here.</p>
                         </div>
                     </div>
@@ -492,8 +502,8 @@
             <div class="ui-card">
                 <div class="card-header">
                     <div>
-                        <small class="card-subtitle" data-i18n="forecastSub">EXTENDED FORECAST</small>
-                        <h3 class="card-title" data-i18n="fiveDayHeading">5 Day Meteorological Forecast</h3>
+                        <small class="card-subtitle" data-i18n="forecastSub">EXTENDED METEOROLOGY</small>
+                        <h3 class="card-title" data-i18n="fiveDayHeading">5 Day District Meteorological Forecast</h3>
                     </div>
                 </div>
                 <div id="forecast" class="forecast-container"></div>
@@ -503,7 +513,7 @@
             <div class="ui-card">
                 <div class="card-header">
                     <div>
-                        <small class="card-subtitle" data-i18n="hourlySub">NEXT HOURS</small>
+                        <small class="card-subtitle" data-i18n="hourlySub">UPCOMING HOURS</small>
                         <h3 class="card-title" data-i18n="hourlyHeading">Hourly Forecast & Trend</h3>
                     </div>
                 </div>
@@ -519,7 +529,7 @@
         <section id="rescueScreen" class="screen">
             <div class="page-title-group">
                 <small data-i18n="rescueSub">AUTONOMOUS EMERGENCY DISPATCH & LOGISTICS</small>
-                <h1 data-i18n="rescueTitle">Smart Rescue Team Coordination Center</h1>
+                <h1 data-i18n="rescueTitle">Smart Rescue Team Coordination Center (NDRF / SDRF)</h1>
                 <p data-i18n="rescueDesc">
                     Real-time GPS tracking of NDRF/SDRF rescue teams, AI incident triage, equipment load monitoring, safe route navigation, and field check-in synchronization.
                 </p>
@@ -819,14 +829,14 @@
                             <small class="card-subtitle">CONVECTIVE INSTABILITY</small>
                             <h3 class="card-title">Atmospheric Lightning Threat Index</h3>
                         </div>
-                        <span class="status-pill danger" id="lightningAlertPill">HIGH RISK</span>
+                        <span class="status-pill safe" id="lightningAlertPill">SAFE</span>
                     </div>
 
                     <div class="lightning-meter-box">
                         <div class="radar-container">
                             <canvas id="lightningRadarCanvas" class="lightning-radar-canvas"></canvas>
                             <div class="meter-circle-overlay">
-                                <strong id="lightningProbVal">78%</strong>
+                                <strong id="lightningProbVal">8%</strong>
                                 <small>Strike Likelihood</small>
                             </div>
                         </div>
@@ -834,19 +844,19 @@
                         <div class="meter-details">
                             <div>
                                 <small>Convective CAPE:</small>
-                                <strong id="lightningCapeVal">2,450 J/kg</strong>
+                                <strong id="lightningCapeVal">450 J/kg</strong>
                             </div>
                             <div>
                                 <small>Lifted Index (LI):</small>
-                                <strong id="lightningLiVal">-5.2 (Unstable)</strong>
+                                <strong id="lightningLiVal">+1.5 (Stable)</strong>
                             </div>
                             <div>
                                 <small>Estimated Thunderstorm ETA:</small>
-                                <strong id="lightningEtaVal">Within 25–40 Mins</strong>
+                                <strong id="lightningEtaVal">No Storm Expected</strong>
                             </div>
                             <div>
                                 <small>Safety Directive:</small>
-                                <span class="threat-note red" id="lightningActionNote">🚨 Take shelter in pucca concrete building immediately! Avoid open grounds and trees.</span>
+                                <span class="threat-note green" id="lightningActionNote">✅ Low atmospheric instability. Safe for routine outdoor activities.</span>
                             </div>
                         </div>
                     </div>
@@ -1004,101 +1014,7 @@
 
 
         <!-- =================================================
-             SCREEN 6: JAL SANRAKSHAN AI (RAINWATER HARVESTING)
-        ================================================== -->
-        <section id="waterScreen" class="screen">
-            <div class="page-title-group">
-                <small data-i18n="waterSub">GROUNDWATER RECHARGE & RAIN HARVESTING INTELLIGENCE</small>
-                <h1 data-i18n="waterTitle">Jal Sanrakshan AI (Rainwater Harvest Yield Estimator)</h1>
-                <p data-i18n="waterDesc">
-                    Calculate harvestable rainwater volume (liters) from 5-day precipitation forecasts, compute groundwater recharging points, and calculate municipal water tanker monetary savings.
-                </p>
-            </div>
-
-            <div class="grid-2-col">
-                <div class="ui-card">
-                    <div class="card-header">
-                        <div>
-                            <small class="card-subtitle">CALCULATION MODEL (JAL SHAKTI ABHIYAN)</small>
-                            <h3 class="card-title">Catchment Area & Surface Parameter</h3>
-                        </div>
-                    </div>
-
-                    <div class="water-calc-form">
-                        <div class="form-group">
-                            <label>Catchment / Roof Area (छत या खेत का क्षेत्रफल):</label>
-                            <div class="slider-header-row">
-                                <span id="roofAreaLabel">1,500 Sq. Feet (Residential Rooftop)</span>
-                            </div>
-                            <input type="range" id="roofAreaSlider" min="200" max="10000" step="100" value="1500" class="custom-slider">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Catchment Surface Runoff Coefficient (सतह का प्रकार):</label>
-                            <select id="surfaceCoeff" class="form-control">
-                                <option value="0.85">Concrete Pucca Rooftop (85% Runoff Efficiency)</option>
-                                <option value="0.75">Corrugated Tin / Metal Sheet (75% Efficiency)</option>
-                                <option value="0.55">Paved Courtyard / Tiles (55% Efficiency)</option>
-                                <option value="0.30">Agricultural Open Farmland (30% Infiltration)</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="water-yield-summary">
-                        <div class="yield-stat-box">
-                            <span>💧 Harvestable Rainwater</span>
-                            <strong id="harvestLitersVal">14,200 Liters</strong>
-                            <small>Based on upcoming 5-day rain forecast</small>
-                        </div>
-
-                        <div class="yield-stat-box">
-                            <span>💰 Water Tanker Savings</span>
-                            <strong id="waterSavingsVal">₹ 1,750 Saved</strong>
-                            <small>Equivalent to 3.5 water tankers</small>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="ui-card">
-                    <div class="card-header">
-                        <div>
-                            <small class="card-subtitle">DISTRICT GROUNDWATER ADVISORY</small>
-                            <h3 class="card-title">Hydro-Geological Recharging Directive</h3>
-                        </div>
-                    </div>
-
-                    <div class="hydro-advisory-box">
-                        <div class="hydro-item">
-                            <span class="hydro-icon">🏞️</span>
-                            <div>
-                                <strong>Amrit Sarovar / Village Pond Intake</strong>
-                                <p>Optimal intake velocity: Divert runoff through silt-trap chambers to prevent siltation.</p>
-                            </div>
-                        </div>
-
-                        <div class="hydro-item">
-                            <span class="hydro-icon">🧪</span>
-                            <div>
-                                <strong>First Flush Filtration Efficiency</strong>
-                                <p>Discard first 20 minutes of roof runoff (contains airborne particulate pollution PM2.5/PM10).</p>
-                            </div>
-                        </div>
-
-                        <div class="hydro-item">
-                            <span class="hydro-icon">⚡</span>
-                            <div>
-                                <strong>Borewell Recharging Safety</strong>
-                                <p>Ensure multi-layer sand/gravel filter bed before injecting roof water into shallow aquifers.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-
-        <!-- =================================================
-             SCREEN 7: RESOURCE INVENTORY
+             SCREEN 6: RESOURCE INVENTORY
         ================================================== -->
         <section id="resourcesScreen" class="screen">
             <div class="page-title-group">
@@ -1213,12 +1129,12 @@
 
 
         <!-- =================================================
-             SCREEN 8: DISTRICT COMMAND CENTER
+             SCREEN 7: DISTRICT COMMAND CENTER (DDMA CONTROL CELL)
         ================================================== -->
         <section id="disasterScreen" class="screen">
             <div class="page-title-group">
                 <small data-i18n="cmdSub">DISTRICT ADMINISTRATION & DISASTER CONTROL</small>
-                <h1 data-i18n="cmdTitle">District Command Center</h1>
+                <h1 data-i18n="cmdTitle">District Disaster Management Authority (DDMA) Control Room</h1>
                 <p data-i18n="cmdDesc">
                     Automated meteorological hazard monitoring for District Magistrate / DDMA response teams.
                 </p>
@@ -1226,7 +1142,7 @@
 
             <div class="command-actions-bar">
                 <button class="btn btn-primary" id="exportBulletinBtn" type="button">
-                    📄 <span data-i18n="exportDoc">Export Official Weather Bulletin (PDF/Print)</span>
+                    📄 <span data-i18n="exportDoc">Export Official DDMA Bulletin (PDF/Print)</span>
                 </button>
                 <button class="btn btn-secondary siren-pill" id="broadcastAlertBtn" type="button">
                     🚨 <span data-i18n="broadcastBtn">Broadcast Emergency Sirens</span>
@@ -1337,7 +1253,7 @@
 
 
         <!-- =================================================
-             SCREEN 9: DISTRICT LEADERBOARD
+             SCREEN 8: DISTRICT LEADERBOARD
         ================================================== -->
         <section id="leaderboardScreen" class="screen">
             <div class="page-title-group">
@@ -1409,7 +1325,7 @@
 
 
         <!-- =================================================
-             SCREEN 10: KISAN SMART ADVISORY & MANDI AI
+             SCREEN 9: KISAN SMART ADVISORY & MANDI AI
         ================================================== -->
         <section id="farmerScreen" class="screen">
             <div class="page-title-group">
@@ -1445,7 +1361,7 @@
                     </div>
 
                     <div id="farmerAdvice" class="kisan-advice-box">
-                        Search a city to receive customized farming recommendations.
+                        Search a district to receive customized farming recommendations.
                     </div>
 
                     <div class="kisan-badges-grid">
@@ -1493,7 +1409,7 @@
                         <div class="pmfby-box">
                             <strong>🌾 PM FASAL BIMA YOJANA (PMFBY) READINESS:</strong>
                             <p>Automated crop damage eligibility threshold: Active if rainfall exceeds 75mm within 24h. Lekhpal geotagged survey checklist generated.</p>
-                            <button class="btn btn-secondary" style="margin-top: 8px; font-size: 11px;" onclick="alert('✅ PMFBY Claim Eligibility Dossier Generated for District Agriculture Officer!')">📋 Generate Claim Readiness Dossier</button>
+                            <button class="btn btn-secondary" style="margin-top: 8px; font-size: 11.5px;" onclick="alert('✅ PMFBY Claim Eligibility Dossier Generated for District Agriculture Officer!')">📋 Generate Claim Readiness Dossier</button>
                         </div>
                     </div>
                 </div>
@@ -1502,7 +1418,7 @@
 
 
         <!-- =================================================
-             SCREEN 11: CITIZEN HAZARD REPORTING
+             SCREEN 10: CITIZEN HAZARD REPORTING
         ================================================== -->
         <section id="citizenScreen" class="screen">
             <div class="page-title-group">
@@ -1562,12 +1478,12 @@
 
 
         <!-- =================================================
-             SCREEN 12: ANALYTICS
+             SCREEN 11: METEOROLOGICAL TRENDS & ANALYTICS
         ================================================== -->
         <section id="analyticsScreen" class="screen">
             <div class="page-title-group">
                 <small data-i18n="analyticsSub">METEOROLOGICAL TRENDS</small>
-                <h1 data-i18n="analyticsTitle">Weather Analytics</h1>
+                <h1 data-i18n="analyticsTitle">Weather Analytics & Trends</h1>
                 <p data-i18n="analyticsDesc">
                     Understand upcoming hours through interactive real-time trend charts.
                 </p>
@@ -1614,7 +1530,7 @@
 
 
         <!-- =================================================
-             SCREEN 13: HAZARD & RESCUE MAP
+             SCREEN 12: HAZARD & RESCUE MAP
         ================================================== -->
         <section id="mapScreen" class="screen">
             <div class="page-title-group">
@@ -1662,7 +1578,7 @@
 
 
         <!-- =================================================
-             SCREEN 14: ALERT CENTER
+             SCREEN 13: ALERT CENTER
         ================================================== -->
         <section id="alertsScreen" class="screen">
             <div class="page-title-group">
@@ -1712,19 +1628,19 @@
                     </div>
                 </div>
                 <div id="alertList" class="alerts-feed">
-                    <div class="empty">Search a city to see alerts.</div>
+                    <div class="empty">Search a district to see alerts.</div>
                 </div>
             </div>
         </section>
 
 
         <!-- =================================================
-             SCREEN 15: AI COPILOT
+             SCREEN 14: AI COPILOT (DM ADVISORY)
         ================================================== -->
         <section id="aiScreen" class="screen">
             <div class="page-title-group">
                 <small data-i18n="aiSub">ARTIFICIAL INTELLIGENCE</small>
-                <h1 data-i18n="aiTitle">SkyCast AI Disaster Copilot</h1>
+                <h1 data-i18n="aiTitle">SkyCast AI Disaster Copilot (DM Executive Advisory)</h1>
                 <p data-i18n="aiDesc">
                     Ask intelligent questions about disaster triage, high-risk zones, rescue deployment priorities, travel viability, and agriculture.
                 </p>
@@ -1741,7 +1657,7 @@
                     </div>
 
                     <div id="answer" class="copilot-response-box">
-                        Search a city first, then ask me anything about disaster management, rescue priorities, or weather intelligence.
+                        Search a district first, then ask me anything about disaster management, rescue priorities, or weather intelligence.
                     </div>
 
                     <div class="copilot-input-box">
@@ -1781,12 +1697,12 @@
 
 
         <!-- =================================================
-             SCREEN 16: COMPARE
+             SCREEN 15: COMPARE DISTRICTS
         ================================================== -->
         <section id="compareScreen" class="screen">
             <div class="page-title-group">
                 <small data-i18n="compareSub">WEATHER COMPARISON</small>
-                <h1 data-i18n="compareTitle">Compare Cities & Districts</h1>
+                <h1 data-i18n="compareTitle">Compare Regional Districts</h1>
                 <p data-i18n="compareDesc">
                     Head-to-head comparison of temperature, humidity, wind, and overall atmospheric comfort.
                 </p>
@@ -1817,12 +1733,12 @@
 
 
         <!-- =================================================
-             SCREEN 17: TRAVEL PLANNER
+             SCREEN 16: HIGHWAY TRAVEL PLANNER
         ================================================== -->
         <section id="travelScreen" class="screen">
             <div class="page-title-group">
                 <small data-i18n="travelSub">TRAVEL INTELLIGENCE</small>
-                <h1 data-i18n="travelTitle">Travel & Highway Planner</h1>
+                <h1 data-i18n="travelTitle">Travel & Highway Route Planner</h1>
                 <p data-i18n="travelDesc">
                     Evaluate route and destination meteorological hazards before you embark.
                 </p>
@@ -1833,7 +1749,7 @@
                     <div class="travel-route-box">
                         <div class="route-point">
                             <small data-i18n="fromLabel">FROM</small>
-                            <strong id="fromCity">Search city first</strong>
+                            <strong id="fromCity">Search district first</strong>
                         </div>
                         <span class="route-arrow">→</span>
                         <div class="route-point">
@@ -1865,7 +1781,7 @@
         </section>
 
         <footer class="app-footer">
-            SkyCast AI • Enterprise Hyperlocal Weather Intelligence & Autonomous Disaster Management Platform
+            Office of the District Disaster Management Authority (DDMA) • SkyCast AI Enterprise Intelligence Platform
         </footer>
 
     </main>
@@ -1976,7 +1892,7 @@
             <div>
                 <h2>OFFICE OF THE DISTRICT DISASTER MANAGEMENT AUTHORITY (DDMA)</h2>
                 <h3>DAILY METEOROLOGICAL & PUBLIC SAFETY BULLETIN</h3>
-                <small id="bulletinDateTime">Date: 20-Aug-2026 | Ref: SKYCAST-DDMA/2026/08</small>
+                <small id="bulletinDateTime">Date: 21-Aug-2026 | Ref: SKYCAST-DDMA/2026/08</small>
             </div>
         </div>
         <hr>

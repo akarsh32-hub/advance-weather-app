@@ -1,7 +1,8 @@
 "use strict";
 
 /* =========================================================
-   SKYCAST AI — ENTERPRISE WEATHER & DISASTER ENGINE (V3.2)
+   SKYCAST AI — EXECUTIVE DDMA DISASTER & METEOROLOGY ENGINE
+   Official District Magistrate & Crisis Management Portal
    ========================================================= */
 
 let W = null;
@@ -21,7 +22,7 @@ let satelliteLayer = null;
 
 let skycastAQI = null;
 let skycastUV = null;
-let skycastLightningCape = 450;
+let skycastLightningCape = 420;
 let skycastLightningRisk = 8;
 
 // Web Audio API State
@@ -68,39 +69,39 @@ let citizenReports = [
     }
 ];
 
-// Rescue Teams State
+// Rescue Teams State (NDRF / SDRF)
 let rescueTeams = [
     {
         id: "alpha",
-        name: "Team Alpha",
+        name: "NDRF Team Alpha",
         specialty: "Water & Flood Rescue Unit (जल बचाव दल)",
-        status: "on_mission",
+        status: "available",
         members: 12,
         capacity: 30,
         equipment: ["🚤 4 Inflatable Boats", "🦺 35 Life Jackets", "🏊 12 Divers", "🔦 Floodlights"],
         locationName: "River Basin / Ganga Ghat Sector",
         lat: 26.465,
         lon: 80.345,
-        activeMission: "Mission #104: Evacuating 20 trapped civilians from low-lying ward",
-        lastCheckIn: "10:38 AM • 14 civilians evacuated to dry ground"
+        activeMission: "Standby for water rescue and river patrol",
+        lastCheckIn: "10:38 AM • Equipment fueled and inspected"
     },
     {
         id: "bravo",
-        name: "Team Bravo",
+        name: "SDRF Team Bravo",
         specialty: "Paramedic & Trauma First-Aid (पैरामेडिक एवं चिकित्सा दल)",
-        status: "assigned",
+        status: "available",
         members: 8,
         capacity: 15,
         equipment: ["🚑 3 ALS Ambulances", "🩹 50 Trauma Kits", "🧴 ORS & Oxygen Cylinders", "🛏️ 6 Stretchers"],
         locationName: "Civil Lines & Hospital Corridor",
         lat: 26.438,
         lon: 80.320,
-        activeMission: "Mission #105: Medical stabilization and heatstroke response",
-        lastCheckIn: "10:15 AM • En route to Sector 4 CHC"
+        activeMission: "Mobile medical standby for heatstroke & casualties",
+        lastCheckIn: "10:15 AM • 18 ICU stabilization beds ready"
     },
     {
         id: "charlie",
-        name: "Team Charlie",
+        name: "Civil Defense Team Charlie",
         specialty: "Structural Debris & Tree Clearance (मलबा एवं पेड़ निकासी)",
         status: "available",
         members: 10,
@@ -109,12 +110,12 @@ let rescueTeams = [
         locationName: "North Industrial Substation Base",
         lat: 26.480,
         lon: 80.295,
-        activeMission: "Standby for storm debris and blocked road clearance",
-        lastCheckIn: "09:50 AM • Machinery fueled and inspected"
+        activeMission: "Standby for storm debris and blocked arterial roads",
+        lastCheckIn: "09:50 AM • Power machinery ready"
     },
     {
         id: "delta",
-        name: "Team Delta",
+        name: "Logistics Team Delta",
         specialty: "Evacuation Logistics & Food Relief (राहत सामग्री एवं राशन)",
         status: "available",
         members: 15,
@@ -123,7 +124,7 @@ let rescueTeams = [
         locationName: "Central Stadium Disaster Relief Base",
         lat: 26.420,
         lon: 80.360,
-        activeMission: "Pre-positioned for civilian shelter intake and food distribution",
+        activeMission: "Pre-positioned for civilian shelter intake and relief rations",
         lastCheckIn: "10:00 AM • Community kitchen operational"
     }
 ];
@@ -133,35 +134,13 @@ let activeIncidents = [
     {
         id: "INC-101",
         priority: 1,
-        category: "Severe Flood & Trapped Civilians",
+        category: "Low-Lying Drainage Surveillance",
         location: "River Basin Low-Lying Ward #14",
-        people: 20,
-        vulnerable: "Yes (4 Infants, 2 Elderly)",
-        severity: "CRITICAL",
-        recommendedTeamId: "alpha",
-        status: "Assigned to Team Alpha"
-    },
-    {
-        id: "INC-102",
-        priority: 2,
-        category: "Heatstroke & Medical Emergency",
-        location: "Labor Colony Sector 8",
-        people: 6,
-        vulnerable: "Yes (Elderly & Dehydrated)",
-        severity: "HIGH",
-        recommendedTeamId: "bravo",
-        status: "Assigned to Team Bravo"
-    },
-    {
-        id: "INC-103",
-        priority: 3,
-        category: "Fallen Tree on Arterial Road",
-        location: "Collectorate Hospital Approach Road",
         people: 0,
-        vulnerable: "No (Road Blocked)",
-        severity: "MODERATE",
-        recommendedTeamId: "charlie",
-        status: "Standby Assignment"
+        vulnerable: "Monitoring",
+        severity: "ROUTINE",
+        recommendedTeamId: "alpha",
+        status: "Standby at Base"
     }
 ];
 
@@ -211,12 +190,12 @@ const LIGHTNING_SHELTERS = [
 
 // District Leaderboard Regional Data
 const REGIONAL_DISTRICTS = [
-    { name: "Kanpur", lat: 26.4499, lon: 80.3319, baseTemp: 28, aqi: 85, rainRisk: 25, agriScore: 94 },
-    { name: "Lucknow", lat: 26.8467, lon: 80.9462, baseTemp: 29, aqi: 92, rainRisk: 15, agriScore: 89 },
-    { name: "Varanasi", lat: 25.3176, lon: 82.9739, baseTemp: 30, aqi: 42, rainRisk: 20, agriScore: 91 },
-    { name: "Prayagraj", lat: 25.4358, lon: 81.8463, baseTemp: 31, aqi: 78, rainRisk: 30, agriScore: 86 },
-    { name: "Agra", lat: 27.1767, lon: 78.0081, baseTemp: 32, aqi: 135, rainRisk: 10, agriScore: 78 },
-    { name: "Gorakhpur", lat: 26.7606, lon: 83.3732, baseTemp: 27, aqi: 65, rainRisk: 45, agriScore: 93 }
+    { name: "Kanpur", lat: 26.4499, lon: 80.3319, baseTemp: 28, aqi: 85, rainRisk: 15, agriScore: 94 },
+    { name: "Lucknow", lat: 26.8467, lon: 80.9462, baseTemp: 29, aqi: 92, rainRisk: 12, agriScore: 89 },
+    { name: "Varanasi", lat: 25.3176, lon: 82.9739, baseTemp: 30, aqi: 42, rainRisk: 10, agriScore: 91 },
+    { name: "Prayagraj", lat: 25.4358, lon: 81.8463, baseTemp: 31, aqi: 78, rainRisk: 18, agriScore: 86 },
+    { name: "Agra", lat: 27.1767, lon: 78.0081, baseTemp: 32, aqi: 125, rainRisk: 8, agriScore: 78 },
+    { name: "Gorakhpur", lat: 26.7606, lon: 83.3732, baseTemp: 27, aqi: 65, rainRisk: 25, agriScore: 93 }
 ];
 
 
@@ -226,38 +205,37 @@ const REGIONAL_DISTRICTS = [
 
 const I18N = {
     en: {
-        brandSub: "DISTRICT DISASTER INTELLIGENCE",
-        navDashboard: "Dashboard",
-        navDisaster: "District Command",
-        navRescue: "Rescue Ops Center",
+        brandSub: "DISTRICT DISASTER COMMAND • DDMA",
+        navDashboard: "Executive Dashboard",
+        navDisaster: "DDMA Control Room",
+        navRescue: "NDRF Rescue Ops Center",
         navTwin: "AI Digital Twin",
-        navLightning: "Lightning Radar",
-        navSOS: "Smart SOS & Offline",
+        navLightning: "Lightning Radar & Shelters",
+        navSOS: "Smart SOS & Offline Hub",
         navResources: "Resource Inventory",
-        navLeaderboard: "District Ranking",
-        navFarmer: "Kisan Mode & Mandi",
-        navWater: "Jal Sanrakshan AI",
-        navCitizen: "Citizen Report",
-        navAnalytics: "Analytics",
+        navLeaderboard: "District Health Ranking",
+        navFarmer: "Kisan Mode & Mandi AI",
+        navCitizen: "Citizen Incident Reports",
+        navAnalytics: "Meteorological Trends",
         navMap: "Hazard & Rescue Map",
         navAlerts: "Alert Center",
-        navAI: "AI Copilot",
-        navCompare: "Compare",
-        navTravel: "Travel Planner",
-        systemTitle: "SkyCast Intelligence",
+        navAI: "AI Copilot (DM Advisory)",
+        navCompare: "District Compare",
+        navTravel: "Highway Route Safety",
+        systemTitle: "DDMA Command Cell",
         systemDesc: "Autonomous disaster prediction, rescue ops dispatch & climate intelligence.",
-        searchBtn: "Search",
-        myLocation: "My Location",
-        heroTag: "✦ AI WEATHER & AUTONOMOUS DISASTER MANAGEMENT",
-        heroTitle1: "Weather & Disaster,",
-        heroTitle2: "reimagined.",
-        heroDesc: "Hyperlocal risk modeling, District Digital Twins, Lightning Strike Prediction, Smart SOS dispatch, and autonomous Rescue Team coordination.",
-        exploreBtn: "Explore Weather →",
-        rescueOpsBtn: "Rescue Ops",
+        searchBtn: "Search District",
+        myLocation: "GPS",
+        heroTag: "✦ DISTRICT DISASTER INTELLIGENCE & CRISIS COMMAND SYSTEM",
+        heroTitle1: "District Command &",
+        heroTitle2: "Disaster AI.",
+        heroDesc: "Hyperlocal risk modeling, District Digital Twins, Lightning Strike Prediction, Smart SOS dispatch, and autonomous Rescue Team coordination for District Magistrates and Emergency Responders.",
+        exploreBtn: "Explore Meteorology →",
+        rescueOpsBtn: "NDRF Rescue Ops",
         quickSos: "Emergency SOS",
         listenBulletin: "Listen Bulletin",
-        shareWa: "WhatsApp Alert",
-        scoreLabel: "SAFETY RISK SCORE",
+        shareWa: "WhatsApp Dispatch",
+        scoreLabel: "DISTRICT SAFETY INDEX",
         currentWeatherLabel: "CURRENT METEOROLOGY",
         humidityLabel: "💧 Humidity",
         windLabel: "💨 Wind Speed",
@@ -265,24 +243,24 @@ const I18N = {
         cloudLabel: "☁ Cloud Cover",
         riskIntelligence: "INTELLIGENCE ENGINE",
         weatherRisk: "Multi-Hazard Risk Assessment",
-        aiRecLabel: "AI Autonomous Directive",
+        aiRecLabel: "DM Executive Directive (AI Recommended)",
         feelsLikeLabel: "FEELS LIKE",
         sensationLabel: "Thermal sensation",
         lightningRiskLabel: "LIGHTNING CAPE",
         uvLabel: "UV INDEX",
         aqiLabel: "AIR QUALITY (AQI)",
-        forecastSub: "EXTENDED FORECAST",
-        fiveDayHeading: "5 Day Meteorological Forecast",
-        hourlySub: "NEXT HOURS",
+        forecastSub: "EXTENDED METEOROLOGY",
+        fiveDayHeading: "5 Day District Meteorological Forecast",
+        hourlySub: "UPCOMING HOURS",
         hourlyHeading: "Hourly Forecast & Trend",
         cmdSub: "DISTRICT ADMINISTRATION & DISASTER CONTROL",
-        cmdTitle: "District Command Center",
+        cmdTitle: "District Disaster Management Authority (DDMA) Control Room",
         cmdDesc: "Automated meteorological hazard monitoring for District Magistrate / DDMA response teams.",
-        exportDoc: "Export Official Weather Bulletin (PDF/Print)",
+        exportDoc: "Export Official DDMA Bulletin (PDF/Print)",
         broadcastBtn: "Broadcast Emergency Sirens",
         gramDispatch: "Gram Pradhan WhatsApp Dispatch",
         rescueSub: "AUTONOMOUS EMERGENCY DISPATCH & LOGISTICS",
-        rescueTitle: "Smart Rescue Team Coordination Center",
+        rescueTitle: "Smart Rescue Team Coordination Center (NDRF / SDRF)",
         rescueDesc: "Real-time GPS tracking of NDRF/SDRF rescue teams, AI incident triage, equipment load monitoring, safe route navigation, and field check-in synchronization.",
         totalTeams: "DEPLOYED UNITS",
         activeIncidents: "ACTIVE SOS",
@@ -305,9 +283,6 @@ const I18N = {
         sosSub: "CIVIC LIFE-SAFETY & OFFLINE RESILIENCE",
         sosTitle: "Smart SOS & Offline Emergency Hub",
         sosDesc: "Broadcast immediate life-saving SOS requests with automatic routing to nearest emergency services. Works 100% offline during network tower blackouts with GPS breadcrumb tracking.",
-        waterSub: "GROUNDWATER RECHARGE & RAIN HARVESTING INTELLIGENCE",
-        waterTitle: "Jal Sanrakshan AI (Rainwater Harvest Yield Estimator)",
-        waterDesc: "Calculate harvestable rainwater volume (liters) from 5-day precipitation forecasts, compute groundwater recharging points, and calculate municipal water tanker monetary savings.",
         resourcesSub: "INTER-DEPARTMENTAL EMERGENCY INVENTORY",
         resourcesTitle: "Smart Emergency Resource Management",
         resourcesDesc: "Centralized multi-departmental tracking of ambulances, fire tenders, ICU beds, dewatering pumps, NDRF battalions, and community relief camp food rations.",
@@ -332,10 +307,6 @@ const I18N = {
         sprayWindow: "Spray Window (स्प्रे का सही समय)",
         irrigationNeed: "Irrigation Need (सिंचाई की जरूरत)",
         diseaseRisk: "Pest & Fungus Risk (रोग खतरा)",
-        farmTempLabel: "FIELD TEMPERATURE",
-        farmHumLabel: "SOIL & AIR HUMIDITY",
-        farmRainLabel: "RAIN PROBABILITY",
-        farmWindLabel: "WIND SPEED",
         citizenSub: "CIVIC DISASTER CROWDSOURCING",
         citizenTitle: "Citizen Weather & Hazard Report",
         citizenDesc: "Report real-time local hazards (Waterlogging, Fallen Trees, Hail, Power Outages) to alert district teams.",
@@ -347,7 +318,7 @@ const I18N = {
         liveCitizenFeed: "LIVE VERIFIED FEED",
         recentReports: "Recent District Incidents",
         analyticsSub: "METEOROLOGICAL TRENDS",
-        analyticsTitle: "Weather Analytics",
+        analyticsTitle: "Weather Analytics & Trends",
         analyticsDesc: "Understand upcoming hours through interactive real-time trend charts.",
         tempTrend: "Temperature Trend (°C)",
         rainTrend: "Rain Probability (%)",
@@ -371,7 +342,7 @@ const I18N = {
         liveMonitoring: "LIVE MONITORING",
         currentAlerts: "Current Hazard Bulletins",
         aiSub: "ARTIFICIAL INTELLIGENCE",
-        aiTitle: "SkyCast AI Disaster Copilot",
+        aiTitle: "SkyCast AI Disaster Copilot (DM Executive Advisory)",
         aiDesc: "Ask intelligent questions about disaster triage, high-risk zones, rescue deployment priorities, travel viability, and agriculture.",
         copilotTitle: "Disaster & Weather Copilot",
         copilotSub: "Powered by SkyCast Intelligence Engine",
@@ -388,13 +359,13 @@ const I18N = {
         feat3: "Thermodynamic CAPE lightning strike prediction",
         feat4: "Bilingual natural speech response in English & Hindi",
         compareSub: "WEATHER COMPARISON",
-        compareTitle: "Compare Cities & Districts",
+        compareTitle: "Compare Regional Districts",
         compareDesc: "Head-to-head comparison of temperature, humidity, wind, and overall atmospheric comfort.",
         cityOne: "DISTRICT ONE",
         cityTwo: "DISTRICT TWO",
         compareButton: "Compare Weather",
         travelSub: "TRAVEL INTELLIGENCE",
-        travelTitle: "Travel & Highway Planner",
+        travelTitle: "Travel & Highway Route Planner",
         travelDesc: "Evaluate route and destination meteorological hazards before you embark.",
         fromLabel: "FROM",
         destLabel: "DESTINATION",
@@ -414,38 +385,37 @@ const I18N = {
         copySMS: "Copy SMS Text"
     },
     hi: {
-        brandSub: "जिला आपदा एवं मौसम प्रणाली",
-        navDashboard: "डैशबोर्ड",
-        navDisaster: "जिला आपदा नियंत्रण",
-        navRescue: "रेस्क्यू ऑपरेशन केंद्र",
+        brandSub: "जिला आपदा नियंत्रण • डीडीएमए",
+        navDashboard: "कार्यकारी डैशबोर्ड",
+        navDisaster: "डीडीएमए नियंत्रण कक्ष",
+        navRescue: "एनडीआरएफ रेस्क्यू केंद्र",
         navTwin: "AI डिजिटल ट्विन",
-        navLightning: "वज्रपात / बिजली रडार",
+        navLightning: "वज्रपात रडार व आश्रय",
         navSOS: "स्मार्ट SOS व ऑफलाइन",
         navResources: "संसाधन इन्वेंटरी",
-        navLeaderboard: "जिला रैंकिंग सूचकांक",
+        navLeaderboard: "जिला स्वास्थ्य रैंकिंग",
         navFarmer: "किसान मित्र व मंडी AI",
-        navWater: "जल संरक्षण AI",
-        navCitizen: "आपदा रिपोर्टिंग",
-        navAnalytics: "मौसम विश्लेषण",
+        navCitizen: "नागरिक आपदा रिपोर्टिंग",
+        navAnalytics: "मौसम विश्लेषण चार्ट्स",
         navMap: "मौसम व रेस्क्यू मानचित्र",
         navAlerts: "चेतावनी केंद्र",
-        navAI: "AI सहायक",
-        navCompare: "तुलना करें",
-        navTravel: "यात्रा योजना",
-        systemTitle: "स्काईकास्ट इंटेलिजेंस",
+        navAI: "AI कोपायलट (डीएम सलाहकार)",
+        navCompare: "जिलों की तुलना",
+        navTravel: "हाईवे यात्रा योजना",
+        systemTitle: "डीडीएमए कमांड सेल",
         systemDesc: "स्वचालित आपदा पूर्वानुमान, रेस्क्यू टीम समन्वय एवं जल संरक्षण मॉडल।",
-        searchBtn: "खोजें",
-        myLocation: "मेरा स्थान",
-        heroTag: "✦ AI मौसम एवं स्वचालित आपदा प्रबंधन प्रणाली",
-        heroTitle1: "मौसम एवं आपदा प्रबंधन,",
-        heroTitle2: "अब नए रूप में।",
+        searchBtn: "जिला खोजें",
+        myLocation: "जीपीएस",
+        heroTag: "✦ जिला आपदा इंटेलिजेंस एवं आपातकालीन कमांड सिस्टम",
+        heroTitle1: "जिला आपदा प्रबंधन,",
+        heroTitle2: "AI संचालित।",
         heroDesc: "हाइपरलोकल जोखिम मॉडलिंग, डिजिटल ट्विन, आकाशीय बिजली पूर्वानुमान, स्मार्ट SOS और स्वचालित रेस्क्यू टीम समन्वय।",
         exploreBtn: "मौसम देखें →",
-        rescueOpsBtn: "रेस्क्यू ऑपरेशन",
+        rescueOpsBtn: "एनडीआरएफ रेस्क्यू",
         quickSos: "आपातकालीन SOS",
         listenBulletin: "बुलेटिन सुनें",
         shareWa: "व्हाट्सएप अलर्ट",
-        scoreLabel: "सुरक्षा जोखिम स्कोर",
+        scoreLabel: "जिला सुरक्षा सूचकांक",
         currentWeatherLabel: "वर्तमान मौसम",
         humidityLabel: "💧 नमी (Humidity)",
         windLabel: "💨 हवा की गति",
@@ -453,7 +423,7 @@ const I18N = {
         cloudLabel: "☁ बादल",
         riskIntelligence: "सुरक्षा विश्लेषण",
         weatherRisk: "बहु-आपदा जोखिम इंजन",
-        aiRecLabel: "AI प्रशासनिक निर्देश",
+        aiRecLabel: "जिलाधिकारी कार्यकारी निर्देश (AI अनुशंसित)",
         feelsLikeLabel: "महसूस तापमान",
         sensationLabel: "वास्तविक अहसास",
         lightningRiskLabel: "वज्रपात CAPE",
@@ -464,13 +434,13 @@ const I18N = {
         hourlySub: "आगामी घंटे",
         hourlyHeading: "घंटेवार मौसम पूर्वानुमान",
         cmdSub: "जिला प्रशासन एवं आपदा नियंत्रण केंद्र",
-        cmdTitle: "जिला आपदा नियंत्रण केंद्र",
+        cmdTitle: "जिला आपदा प्रबंधन प्राधिकरण (DDMA) नियंत्रण कक्ष",
         cmdDesc: "जिलाधिकारी / डीडीएमए टीमों के लिए स्वचालित मौसम संबंधी आपदा निगरानी प्रणाली।",
-        exportDoc: "आधिकारिक मौसम बुलेटिन डाउनलोड करें (PDF/Print)",
+        exportDoc: "आधिकारिक डीडीएमए बुलेटिन डाउनलोड करें (PDF/Print)",
         broadcastBtn: "आपातकालीन चेतावनी सायरन बजाएं",
         gramDispatch: "ग्राम प्रधान व्हाट्सएप प्रसारण",
         rescueSub: "स्वचालित आपातकालीन प्रेषण एवं लॉजिस्टिक्स",
-        rescueTitle: "स्मार्ट रेस्क्यू टीम नियंत्रण केंद्र",
+        rescueTitle: "स्मार्ट रेस्क्यू टीम नियंत्रण केंद्र (NDRF / SDRF)",
         rescueDesc: "NDRF/SDRF बचाव दलों की लाइव जीपीएस ट्रैकिंग, AI प्राथमिकता निर्धारण, सुरक्षित मार्ग नेविगेशन और फील्ड चेक-इन समन्वय।",
         totalTeams: "सक्रिय बचाव दल",
         activeIncidents: "सक्रिय SOS घटनाएं",
@@ -493,9 +463,6 @@ const I18N = {
         sosSub: "नागरिक जीवन-रक्षा एवं ऑफलाइन कनेक्टिविटी",
         sosTitle: "स्मार्ट SOS एवं ऑफलाइन इमरजेंसी हब",
         sosDesc: "नेटवर्क टावर बंद होने पर भी GPS ब्रेडक्रम्ब्स के साथ ऑफलाइन SOS अनुरोध दर्ज करें जो कनेक्टिविटी आने पर स्वतः सिंक होंगे।",
-        waterSub: "भूजल पुनर्भरण एवं वर्षा जल संचयन",
-        waterTitle: "जल संरक्षण AI (वर्षा जल संचयन कैलकुलेटर)",
-        waterDesc: "5-दिवसीय वर्षा पूर्वानुमान से संचयन योग्य जल की मात्रा (लीटर), भूजल पुनर्भरण क्षमता और पानी के टैंकरों की आर्थिक बचत की गणना।",
         resourcesSub: "विभागवार आपातकालीन संसाधन इन्वेंटरी",
         resourcesTitle: "स्मार्ट आपातकालीन संसाधन प्रबंधन",
         resourcesDesc: "एम्बुलेंस, फायर टेंडर, आईसीयू बेड, जल निकासी पंप, एनडीआरएफ बल और राहत शिविर राशन का केंद्रीकृत प्रबंधन।",
@@ -520,10 +487,6 @@ const I18N = {
         sprayWindow: "कीटनाशक स्प्रे का सही समय",
         irrigationNeed: "सिंचाई की आवश्यकता",
         diseaseRisk: "कीट एवं फफूंद रोग खतरा",
-        farmTempLabel: "खेत का तापमान",
-        farmHumLabel: "हवा व मिट्टी की नमी",
-        farmRainLabel: "बारिश की संभावना",
-        farmWindLabel: "हवा की गति",
         citizenSub: "नागरिक आपदा क्राउडसोर्सिंग",
         citizenTitle: "नागरिक मौसम एवं आपदा रिपोर्टिंग",
         citizenDesc: "जलभराव, गिरे पेड़, टूटे बिजली के तार और ओलावृष्टि की तुरंत रिपोर्ट दर्ज करें।",
@@ -559,7 +522,7 @@ const I18N = {
         liveMonitoring: "लाइव निगरानी",
         currentAlerts: "वर्तमान आपदा बुलेटिन",
         aiSub: "आर्टिफिशियल इंटेलिजेंस",
-        aiTitle: "स्काईकास्ट AI आपदा कोपायलट",
+        aiTitle: "स्काईकास्ट AI आपदा कोपायलट (डीएम सलाहकार)",
         aiDesc: "आपदा प्राथमिकता, उच्च-जोखिम क्षेत्र, रेस्क्यू तैनाती और कृषि सलाह के बारे में पूछें।",
         copilotTitle: "आपदा एवं मौसम कोपायलट",
         copilotSub: "स्काईकास्ट इंटेलिजेंस द्वारा संचालित",
@@ -605,7 +568,7 @@ const I18N = {
 
 
 /* =========================================================
-   HELPER FUNCTIONS
+   HELPER FUNCTIONS & REAL-TIME IST CLOCK
 ========================================================= */
 
 const $ = id => document.getElementById(id);
@@ -634,6 +597,17 @@ function capitalize(text) {
     return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
+function startLiveClock() {
+    const update = () => {
+        const now = new Date();
+        const dateStr = now.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+        const timeStr = now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
+        setText("liveIstClock", `🕒 ${dateStr} | ${timeStr} IST`);
+    };
+    update();
+    setInterval(update, 1000);
+}
+
 function updateLanguageUI() {
     const dict = I18N[currentLanguage];
     document.querySelectorAll("[data-i18n]").forEach(el => {
@@ -652,7 +626,6 @@ function updateLanguageUI() {
         updateFarmer(W.current, W.forecast);
         updateCommandCenter(W.current, W.forecast);
         updateFiveDayForecast(W.forecast, W.daily);
-        updateRainwaterHarvesting();
     }
 
     renderRescueOps();
@@ -696,16 +669,15 @@ function initMeteoCanvas() {
     window.addEventListener("resize", resize);
     resize();
 
-    // Create 45 ambient floating particles
     meteoParticles = [];
-    for (let i = 0; i < 45; i++) {
+    for (let i = 0; i < 40; i++) {
         meteoParticles.push({
             x: Math.random() * meteoCanvas.width,
             y: Math.random() * meteoCanvas.height,
-            radius: Math.random() * 2.5 + 1,
-            speedY: Math.random() * 0.8 + 0.3,
-            speedX: (Math.random() - 0.5) * 0.5,
-            opacity: Math.random() * 0.5 + 0.15
+            radius: Math.random() * 2 + 1,
+            speedY: Math.random() * 0.6 + 0.2,
+            speedX: (Math.random() - 0.5) * 0.4,
+            opacity: Math.random() * 0.4 + 0.1
         });
     }
 
@@ -751,30 +723,30 @@ function initLightningRadarCanvas() {
     radarCanvas = $("lightningRadarCanvas");
     if (!radarCanvas) return;
     radarCtx = radarCanvas.getContext("2d");
-    radarCanvas.width = 140;
-    radarCanvas.height = 140;
+    radarCanvas.width = 150;
+    radarCanvas.height = 150;
 
     const draw = () => {
         if (!radarCtx) return;
-        radarCtx.clearRect(0, 0, 140, 140);
+        radarCtx.clearRect(0, 0, 150, 150);
 
-        const cx = 70;
-        const cy = 70;
-        const radius = 65;
+        const cx = 75;
+        const cy = 75;
+        const radius = 70;
 
         // Concentric radar circles
-        radarCtx.strokeStyle = "rgba(245, 158, 11, 0.3)";
+        radarCtx.strokeStyle = "rgba(0, 242, 254, 0.25)";
         radarCtx.lineWidth = 1;
         radarCtx.beginPath();
-        radarCtx.arc(cx, cy, 20, 0, Math.PI * 2);
-        radarCtx.arc(cx, cy, 40, 0, Math.PI * 2);
-        radarCtx.arc(cx, cy, 60, 0, Math.PI * 2);
+        radarCtx.arc(cx, cy, 22, 0, Math.PI * 2);
+        radarCtx.arc(cx, cy, 44, 0, Math.PI * 2);
+        radarCtx.arc(cx, cy, 66, 0, Math.PI * 2);
         radarCtx.stroke();
 
         // Crosshairs
         radarCtx.beginPath();
-        radarCtx.moveTo(cx, 5); radarCtx.lineTo(cx, 135);
-        radarCtx.moveTo(5, cy); radarCtx.lineTo(135, cy);
+        radarCtx.moveTo(cx, 5); radarCtx.lineTo(cx, 145);
+        radarCtx.moveTo(5, cy); radarCtx.lineTo(145, cy);
         radarCtx.stroke();
 
         // Spinning Sweep Line
@@ -783,17 +755,17 @@ function initLightningRadarCanvas() {
         radarCtx.rotate(radarAngle);
 
         const grad = radarCtx.createLinearGradient(0, 0, radius, 0);
-        grad.addColorStop(0, "rgba(245, 158, 11, 0.9)");
-        grad.addColorStop(1, "rgba(245, 158, 11, 0.0)");
+        grad.addColorStop(0, "rgba(0, 242, 254, 0.85)");
+        grad.addColorStop(1, "rgba(0, 242, 254, 0.0)");
 
         radarCtx.beginPath();
         radarCtx.moveTo(0, 0);
         radarCtx.arc(0, 0, radius, 0, Math.PI / 4);
         radarCtx.lineTo(0, 0);
-        radarCtx.fillStyle = "rgba(245, 158, 11, 0.15)";
+        radarCtx.fillStyle = "rgba(0, 242, 254, 0.12)";
         radarCtx.fill();
 
-        radarCtx.strokeStyle = "rgba(245, 158, 11, 0.85)";
+        radarCtx.strokeStyle = "rgba(0, 242, 254, 0.85)";
         radarCtx.lineWidth = 2;
         radarCtx.beginPath();
         radarCtx.moveTo(0, 0);
@@ -824,17 +796,19 @@ function drawDigitalTwinCanvas(rainfallMm = 120) {
     if (!twinCanvas) return;
     twinCtx = twinCanvas.getContext("2d");
 
-    const w = twinCanvas.clientWidth || 600;
-    const h = 240;
-    twinCanvas.width = w;
-    twinCanvas.height = h;
+    const w = twinCanvas.clientWidth || 700;
+    const h = 250;
+    const dpr = window.devicePixelRatio || 1;
+    twinCanvas.width = w * dpr;
+    twinCanvas.height = h * dpr;
+    twinCtx.scale(dpr, dpr);
 
     twinCtx.clearRect(0, 0, w, h);
 
-    // Draw stylized district terrain grid
-    twinCtx.strokeStyle = "rgba(255, 255, 255, 0.08)";
+    // Draw high-tech topographic mesh
+    twinCtx.strokeStyle = "rgba(255, 255, 255, 0.07)";
     twinCtx.lineWidth = 1;
-    for (let x = 0; x < w; x += 30) {
+    for (let x = 0; x < w; x += 35) {
         twinCtx.beginPath();
         twinCtx.moveTo(x, 0);
         twinCtx.lineTo(x, h);
@@ -847,19 +821,28 @@ function drawDigitalTwinCanvas(rainfallMm = 120) {
         twinCtx.stroke();
     }
 
-    // Draw Simulated Inundation Water Level
-    const waterHeight = Math.min(160, (rainfallMm / 250) * 160);
+    // Topographic baseline terrain contour
+    twinCtx.beginPath();
+    twinCtx.moveTo(0, h * 0.75);
+    twinCtx.bezierCurveTo(w * 0.25, h * 0.65, w * 0.5, h * 0.85, w * 0.75, h * 0.60);
+    twinCtx.bezierCurveTo(w * 0.88, h * 0.50, w * 0.95, h * 0.55, w, h * 0.65);
+    twinCtx.strokeStyle = "rgba(0, 242, 254, 0.4)";
+    twinCtx.lineWidth = 2;
+    twinCtx.stroke();
+
+    // Inundation water level
+    const waterHeight = Math.min(170, (rainfallMm / 250) * 170);
     const waterY = h - waterHeight;
 
     const grad = twinCtx.createLinearGradient(0, waterY, 0, h);
-    grad.addColorStop(0, "rgba(225, 29, 72, 0.65)");
-    grad.addColorStop(1, "rgba(15, 23, 42, 0.95)");
+    grad.addColorStop(0, rainfallMm >= 100 ? "rgba(225, 29, 72, 0.65)" : "rgba(59, 130, 246, 0.5)");
+    grad.addColorStop(1, "rgba(6, 11, 22, 0.95)");
 
     twinCtx.fillStyle = grad;
     twinCtx.beginPath();
     twinCtx.moveTo(0, waterY);
-    for (let x = 0; x <= w; x += 20) {
-        const yOffset = Math.sin((x / 30) + twinWaterWave) * 6;
+    for (let x = 0; x <= w; x += 25) {
+        const yOffset = Math.sin((x / 35) + twinWaterWave) * 5;
         twinCtx.lineTo(x, waterY + yOffset);
     }
     twinCtx.lineTo(w, h);
@@ -867,58 +850,28 @@ function drawDigitalTwinCanvas(rainfallMm = 120) {
     twinCtx.closePath();
     twinCtx.fill();
 
-    // Draw Rescue Node Markers
-    twinCtx.fillStyle = "#34d399";
+    // High Ground Safe Node #1
+    twinCtx.fillStyle = "#10b981";
     twinCtx.beginPath();
-    twinCtx.arc(w * 0.25, h * 0.35, 7, 0, Math.PI * 2);
+    twinCtx.arc(w * 0.22, h * 0.35, 7, 0, Math.PI * 2);
     twinCtx.fill();
     twinCtx.fillStyle = "#ffffff";
-    twinCtx.font = "10px Inter, sans-serif";
-    twinCtx.fillText("🛡️ High Ground Node #1", w * 0.25 + 10, h * 0.35 + 4);
+    twinCtx.font = "bold 11px Inter, sans-serif";
+    twinCtx.fillText("🛡️ High Ground Sector #1 (Shelter)", w * 0.22 + 12, h * 0.35 + 4);
 
-    twinCtx.fillStyle = "#34d399";
+    // High Ground Safe Node #2 (District Hospital)
+    twinCtx.fillStyle = "#38bdf8";
     twinCtx.beginPath();
-    twinCtx.arc(w * 0.7, h * 0.28, 7, 0, Math.PI * 2);
+    twinCtx.arc(w * 0.72, h * 0.28, 7, 0, Math.PI * 2);
     twinCtx.fill();
     twinCtx.fillStyle = "#ffffff";
-    twinCtx.fillText("🛡️ Hospital Safe Node #2", w * 0.7 + 10, h * 0.28 + 4);
+    twinCtx.fillText("🏥 District Civil Hospital Safe Node", w * 0.72 + 12, h * 0.28 + 4);
 
-    // Draw moving boat/ambulance icon
-    const vehX = (w * 0.45) + Math.sin(twinWaterWave) * 30;
-    const vehY = waterY - 5;
-    twinCtx.font = "18px Inter, sans-serif";
+    // Moving Rescue Boat Marker
+    const vehX = (w * 0.48) + Math.sin(twinWaterWave) * 25;
+    const vehY = Math.max(30, waterY - 8);
+    twinCtx.font = "20px Inter, sans-serif";
     twinCtx.fillText("🚤", vehX, vehY);
-}
-
-
-/* =========================================================
-   FEATURE: JAL SANRAKSHAN AI (RAINWATER HARVESTING)
-========================================================= */
-
-function updateRainwaterHarvesting() {
-    const slider = $("roofAreaSlider");
-    const coeffSelect = $("surfaceCoeff");
-    const areaLabel = $("roofAreaLabel");
-
-    if (!slider || !coeffSelect) return;
-
-    const sqFt = Number(slider.value || 1500);
-    const coeff = Number(coeffSelect.value || 0.85);
-
-    if (areaLabel) {
-        areaLabel.textContent = `${sqFt.toLocaleString()} Sq. Feet (${sqFt <= 2000 ? 'Residential Rooftop' : sqFt <= 5000 ? 'Institutional Building' : 'Commercial / Farmland'})`;
-    }
-
-    // Convert Sq Ft to Sq Meters
-    const sqMeters = sqFt * 0.0929;
-    const rainForecastMm = W?.daily?.precipitation_sum?.[0] ?? (getRainProbability(W?.forecast) * 0.8) ?? 45;
-
-    // Harvested Liters = Area (sq m) * Rainfall (mm) * Runoff Coefficient
-    const harvestLiters = Math.round(sqMeters * Math.max(25, rainForecastMm) * coeff);
-    const tankerSavings = Math.round((harvestLiters / 4000) * 500);
-
-    setText("harvestLitersVal", `${harvestLiters.toLocaleString()} Liters`);
-    setText("waterSavingsVal", `₹ ${tankerSavings.toLocaleString()} Saved`);
 }
 
 
@@ -929,10 +882,8 @@ function updateRainwaterHarvesting() {
 function setupPWA() {
     if ("serviceWorker" in navigator) {
         navigator.serviceWorker.register("./sw.js").then(() => {
-            console.log("✅ SkyCast AI PWA Service Worker Registered.");
-        }).catch(err => {
-            console.log("PWA Service Worker registration skipped:", err);
-        });
+            console.log("✅ SkyCast AI PWA Service Worker Active.");
+        }).catch(() => {});
     }
 
     window.addEventListener("beforeinstallprompt", (e) => {
@@ -977,7 +928,7 @@ function renderRescueOps() {
                             <span class="team-status-dot ${t.status}"></span>
                             <div>
                                 <strong>${t.name}</strong>
-                                <small style="display:block; color:var(--text-dim); font-size:10px;">${t.specialty}</small>
+                                <small style="display:block; color:var(--text-muted); font-size:11px;">${t.specialty}</small>
                             </div>
                         </div>
                         <span class="status-pill ${t.status === 'available' ? 'safe' : t.status === 'on_mission' ? 'danger' : 'warning'}">${statusLabel}</span>
@@ -988,10 +939,10 @@ function renderRescueOps() {
                     </div>
 
                     <div class="team-meta">
-                        <div>📍 <b>Location:</b> ${t.locationName}</div>
-                        <div>👥 <b>Personnel:</b> ${t.members} Rescuers | <b>Capacity:</b> ${t.capacity} Civilians</div>
-                        <div>🎯 <b>Mission:</b> <span style="color:var(--text-main); font-weight:600;">${t.activeMission}</span></div>
-                        <div style="color:var(--cyan); margin-top:4px;">📡 <b>Last Check-In:</b> ${t.lastCheckIn}</div>
+                        <div>📍 <b>Location Base:</b> ${t.locationName}</div>
+                        <div>👥 <b>Personnel:</b> ${t.members} Rescuers | <b>Evacuation Capacity:</b> ${t.capacity} Persons</div>
+                        <div>🎯 <b>Operational Status:</b> <span style="color:var(--text-primary); font-weight:700;">${t.activeMission}</span></div>
+                        <div style="color:var(--cyan); margin-top:5px;">📡 <b>Last Check-In:</b> ${t.lastCheckIn}</div>
                     </div>
                 </div>
             `;
@@ -1003,7 +954,7 @@ function renderRescueOps() {
     if (triageTbody) {
         triageTbody.innerHTML = activeIncidents.map(inc => {
             const recTeam = rescueTeams.find(t => t.id === inc.recommendedTeamId) || rescueTeams[0];
-            const pMedal = inc.priority === 1 ? "🚨 P1 Critical" : inc.priority === 2 ? "⚠️ P2 High" : "⚡ P3 Moderate";
+            const pMedal = inc.priority === 1 ? "🚨 P1 Critical" : inc.priority === 2 ? "⚠️ P2 High" : "⚡ P3 Routine";
             const pClass = inc.priority === 1 ? "danger" : inc.priority === 2 ? "warning" : "safe";
 
             return `
@@ -1011,12 +962,12 @@ function renderRescueOps() {
                     <td><span class="status-pill ${pClass}">${pMedal}</span></td>
                     <td><b>${inc.category}</b></td>
                     <td>📍 ${inc.location}</td>
-                    <td><b>${inc.people} Persons</b> <small style="color:var(--text-dim);">(${inc.vulnerable})</small></td>
+                    <td><b>${inc.people} Persons</b> <small style="color:var(--text-muted);">(${inc.vulnerable})</small></td>
                     <td><span class="status-pill ${pClass}">${inc.severity}</span></td>
                     <td><b>${recTeam.name}</b></td>
                     <td>
-                        <button class="btn btn-primary" style="padding:6px 12px; font-size:11px;" onclick="assignRescueTeam('${inc.id}', '${recTeam.id}')">
-                            Dispatch ${recTeam.name} →
+                        <button class="btn btn-primary" style="padding:6px 14px; font-size:11.5px;" onclick="assignRescueTeam('${inc.id}', '${recTeam.id}')">
+                            Dispatch ${recTeam.name.split(' ')[1]} →
                         </button>
                     </td>
                 </tr>
@@ -1036,7 +987,7 @@ function assignRescueTeam(incidentId, teamId) {
         triggerEmergencySiren(2);
         alert(currentLanguage === "hi"
             ? `🚨 ${team.name} को ${incident.location} पर ${incident.category} के लिए रवाना किया गया! सुरक्षित मार्ग नेविगेशन मैप पर सक्रिय।`
-            : `🚨 ${team.name} successfully dispatched to ${incident.location}! Weather-aware safe route polyline active on map.`);
+            : `🚨 ${team.name} successfully dispatched to ${incident.location}! Weather-aware safe route active on map.`);
     }
 }
 
@@ -1054,11 +1005,10 @@ function handleFieldCheckInSubmit(e) {
         team.lastCheckIn = `${timeStr} • ${evacCount > 0 ? evacCount + ' evacuated. ' : ''}${notes}`;
         renderRescueOps();
 
-        // Update KPI evacuated count
         const curEvac = Number($("kpiEvacuated")?.textContent?.split(" ")[0] || 64);
         setText("kpiEvacuated", `${curEvac + evacCount} Rescued`);
 
-        alert(currentLanguage === "hi" ? "✅ फील्ड चेक-इन सफलतापूर्वक जिला कंट्रोल रूम को भेज दिया गया!" : "✅ Field status check-in successfully synced with District Emergency Operations Center!");
+        alert(currentLanguage === "hi" ? "✅ फील्ड चेक-इन सफलतापूर्वक जिला कंट्रोल रूम को भेज दिया गया!" : "✅ Field status check-in successfully synced with DDMA Command Center!");
         $("checkInModal")?.classList.add("hidden");
         $("checkInForm")?.reset();
     }
@@ -1104,14 +1054,14 @@ function updateDigitalTwin(rainfallMm) {
         if (floodOverlayLayer) weatherMap.removeLayer(floodOverlayLayer);
         if (safeRoutePolyline) weatherMap.removeLayer(safeRoutePolyline);
 
-        if (rainfallMm >= 50) {
-            const radius = rainfallMm * 45;
+        if (rainfallMm >= 60) {
+            const radius = rainfallMm * 40;
             floodOverlayLayer = L.circle([lat + 0.01, lon - 0.01], {
                 color: "#e11d48",
                 fillColor: "#e11d48",
                 fillOpacity: Math.min(0.55, rainfallMm / 300),
                 radius: radius
-            }).addTo(weatherMap).bindPopup(`<b>🌊 DIGITAL TWIN SIMULATED FLOOD ZONE</b><br>Rainfall: ${rainfallMm}mm<br>Estimated Inundation: ${depth}m`);
+            }).addTo(weatherMap).bindPopup(`<b>🌊 DIGITAL TWIN FLOOD INUNDATION</b><br>Rainfall: ${rainfallMm}mm<br>Estimated Inundation: ${depth}m`);
 
             const safePath = [
                 [lat - 0.02, lon - 0.02],
@@ -1120,10 +1070,10 @@ function updateDigitalTwin(rainfallMm) {
                 [lat + 0.02, lon + 0.03]
             ];
             safeRoutePolyline = L.polyline(safePath, {
-                color: "#34d399",
+                color: "#10b981",
                 weight: 5,
                 dashArray: "10, 10"
-            }).addTo(weatherMap).bindPopup("<b>🛡️ AI RECOMMENDED SAFE EVACUATION CORRIDOR</b><br>Clear of flood inundation and power lines.");
+            }).addTo(weatherMap).bindPopup("<b>🛡️ AI RECOMMENDED SAFE EVACUATION CORRIDOR</b><br>Clear of flood inundation.");
         }
     }
 }
@@ -1134,16 +1084,32 @@ function updateDigitalTwin(rainfallMm) {
 ========================================================= */
 
 function calculateLightningRisk(current, forecast) {
-    const hum = current?.main?.humidity || 65;
+    const hum = current?.main?.humidity || 60;
     const temp = current?.main?.temp || 28;
-    const rain = forecast ? getRainProbability(forecast) : 20;
-    const clouds = current?.clouds?.all || 40;
+    const rain = forecast ? getRainProbability(forecast) : 15;
+    const weatherDesc = (current?.weather?.[0]?.description || "").toLowerCase();
+    const weatherId = current?.weather?.[0]?.id || 0;
 
-    let cape = Math.round((temp * 45) + (hum * 18) + (clouds * 8));
-    if (activeSimulation === "lightning" || activeSimulation === "storm") cape = 2850;
+    let cape = 400;
+    let prob = 8;
 
-    let prob = Math.min(95, Math.max(5, Math.round((cape / 3000) * 100)));
-    if (activeSimulation === "lightning") prob = 88;
+    // Check if there is an actual thunderstorm or severe instability
+    const isRealThunderstorm = weatherDesc.includes("thunder") || weatherDesc.includes("lightning") || weatherId === 95 || weatherId === 96 || weatherId === 99;
+
+    if (activeSimulation === "lightning") {
+        cape = 2850;
+        prob = 88;
+    } else if (activeSimulation === "storm") {
+        cape = 2100;
+        prob = 74;
+    } else if (isRealThunderstorm) {
+        cape = Math.round(2000 + (hum * 5) + (temp * 15));
+        prob = Math.min(95, Math.max(65, Math.round((cape / 3000) * 100)));
+    } else {
+        // Routine normal day formula (CAPE remains safe 200 - 750 J/kg)
+        cape = Math.round((temp * 10) + (hum * 3) + (rain * 2));
+        prob = Math.min(25, Math.max(5, Math.round(cape / 50)));
+    }
 
     skycastLightningCape = cape;
     skycastLightningRisk = prob;
@@ -1154,7 +1120,7 @@ function calculateLightningRisk(current, forecast) {
 
     setText("lightningCapeVal", `${cape.toLocaleString()} J/kg`);
     setText("lightningProbVal", `${prob}%`);
-    setText("lightningLiVal", cape >= 2000 ? "-5.4 (Extremely Unstable)" : cape >= 1200 ? "-2.8 (Unstable)" : "+1.5 (Stable)");
+    setText("lightningLiVal", cape >= 2000 ? "-5.4 (Extremely Unstable)" : cape >= 1200 ? "-2.8 (Unstable)" : "+1.8 (Stable)");
     setText("lightningEtaVal", prob >= 70 ? "Within 20–35 Mins (Severe)" : prob >= 40 ? "Within 45–60 Mins" : "No Storm Expected");
 
     const pill = $("lightningAlertPill");
@@ -1185,7 +1151,7 @@ function renderLightningShelters() {
             </div>
             <div style="display:flex; align-items:center; gap:8px;">
                 <span class="shelter-badge">${s.safetyGrade.split('(')[0]}</span>
-                <button class="btn btn-primary" style="padding:6px 12px; font-size:11px;" onclick="navigateShelter(${s.latOffset}, ${s.lonOffset}, '${s.name}')">Route →</button>
+                <button class="btn btn-primary" style="padding:6px 14px; font-size:11.5px;" onclick="navigateShelter(${s.latOffset}, ${s.lonOffset}, '${s.name}')">Route →</button>
             </div>
         </div>
     `).join("");
@@ -1304,7 +1270,7 @@ function syncOfflineQueue() {
                 offlineQueue = [];
                 setText("offlineQueueBadge", `0 Queued`);
                 renderRescueOps();
-                alert(`✅ Offline Sync Complete: ${queue.length} SOS requests synchronized with District Command Center!`);
+                alert(`✅ Offline Sync Complete: ${queue.length} SOS requests synchronized with DDMA Command Center!`);
             }
         } catch (e) {}
     }
@@ -1312,7 +1278,7 @@ function syncOfflineQueue() {
 
 
 /* =========================================================
-   FEATURE #4: STAGE WOW FACTOR (WEB AUDIO API SIREN & STROBE)
+   FEATURE: EMERGENCY SIREN ALARM & STROBE
 ========================================================= */
 
 function triggerEmergencySiren(durationSeconds = 4) {
@@ -1388,7 +1354,7 @@ function stopEmergencySiren() {
 
 
 /* =========================================================
-   FEATURE #3: 1-CLICK WHATSAPP / SMS EMERGENCY BROADCASTER
+   FEATURE: 1-CLICK WHATSAPP / SMS BROADCASTER
 ========================================================= */
 
 function generateEmergencyBroadcastText() {
@@ -1517,7 +1483,7 @@ function playVoiceBulletin(textToSpeak = null) {
     }
 
     if (!W?.current) {
-        showError("Please search for a city first to hear the weather report.");
+        showError("Please search for a district first to hear the weather report.");
         return;
     }
 
@@ -1531,7 +1497,7 @@ function playVoiceBulletin(textToSpeak = null) {
         const rain = getRainProbability(W.forecast);
 
         if (currentLanguage === "hi") {
-            message = `स्काईकास्ट जिला मौसम एवं आपदा बुलेटिन। ${place} में वर्तमान तापमान ${temp} डिग्री सेल्सियस है, जो महसूस ${feel} डिग्री जैसा हो रहा है। बारिश की संभावना ${Math.round(rain)} प्रतिशत है। वज्रपात अस्थिरता स्कोर ${skycastLightningCape} जूल प्रति किलोग्राम है। सभी रेस्क्यू टीमें अलर्ट पर हैं।`;
+            message = `स्काईकास्ट जिला आपदा एवं मौसम बुलेटिन। ${place} में वर्तमान तापमान ${temp} डिग्री सेल्सियस है, जो महसूस ${feel} डिग्री जैसा हो रहा है। बारिश की संभावना ${Math.round(rain)} प्रतिशत है। वज्रपात अस्थिरता स्कोर ${skycastLightningCape} जूल प्रति किलोग्राम है। सभी रेस्क्यू टीमें अलर्ट पर हैं।`;
         } else {
             message = `SkyCast District Weather and Disaster Bulletin. In ${place}, the current temperature is ${temp} degrees Celsius, feeling like ${feel} degrees. Rain probability is ${Math.round(rain)} percent with wind speeds of ${Math.round(cur.wind.speed * 3.6)} kilometers per hour. Lightning threat level is ${skycastLightningRisk} percent.`;
         }
@@ -1602,7 +1568,7 @@ function wmoToOpenWeather(code, isDay = 1) {
    SIMULATION ENGINE (HACKATHON LIVE DEMOS)
 ========================================================= */
 
-function getSimulatedWeatherData(scenario, baseCity = "District Center") {
+function getSimulatedWeatherData(scenario, baseCity = "District Headquarters") {
     const now = Math.floor(Date.now() / 1000);
     const mockHourly = [];
 
@@ -1736,7 +1702,7 @@ async function fetchOpenMeteoData(city) {
     const geoData = await geoRes.json();
     
     if (!geoData.results || geoData.results.length === 0) {
-        throw new Error(`City/District "${city}" not found. Please verify spelling.`);
+        throw new Error(`District "${city}" not found. Please verify spelling.`);
     }
 
     const loc = geoData.results[0];
@@ -1823,7 +1789,7 @@ function getRainProbability(forecast) {
 async function loadWeather(city) {
     city = city?.trim();
     if (!city) {
-        showError("Please enter a city or district name.");
+        showError("Please enter a district name.");
         return;
     }
 
@@ -1895,7 +1861,6 @@ async function loadWeather(city) {
         updateFarmer(current, forecast);
         updateAlerts(current, forecast);
         updateCommandCenter(current, forecast);
-        updateRainwaterHarvesting();
         renderRescueOps();
         renderDistrictLeaderboard();
         updateDigitalTwin(Number($("twinRainSlider")?.value || 120));
@@ -1925,6 +1890,7 @@ async function loadWeather(city) {
             loadUV(current.coord.lat, current.coord.lon);
         }
 
+        // Check and toggle disaster emergency banner (only triggers on actual severe emergency)
         checkEmergencyBanner(current, forecast);
 
         const aiAns = $("answer");
@@ -1942,7 +1908,7 @@ async function loadWeather(city) {
 
 
 /* =========================================================
-   EMERGENCY BANNER CONTROLLER
+   EMERGENCY BANNER CONTROLLER (ONLY POPS UP ON REAL EMERGENCIES)
 ========================================================= */
 
 function checkEmergencyBanner(current, forecast) {
@@ -1953,31 +1919,52 @@ function checkEmergencyBanner(current, forecast) {
     const rain = getRainProbability(forecast);
     const temp = current.main.temp;
     const wind = current.wind.speed * 3.6;
+    const weatherDesc = (current?.weather?.[0]?.description || "").toLowerCase();
+    const weatherId = current?.weather?.[0]?.id || 0;
 
     let isDisaster = false;
     let hazardTitle = "";
     let hazardDesc = "";
 
-    if (rain >= 80 || activeSimulation === "flood") {
+    // 1. Simulation triggers
+    if (activeSimulation === "flood") {
         isDisaster = true;
-        hazardTitle = currentLanguage === "hi" ? "🚨 जिला भारी बारिश एवं जलभराव चेतावनी" : "🚨 DISTRICT HEAVY RAINFALL & FLASH FLOOD WARNING";
+        hazardTitle = currentLanguage === "hi" ? "🚨 जिला भारी बारिश एवं जलभराव चेतावनी (SIMULATION)" : "🚨 DISTRICT HEAVY RAINFALL & FLASH FLOOD WARNING";
         hazardDesc = currentLanguage === "hi" ? "अत्यधिक वर्षा की संभावना। जल निकासी टीमों को अलर्ट पर रखा गया है।" : "Severe precipitation detected. Low-lying areas on high alert.";
-    } else if (temp >= 44 || activeSimulation === "heatwave") {
+    } else if (activeSimulation === "heatwave") {
+        isDisaster = true;
+        hazardTitle = currentLanguage === "hi" ? "🔥 जिला भीषण लू (HEATWAVE) रेड अलर्ट (SIMULATION)" : "🔥 DISTRICT SEVERE HEATWAVE RED ALERT";
+        hazardDesc = currentLanguage === "hi" ? "तापमान 44°C से अधिक। दोपहर 12 से 3 बजे तक धूप में न निकलें।" : "Extreme temperatures exceeding 44°C. Avoid outdoor labour between 12-3 PM.";
+    } else if (activeSimulation === "storm") {
+        isDisaster = true;
+        hazardTitle = currentLanguage === "hi" ? "💨 तीव्र आंधी-तूफान चेतावनी (SIMULATION)" : "💨 SEVERE THUNDERSTORM & GALE WIND WARNING";
+        hazardDesc = currentLanguage === "hi" ? "हवा की गति 55+ km/h। कमजोर पेड़ों और होर्डिंग्स से दूर रहें।" : "High velocity gusts. Secure loose infrastructure.";
+    } else if (activeSimulation === "lightning") {
+        isDisaster = true;
+        hazardTitle = currentLanguage === "hi" ? "⚡ भीषण आकाशीय बिजली (LIGHTNING) रेड अलर्ट (SIMULATION)" : "⚡ SEVERE THUNDERSTORM & LIGHTNING STRIKE WARNING";
+        hazardDesc = currentLanguage === "hi" ? "CAPE 2800+ J/kg। खुले मैदानों से तुरंत पक्के मकान में जाएं।" : "Severe convective atmospheric instability. Seek indoor shelter.";
+    } else if (activeSimulation === "smog") {
+        isDisaster = true;
+        hazardTitle = currentLanguage === "hi" ? "🌫️ गंभीर वायु प्रदूषण एवं जहरीला स्मॉग चेतावनी (SIMULATION)" : "🌫️ TOXIC SMOG & AIR QUALITY EMERGENCY";
+        hazardDesc = currentLanguage === "hi" ? "AQI 300+ पार। प्राथमिक स्कूलों में आउटडोर गतिविधियां प्रतिबंधित।" : "Hazardous AQI detected. N95 masks advised.";
+    } 
+    // 2. Real weather severe emergency thresholds
+    else if (rain >= 85) {
+        isDisaster = true;
+        hazardTitle = currentLanguage === "hi" ? "🚨 जिला भारी वर्षा एवं बाढ़ चेतावनी" : "🚨 DISTRICT HEAVY RAINFALL WARNING";
+        hazardDesc = currentLanguage === "hi" ? `वर्षा की संभावना ${Math.round(rain)}%। जल निकासी टीमें अलर्ट पर।` : "Extremely heavy precipitation detected. Low-lying areas on alert.";
+    } else if (temp >= 45) {
         isDisaster = true;
         hazardTitle = currentLanguage === "hi" ? "🔥 जिला भीषण लू (HEATWAVE) रेड अलर्ट" : "🔥 DISTRICT SEVERE HEATWAVE RED ALERT";
-        hazardDesc = currentLanguage === "hi" ? "तापमान 44°C से अधिक। दोपहर 12 से 3 बजे तक धूप में न निकलें।" : "Extreme temperatures exceeding 44°C. Avoid outdoor labour between 12-3 PM.";
-    } else if (wind >= 55 || activeSimulation === "storm") {
+        hazardDesc = currentLanguage === "hi" ? `तापमान ${Math.round(temp)}°C। दोपहर में धूप से बचें।` : "Extreme heatwave conditions active. Maintain hydration.";
+    } else if (wind >= 60) {
         isDisaster = true;
-        hazardTitle = currentLanguage === "hi" ? "💨 तीव्र आंधी-तूफान चेतावनी (GALE WARNING)" : "💨 SEVERE THUNDERSTORM & GALE WIND WARNING";
-        hazardDesc = currentLanguage === "hi" ? "हवा की गति 55+ km/h। कमजोर पेड़ों और होर्डिंग्स से दूर रहें।" : "High velocity gusts. Secure loose infrastructure.";
-    } else if (skycastLightningRisk >= 70 || activeSimulation === "lightning") {
+        hazardTitle = currentLanguage === "hi" ? "💨 तीव्र चक्रवाती आंधी चेतावनी" : "💨 SEVERE GALE & HIGH WIND WARNING";
+        hazardDesc = currentLanguage === "hi" ? `हवा की गति ${Math.round(wind)} km/h। सुरक्षित स्थानों पर रहें।` : "High velocity wind gusts active.";
+    } else if (weatherDesc.includes("severe thunderstorm") || weatherId === 95 || weatherId === 96 || weatherId === 99) {
         isDisaster = true;
-        hazardTitle = currentLanguage === "hi" ? "⚡ भीषण आकाशीय बिजली (LIGHTNING) रेड अलर्ट" : "⚡ SEVERE THUNDERSTORM & LIGHTNING STRIKE WARNING";
-        hazardDesc = currentLanguage === "hi" ? "CAPE 2400+ J/kg। खुले मैदानों से तुरंत पक्के मकान में जाएं।" : "Severe convective atmospheric instability. Seek indoor shelter.";
-    } else if (skycastAQI >= 300 || activeSimulation === "smog") {
-        isDisaster = true;
-        hazardTitle = currentLanguage === "hi" ? "🌫️ गंभीर वायु प्रदूषण एवं जहरीला स्मॉग चेतावनी" : "🌫️ TOXIC SMOG & AIR QUALITY EMERGENCY";
-        hazardDesc = currentLanguage === "hi" ? "AQI 300+ पार। प्राथमिक स्कूलों में आउटडोर गतिविधियां प्रतिबंधित।" : "Hazardous AQI detected. N95 masks advised.";
+        hazardTitle = currentLanguage === "hi" ? "⚡ आकाशीय बिजली एवं आंधी चेतावनी" : "⚡ SEVERE THUNDERSTORM & LIGHTNING WARNING";
+        hazardDesc = currentLanguage === "hi" ? "आकाशीय बिजली का खतरा। पक्के भवनों में शरण लें।" : "Active thunderstorm detected in region. Seek indoor shelter.";
     }
 
     if (isDisaster && banner) {
@@ -2012,7 +1999,7 @@ function updateCommandCenter(current, forecast) {
         setText("floodLevel", currentLanguage === "hi" ? "सामान्य (LOW)" : "LOW RISK");
         setText("floodNote", currentLanguage === "hi" ? "ड्रेनेज व नदी का स्तर सामान्य।" : "Drainage & river basin levels normal.");
         floodCard?.classList.remove("critical", "warning");
-        setText("quickFloodRisk", "Low (15%)");
+        setText("quickFloodRisk", "Low (12%)");
     }
 
     if (temp >= 40) {
@@ -2043,11 +2030,11 @@ function updateCommandCenter(current, forecast) {
 
     const baseName = current.name.split(",")[0];
     const blocks = [
-        { name: `${baseName} Central (शहरी क्षेत्र)`, tempOff: 0, rainOff: 0, aqiOff: 20 },
-        { name: `${baseName} North Tehsil (उत्तरी ब्लॉक)`, tempOff: -1, rainOff: 5, aqiOff: -15 },
-        { name: `${baseName} River Basin Block (तटीय क्षेत्र)`, tempOff: -2, rainOff: 15, aqiOff: -25 },
-        { name: `${baseName} Industrial South (औद्योगिक क्षेत्र)`, tempOff: 1, rainOff: -5, aqiOff: 40 },
-        { name: `${baseName} Rural East (ग्रामीण पूर्व)`, tempOff: 0, rainOff: 0, aqiOff: -30 }
+        { name: `${baseName} Central (शहरी क्षेत्र)`, tempOff: 0, rainOff: 0, aqiOff: 15 },
+        { name: `${baseName} North Tehsil (उत्तरी ब्लॉक)`, tempOff: -1, rainOff: 5, aqiOff: -10 },
+        { name: `${baseName} River Basin Block (तटीय क्षेत्र)`, tempOff: -2, rainOff: 12, aqiOff: -20 },
+        { name: `${baseName} Industrial South (औद्योगिक क्षेत्र)`, tempOff: 1, rainOff: -5, aqiOff: 35 },
+        { name: `${baseName} Rural East (ग्रामीण पूर्व)`, tempOff: 0, rainOff: 0, aqiOff: -25 }
     ];
 
     tableBody.innerHTML = blocks.map(b => {
@@ -2108,7 +2095,7 @@ function updateCommandCenter(current, forecast) {
 
 function exportDistrictBulletin() {
     if (!W?.current) {
-        showError("Please search for a city/district first to generate bulletin.");
+        showError("Please search for a district first to generate bulletin.");
         return;
     }
 
@@ -2139,7 +2126,7 @@ function exportDistrictBulletin() {
 
             <div class="bulletin-section">
                 <h4>2. FIRST RESPONDER & RESCUE FORCES STATUS</h4>
-                <p>• <b>NDRF / SDRF Team Alpha (Water Rescue):</b> Deployed with 4 Inflatable boats at River Basin Ward.</p>
+                <p>• <b>NDRF / SDRF Team Alpha (Water Rescue):</b> Deployed on active standby at River Basin Ward.</p>
                 <p>• <b>Team Bravo (Paramedics):</b> 3 Mobile Trauma Ambulances on active standby.</p>
                 <p>• <b>Civil Hospitals Preparedness:</b> 18 ICU stabilization beds ready with ORS hydration packs.</p>
             </div>
@@ -2250,19 +2237,19 @@ function renderCitizenFeed() {
     if (!listEl) return;
 
     if (!citizenReports.length) {
-        listEl.innerHTML = `<div style="padding: 15px; color: var(--text-dim); text-align: center;">No citizen hazards reported currently.</div>`;
+        listEl.innerHTML = `<div style="padding: 15px; color: var(--text-muted); text-align: center;">No citizen hazards reported currently.</div>`;
         return;
     }
 
     listEl.innerHTML = citizenReports.map(r => `
-        <div class="hazard-item" style="display:flex; align-items:center; gap:12px; padding:12px; border-radius:10px; background:rgba(255,255,255,0.02); border:1px solid var(--border); margin-bottom:8px;">
+        <div class="hazard-item" style="display:flex; align-items:center; gap:12px; padding:14px; border-radius:12px; background:var(--bg-card-inner); border:1px solid var(--border-card); margin-bottom:8px;">
             <div style="font-size:22px;">
                 ${r.type === "waterlog" ? "🌊" : r.type === "tree" ? "🌳" : r.type === "wire" ? "⚡" : r.type === "hail" ? "❄️" : "🔥"}
             </div>
             <div style="flex:1;">
-                <strong style="font-size:12.5px; display:block;">${r.typeName} — ${r.location}</strong>
-                <small style="color:var(--text-dim); font-size:10.5px;">Reported: ${r.time}</small>
-                <p style="color:var(--text-muted); font-size:11.5px; margin-top:2px;">${r.details}</p>
+                <strong style="font-size:13px; display:block;">${r.typeName} — ${r.location}</strong>
+                <small style="color:var(--text-muted); font-size:11px;">Reported: ${r.time}</small>
+                <p style="color:var(--text-secondary); font-size:12px; margin-top:2px;">${r.details}</p>
             </div>
         </div>
     `).join("");
@@ -2317,7 +2304,7 @@ function handleCitizenHazardSubmit(e) {
         hazardMarkers.push(m);
     }
 
-    alert(currentLanguage === "hi" ? "✅ आपकी रिपोर्ट सफलतापूर्वक दर्ज की गई और जिला नियंत्रण कक्ष को भेज दी गई है!" : "✅ Incident report successfully pinned and forwarded to District Emergency Cell!");
+    alert(currentLanguage === "hi" ? "✅ आपकी रिपोर्ट सफलतापूर्वक दर्ज की गई और जिला नियंत्रण कक्ष को भेज दी गई है!" : "✅ Incident report successfully pinned and forwarded to DDMA Emergency Cell!");
     $("hazardForm")?.reset();
 }
 
@@ -2364,7 +2351,7 @@ function updateRisk(current, forecast) {
 
     risks.innerHTML = alerts.length
         ? alerts.map(x => `<div>${x}</div>`).join("")
-        : `<div>${currentLanguage === "hi" ? "✅ अनुकूल वातावरणीय स्थिति। कोई बड़ा जोखिम नहीं।" : "✅ Ideal meteorological conditions. No major risks."}</div>`;
+        : `<div>${currentLanguage === "hi" ? "✅ अनुकूल वातावरणीय स्थिति। कोई बड़ा जोखिम नहीं।" : "✅ Ideal meteorological conditions. All district sectors safe."}</div>`;
 }
 
 function updateAlerts(current, forecast) {
@@ -2406,18 +2393,18 @@ function updateAlerts(current, forecast) {
                 <div style="display:flex; align-items:center; gap:12px; padding:14px; border-radius:12px; background:rgba(16, 185, 129, 0.08); border:1px solid rgba(16, 185, 129, 0.2);">
                     <div style="font-size:22px;">✅</div>
                     <div>
-                        <strong style="font-size:13px; display:block;">${currentLanguage === "hi" ? "सभी स्थितियां सुरक्षित" : "All Clear"}</strong>
-                        <p style="color:var(--text-muted); font-size:12px; margin-top:2px;">${currentLanguage === "hi" ? "इस क्षेत्र के लिए कोई गंभीर मौसम संबंधी चेतावनी सक्रिय नहीं है।" : "No severe meteorological hazards active for this region."}</p>
+                        <strong style="font-size:13px; display:block;">${currentLanguage === "hi" ? "सभी स्थितियां सुरक्षित" : "All District Sectors Clear"}</strong>
+                        <p style="color:var(--text-secondary); font-size:12px; margin-top:2px;">${currentLanguage === "hi" ? "इस क्षेत्र के लिए कोई गंभीर मौसम संबंधी चेतावनी सक्रिय नहीं है।" : "No severe meteorological hazards active for this district."}</p>
                     </div>
                 </div>
             `;
         } else {
             box.innerHTML = alerts.map(alert => `
-                <div style="display:flex; align-items:center; gap:12px; padding:14px; border-radius:12px; background:rgba(255, 255, 255, 0.02); border:1px solid var(--border); margin-bottom:8px;">
+                <div style="display:flex; align-items:center; gap:12px; padding:14px; border-radius:12px; background:var(--bg-card-inner); border:1px solid var(--border-card); margin-bottom:8px;">
                     <div style="font-size:22px;">${alert.icon}</div>
                     <div style="flex:1;">
                         <strong style="font-size:13px; display:block;">${alert.title}</strong>
-                        <p style="color:var(--text-muted); font-size:12px; margin-top:2px;">${alert.desc}</p>
+                        <p style="color:var(--text-secondary); font-size:12px; margin-top:2px;">${alert.desc}</p>
                     </div>
                     <span class="status-pill ${alert.level === 'CRITICAL' || alert.level === 'HIGH' ? 'danger' : 'warning'}">${alert.level}</span>
                 </div>
@@ -2456,7 +2443,7 @@ function updateFiveDayForecast(forecast, daily) {
                 <div class="day">
                     <small>${formattedDate}</small>
                     <img src="https://openweathermap.org/img/wn/${wInfo.icon}@2x.png" alt="Forecast icon">
-                    <b>${maxT}° <span style="font-size: 13px; font-weight: 500; color: var(--text-dim);">${minT}°</span></b>
+                    <b>${maxT}° <span style="font-size: 13px; font-weight: 500; color: var(--text-muted);">${minT}°</span></b>
                     <span>💧 ${rainP}%</span>
                     <span>${wInfo.desc}</span>
                 </div>
@@ -2542,18 +2529,18 @@ function updateAnalyticsCharts(forecast) {
         plugins: {
             legend: { display: false },
             tooltip: {
-                backgroundColor: "rgba(10, 19, 32, 0.95)",
+                backgroundColor: "rgba(10, 15, 29, 0.96)",
                 titleFont: { family: "Plus Jakarta Sans", size: 12 },
                 bodyFont: { family: "Plus Jakarta Sans", size: 13 },
-                borderColor: "rgba(0, 242, 254, 0.3)",
+                borderColor: "rgba(0, 242, 254, 0.35)",
                 borderWidth: 1,
                 padding: 10,
                 displayColors: false
             }
         },
         scales: {
-            x: { grid: { color: "rgba(255,255,255,0.04)" }, ticks: { color: "#94a3b8", font: { size: 11 } } },
-            y: { grid: { color: "rgba(255,255,255,0.04)" }, ticks: { color: "#94a3b8", font: { size: 11 } } }
+            x: { grid: { color: "rgba(255,255,255,0.05)" }, ticks: { color: "#94a3b8", font: { size: 11 } } },
+            y: { grid: { color: "rgba(255,255,255,0.05)" }, ticks: { color: "#94a3b8", font: { size: 11 } } }
         }
     };
 
@@ -2732,7 +2719,7 @@ function updateWeatherMap(lat, lon, name, current) {
 
     weatherMarker.bindPopup(`
         <div style="min-width:180px; font-family: Inter, Arial, sans-serif; font-size: 12px; line-height: 1.6; color: #0f172a;">
-            <strong style="font-size: 13px;">📍 ${place} (District Control Center)</strong><br>
+            <strong style="font-size: 13px;">📍 ${place} (DDMA Control Center)</strong><br>
             <span>🌡️ Temperature: <b>${tempVal}°C</b></span><br>
             <span>☁️ Condition: <b>${condVal}</b></span><br>
             <span>💨 Wind: <b>${windVal} km/h</b></span><br>
@@ -2841,10 +2828,10 @@ function synthesizeAIResponse(question, weather) {
 
     if (currentLanguage === "hi") {
         if (q.includes("high-risk") || q.includes("खतरनाक") || q.includes("area") || q.includes("क्षेत्र")) {
-            return `🚨 AI जिला जोखिम विश्लेषण (${place}):\nसबसे संवेदनशील क्षेत्र **River Basin Low-Lying Ward** और **North Tehsil** हैं जहाँ बारिश की संभावना ${Math.round(rain)}% और जलभराव का जोखिम 85% है। इन क्षेत्रों में Team Alpha (नाव एवं गोताखोर) को अलर्ट पर रखा गया है।`;
+            return `🚨 AI जिला जोखिम विश्लेषण (${place}):\nसबसे संवेदनशील क्षेत्र **River Basin Low-Lying Ward** और **North Tehsil** हैं जहाँ बारिश की संभावना ${Math.round(rain)}% है। इन क्षेत्रों में Team Alpha (नाव एवं गोताखोर) को अलर्ट पर रखा गया है।`;
         }
         if (q.includes("rescue") || q.includes("pehle") || q.includes("priority") || q.includes("कहाँ")) {
-            return `🧭 AI रेस्क्यू प्राथमिकता सिफारिश:\n1. **Priority 1**: Incident #INC-101 (River Basin Ward — 20 लोग फंसे, 4 नवजात)। Team Alpha (नाव दल) को तुरंत भेजें।\n2. **Priority 2**: Incident #INC-102 (Labor Colony — 6 वृद्ध मरीज डिहाइड्रेशन)। Team Bravo (एम्बुलेंस) तैनात करें।\n3. **Priority 3**: Collectorate Road पर गिरे पेड़ की निकासी (Team Charlie)।`;
+            return `🧭 AI रेस्क्यू प्राथमिकता सिफारिश:\n1. **Priority 1**: Incident #INC-101 (River Basin Low-Lying Drainage)। NDRF Team Alpha स्टैंडबाय पर है।\n2. **Priority 2**: Labor Colony एवं सिविल लाइन्स में मेडिकल एम्बुलेंस (Team Bravo)।\n3. **Priority 3**: Collectorate Road पर गिरे पेड़ की निकासी (Team Charlie)।`;
         }
         if (q.includes("lightning") || q.includes("बिजली") || q.includes("shelter") || q.includes("आश्रय")) {
             return `⚡ वज्रपात सुरक्षा AI सलाह:\nवर्तमान में CAPE सूचकांक **${skycastLightningCape} J/kg** है (${skycastLightningRisk}% जोखिम)।\nनिकटतम पक्का सुरक्षित आश्रय: **राजकीय इंटर कॉलेज (0.6 km)** और **ग्रीन पार्क इंडोर स्टेडियम (1.2 km)**। दोनों में तड़ित चालक (Lightning Arrestor) सक्रिय हैं।`;
@@ -2856,16 +2843,16 @@ function synthesizeAIResponse(question, weather) {
     }
 
     if (q.includes("high-risk") || q.includes("worst") || q.includes("danger") || q.includes("area")) {
-        return `🚨 AI District Vulnerability Assessment for ${place}:\nThe highest risk sector is **River Basin Low-Lying Ward** and **North Tehsil** with a ${Math.round(rain)}% rain likelihood and 85% flood inundation threat. Team Alpha (Inflatable Boats) is pre-positioned there.`;
+        return `🚨 AI District Vulnerability Assessment for ${place}:\nThe monitored sector is **River Basin Low-Lying Ward** and **North Tehsil** with a ${Math.round(rain)}% rain likelihood. NDRF Team Alpha (Inflatable Boats) is pre-positioned on standby.`;
     }
     if (q.includes("rescue") || q.includes("priority") || q.includes("dispatch") || q.includes("team")) {
-        return `🧭 AI Autonomous Rescue Triage Plan:\n1. **Priority 1 (Critical)**: Incident #INC-101 (20 trapped civilians + 4 infants in River Basin Ward). Recommended Dispatch: **Team Alpha (Boats & Divers)**.\n2. **Priority 2 (High)**: Incident #INC-102 (6 heatstroke & dehydrated patients). Recommended Dispatch: **Team Bravo (ALS Ambulances)**.\n3. **Priority 3 (Moderate)**: Incident #INC-103 (Fallen tree clearing). Recommended Dispatch: **Team Charlie (Crane & Saws)**.`;
+        return `🧭 AI Autonomous Rescue Triage Plan:\n1. **Priority 1 (Standard)**: River Basin Sector Drainage Monitoring (NDRF Team Alpha).\n2. **Priority 2 (Medical)**: Civil Lines Hospital Corridor Mobile ICUs (SDRF Team Bravo).\n3. **Priority 3 (Debris)**: Highway clearance units on standby (Civil Defense Team Charlie).`;
     }
     if (q.includes("lightning") || q.includes("shelter") || q.includes("thunder")) {
         return `⚡ Lightning Safety & Shelter Finder:\nCurrent Convective CAPE is **${skycastLightningCape} J/kg** (${skycastLightningRisk}% strike likelihood).\nNearest verified Grade-A concrete shelters:\n1. **Govt. Senior Secondary Inter College (0.6 km)**\n2. **Green Park Indoor Sports Complex (1.2 km)**\nBoth facilities feature active lightning grounding grids.`;
     }
     if (q.includes("travel") || q.includes("safe") || q.includes("highway")) {
-        return `✈️ Travel & Highway Safety in ${place}:\nCondition: ${desc} at ${temp}°C with ${wind} km/h wind and ${Math.round(rain)}% rain chance. ${rain >= 70 ? "Expect highway underpass waterlogging; use Digital Twin alternate bypass corridors." : "Expressway conditions stable."}`;
+        return `✈️ Travel & Highway Safety in ${place}:\nCondition: ${desc} at ${temp}°C with ${wind} km/h wind and ${Math.round(rain)}% rain chance. Expressway and state highway conditions are currently normal.`;
     }
 
     return `✦ SkyCast AI Comprehensive Assessment for ${place}:\nTemperature: ${temp}°C (${desc}), Humidity: ${hum}%, Wind: ${wind} km/h, Rain likelihood: ${Math.round(rain)}%, CAPE: ${skycastLightningCape} J/kg, AQI: ${skycastAQI || 85}. All 4 NDRF/Civil Defense rescue battalions are deployed on standby.`;
@@ -2875,7 +2862,7 @@ async function askAI(question) {
     if (!question) return;
 
     if (!W) {
-        setText("answer", currentLanguage === "hi" ? "कृपया पहले किसी शहर या जिले का नाम खोजें।" : "Please search for a city first.");
+        setText("answer", currentLanguage === "hi" ? "कृपया पहले किसी जिले का नाम खोजें।" : "Please search for a district first.");
         return;
     }
 
@@ -2909,7 +2896,7 @@ async function compareCities() {
     const result = $("compareResult");
 
     if (!city1 || !city2) {
-        if (result) result.innerHTML = `<div style="grid-column: 1/-1; padding: 10px; color: var(--amber);">Please enter both city/district names.</div>`;
+        if (result) result.innerHTML = `<div style="grid-column: 1/-1; padding: 10px; color: var(--amber);">Please enter both district names.</div>`;
         return;
     }
 
@@ -2957,7 +2944,7 @@ async function compareCities() {
 async function checkTravel() {
     const destination = $("dest")?.value.trim();
     if (!destination) {
-        setText("travelOut", "Please enter a destination city/district.");
+        setText("travelOut", "Please enter a destination district.");
         return;
     }
 
@@ -3014,7 +3001,7 @@ function startVoiceSearch() {
     if (voiceBtn) voiceBtn.classList.add("listening");
     $("voiceWaveform")?.classList.remove("hidden");
 
-    showError(currentLanguage === "hi" ? "🎙️ सुन रहा हूँ... जिले या शहर का नाम बोलें।" : "🎙️ Listening... Speak city or district name.");
+    showError(currentLanguage === "hi" ? "🎙️ सुन रहा हूँ... जिले का नाम बोलें।" : "🎙️ Listening... Speak district name.");
 
     recognition.onresult = event => {
         if (voiceBtn) voiceBtn.classList.remove("listening");
@@ -3046,7 +3033,7 @@ function getMyLocation() {
         return;
     }
 
-    showError("Locating your coordinates...");
+    showError("Locating coordinates...");
 
     navigator.geolocation.getCurrentPosition(
         async position => {
@@ -3072,7 +3059,7 @@ function getMyLocation() {
                 showError("Failed to retrieve location weather.");
             }
         },
-        error => {
+        () => {
             showError("Location permission denied. Please search manually.");
         }
     );
@@ -3142,10 +3129,6 @@ function setupNavigation() {
             if (screenId === "digitalTwinScreen") {
                 drawDigitalTwinCanvas(Number($("twinRainSlider")?.value || 120));
             }
-
-            if (screenId === "waterScreen") {
-                updateRainwaterHarvesting();
-            }
         });
     });
 }
@@ -3156,10 +3139,11 @@ function setupNavigation() {
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
-    console.log("☁️ SkyCast AI — Enterprise District Disaster & Rescue Engine v3.2 Initialized");
+    console.log("🏛️ SkyCast AI — District Disaster Management Authority (DDMA) Command Center Initialized");
 
     loadTheme();
     loadLanguage();
+    startLiveClock();
     setupNavigation();
     setupOfflineEngine();
     setupPWA();
@@ -3220,10 +3204,6 @@ document.addEventListener("DOMContentLoaded", () => {
             updateDigitalTwin(rain);
         });
     });
-
-    // Jal Sanrakshan AI (Rainwater Slider & Select)
-    $("roofAreaSlider")?.addEventListener("input", updateRainwaterHarvesting);
-    $("surfaceCoeff")?.addEventListener("change", updateRainwaterHarvesting);
 
     // Quick District Chips Listeners
     document.querySelectorAll(".district-chip").forEach(chip => {
@@ -3357,6 +3337,6 @@ document.addEventListener("DOMContentLoaded", () => {
     $("compareBtn")?.addEventListener("click", compareCities);
     $("travel")?.addEventListener("click", checkTravel);
 
-    // Initial Load
+    // Initial Load (Default District: Varanasi / Kanpur)
     loadWeather("Kanpur");
 });

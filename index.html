@@ -354,6 +354,43 @@
                 </div>
             </div>
 
+            <!-- CITIZEN LAST-KNOWN LOCATION GEO-ANCHOR WIDGET (LIFE-SAVING PASSIVE BEACON) -->
+            <div class="ui-card geo-anchor-card" id="geoAnchorWidget">
+                <div class="geo-anchor-header">
+                    <div class="geo-beacon-indicator">
+                        <span class="beacon-pulse"></span>
+                        <span class="beacon-icon">📍</span>
+                    </div>
+                    <div class="geo-anchor-info">
+                        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                            <strong>PASSIVE CITIZEN DISASTER GEO-ANCHOR (नागरिक आपदा सुरक्षा एंकर)</strong>
+                            <span class="status-pill safe" id="geoAnchorStatusBadge">🟢 LOCATION CACHED & PROTECTED</span>
+                        </div>
+                        <small id="geoAnchorDetails">Last Known Coordinates: 26.4499° N, 80.3319° E • Automatically saved to protect your family during sudden floods & network blackouts.</small>
+                    </div>
+                </div>
+
+                <div class="geo-anchor-grid">
+                    <div class="geo-stat-pill">
+                        <small>LAST RECORDED SECTOR</small>
+                        <strong id="geoAnchorSector">Kanpur Central</strong>
+                    </div>
+                    <div class="geo-stat-pill">
+                        <small>INUNDATION THREAT</small>
+                        <strong id="geoAnchorThreat" class="green">SAFE (0.0m water)</strong>
+                    </div>
+                    <div class="geo-stat-pill">
+                        <small>NEAREST CONCRETE SHELTER</small>
+                        <strong id="geoAnchorShelter">Govt Inter College (450m • 6m walk)</strong>
+                    </div>
+                    <div class="geo-stat-action">
+                        <button class="btn btn-primary" id="broadcastGeoBeaconBtn" type="button" style="width:100%; font-size:12px;">
+                            🚨 Broadcast GPS Beacon to NDRF
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <!-- CURRENT WEATHER & RISK ROW -->
             <div class="grid-2-col">
                 

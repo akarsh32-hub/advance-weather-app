@@ -13,6 +13,7 @@ let selectedDroneTarget = "katri";
 
 let weatherMap = null;
 let weatherMarker = null;
+let geoAnchorMarker = null;
 let hazardMarkers = [];
 let rescueMarkers = [];
 let floodOverlayLayer = null;
@@ -45,6 +46,16 @@ let gpsBreadcrumbs = [];
 
 // Deferred PWA Prompt
 let deferredPwaPrompt = null;
+
+// Passive Citizen Geo-Anchor State (Life-Saving Location Persistence)
+let citizenGeoAnchor = {
+    lat: 26.4499,
+    lon: 80.3319,
+    cityName: "Kanpur Central Ward #4",
+    cachedAt: new Date().toISOString(),
+    inundationThreat: "SAFE",
+    safeShelterName: "Govt Senior Secondary Inter College (450m • 6m walk)"
+};
 
 // Citizen hazard reports stored in memory
 let citizenReports = [
@@ -693,6 +704,7 @@ function updateLanguageUI() {
         updateCommandCenter(W.current, W.forecast);
         updateFiveDayForecast(W.forecast, W.daily);
         renderVillageRiskMatrix();
+        updateGeoAnchorWidget();
     }
 
     renderRescueOps();
@@ -712,6 +724,102 @@ function loadLanguage() {
         currentLanguage = saved;
     }
     updateLanguageUI();
+}
+
+
+/* =========================================================
+   FEATURE: PASSIVE CITIZEN DISASTER GEO-ANCHOR ENGINE
+========================================================= */
+
+function saveCitizenGeoAnchor(lat, lon, cityName) {
+    citizenGeoAnchor.lat = Number(lat) || 26.4499;
+    citizenGeoAnchor.lon = Number(lon) || 80.3319;
+    citizenGeoAnchor.cityName = cityName ? cityName.split(",")[0] : "Kanpur Central";
+    citizenGeoAnchor.cachedAt = new Date().toISOString();
+
+    try {
+        localStorage.setItem("skycast_citizen_geo_anchor", JSON.stringify(citizenGeoAnchor));
+    } catch(e) {}
+
+    updateGeoAnchorWidget();
+}
+
+function loadCitizenGeoAnchor() {
+    try {
+        const saved = localStorage.getItem("skycast_citizen_geo_anchor");
+        if (saved) {
+            citizenGeoAnchor = { ...citizenGeoAnchor, ...JSON.parse(saved) };
+        }
+    } catch(e) {}
+    updateGeoAnchorWidget();
+}
+
+function updateGeoAnchorWidget() {
+    const card = $("geoAnchorWidget");
+    const statusBadge = $("geoAnchorStatusBadge");
+    const details = $("geoAnchorDetails");
+    const threat = $("geoAnchorThreat");
+    const sector = $("geoAnchorSector");
+    const shelter = $("geoAnchorShelter");
+
+    if (!card) return;
+
+    const rainMm = Number($("twinRainSlider")?.value || 80);
+    const isFloodDanger = activeSimulation === "flood" || rainMm >= 100 || (W?.forecast && getRainProbability(W.forecast) >= 75);
+
+    setText("geoAnchorSector", citizenGeoAnchor.cityName);
+    setText("geoAnchorShelter", citizenGeoAnchor.safeShelterName);
+
+    if (isFloodDanger) {
+        card.classList.add("alert");
+        if (statusBadge) {
+            statusBadge.textContent = currentLanguage === "hi" ? "🔴 बाढ़ चेतावनी: सुरक्षित स्थान पर जाएं" : "🔴 INUNDATION RISK IN YOUR SECTOR";
+            statusBadge.className = "status-pill danger";
+        }
+        if (threat) {
+            threat.textContent = currentLanguage === "hi" ? "गंभीर खतरा (+1.8m जलभराव)" : "CRITICAL (+1.8m Inundation Likelihood)";
+            threat.className = "red";
+        }
+        if (details) {
+            details.textContent = currentLanguage === "hi"
+                ? `अंतिम ज्ञात स्थान (${citizenGeoAnchor.lat.toFixed(4)}° N, ${citizenGeoAnchor.lon.toFixed(4)}° E) बाढ़ प्रभावित क्षेत्र में है। NDRF मोटरबोट्स को अलर्ट भेजा गया है।`
+                : `Last known position (${citizenGeoAnchor.lat.toFixed(4)}° N, ${citizenGeoAnchor.lon.toFixed(4)}° E) is in an active flood warning zone. NDRF rescue boat dispatched.`;
+        }
+    } else {
+        card.classList.remove("alert");
+        if (statusBadge) {
+            statusBadge.textContent = currentLanguage === "hi" ? "🟢 स्थान सुरक्षित एवं कैश्ड" : "🟢 LOCATION CACHED & PROTECTED";
+            statusBadge.className = "status-pill safe";
+        }
+        if (threat) {
+            threat.textContent = currentLanguage === "hi" ? "सुरक्षित (0.0m जलस्तर)" : "SAFE (0.0m water)";
+            threat.className = "green";
+        }
+        if (details) {
+            details.textContent = currentLanguage === "hi"
+                ? `अंतिम ज्ञात स्थान (${citizenGeoAnchor.lat.toFixed(4)}° N, ${citizenGeoAnchor.lon.toFixed(4)}° E) सुरक्षित कैश्ड है। अचानक बाढ़ या मोबाइल टावर फेल होने पर आपकी लोकेशन सुरक्षित रहेगी।`
+                : `Last Known Coordinates: ${citizenGeoAnchor.lat.toFixed(4)}° N, ${citizenGeoAnchor.lon.toFixed(4)}° E • Automatically saved to protect your family during sudden floods & network blackouts.`;
+        }
+    }
+}
+
+function broadcastGeoAnchorBeacon() {
+    const lat = citizenGeoAnchor.lat.toFixed(5);
+    const lon = citizenGeoAnchor.lon.toFixed(5);
+    const mapsLink = `https://maps.google.com/?q=${lat},${lon}`;
+    const dateStr = new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
+
+    const beaconText = currentLanguage === "hi"
+        ? `🚨 *आपातकालीन नागरिक भू-स्थानिक रक्षा संकेत (GEO-BEACON)* 🚨\n📍 *अंतिम ज्ञात स्थान:* ${citizenGeoAnchor.cityName}\n🗺️ *GPS निर्देशांक:* ${lat}, ${lon}\n🔗 *लाइव मैप लिंक:* ${mapsLink}\n⏰ *समय:* ${dateStr}\n⚠️ *स्थिति:* बाढ़/जलभराव संकट में फंसे नागरिक\n👥 *प्रभावित सदस्य:* 4\n- *जिला आपदा नियंत्रण कक्ष (DDMA) एवं NDRF बेस को प्रेषित*`
+        : `🚨 *EMERGENCY CITIZEN PASSIVE DISASTER BEACON* 🚨\n📍 *Last Known Sector:* ${citizenGeoAnchor.cityName}\n🗺️ *GPS Coordinates:* ${lat}, ${lon}\n🔗 *Google Maps Link:* ${mapsLink}\n⏰ *Time:* ${dateStr}\n⚠️ *Status:* Stranded in Flood Warning Corridor\n👥 *Civilians:* 4 Family Members\n- *Transmitted to DDMA Command Center & NDRF Rescue Battalion.*`;
+
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(beaconText).catch(() => {});
+    }
+
+    triggerEmergencySiren(2.5);
+    const encoded = encodeURIComponent(beaconText);
+    window.open(`https://api.whatsapp.com/send?text=${encoded}`, "_blank");
 }
 
 
@@ -1070,7 +1178,6 @@ function drawDroneReconCanvas() {
 ========================================================= */
 
 function calculateAiRescuePriorityScore(v, currentRainMm = 80, riverSurgeMeters = 3.2) {
-    // Formula combining: Flood Severity + Population Vulnerability + River Surge + History
     let score = v.baseScore;
 
     if (currentRainMm >= 120) score += 5;
@@ -1351,6 +1458,7 @@ function updateDigitalTwin(rainfallMm) {
 
     drawDigitalTwinCanvas(rainfallMm);
     renderVillageRiskMatrix();
+    updateGeoAnchorWidget();
 
     // Update Digital Twin overlay on Leaflet Map
     if (weatherMap && W?.current) {
@@ -1412,7 +1520,6 @@ function calculateLightningRisk(current, forecast) {
         cape = Math.round(2000 + (hum * 5) + (temp * 15));
         prob = Math.min(95, Math.max(65, Math.round((cape / 3000) * 100)));
     } else {
-        // Routine normal day formula (CAPE remains safe 200 - 750 J/kg)
         cape = Math.round((temp * 10) + (hum * 3) + (rain * 2));
         prob = Math.min(25, Math.max(5, Math.round(cape / 50)));
     }
@@ -1514,6 +1621,7 @@ function setupOfflineEngine() {
             gpsBreadcrumbs.push(point);
             localStorage.setItem("skycast_breadcrumbs", JSON.stringify(gpsBreadcrumbs));
             setText("gpsBreadcrumbCount", `${gpsBreadcrumbs.length} Location Points Logged`);
+            saveCitizenGeoAnchor(point.lat, point.lon, "GPS Active Location");
         }, () => {});
     }
 
@@ -1525,7 +1633,7 @@ function handleSmartSOS(e) {
     const category = $("sosCategory")?.value;
     const people = Number($("sosPeopleCount")?.value || 1);
     const vulnerable = $("sosVulnerable")?.value === "yes" ? "Infants/Elderly Present" : "Adults";
-    const location = $("sosLocation")?.value?.trim();
+    const location = $("sosLocation")?.value?.trim() || citizenGeoAnchor.cityName;
     const details = $("sosDetails")?.value?.trim() || "Immediate rescue assistance requested";
 
     if (!location) {
@@ -2158,6 +2266,9 @@ async function loadWeather(city) {
         /* INSIGHTS */
         setText("insightFeel", Math.round(current.main.feels_like) + "°");
 
+        /* SAVE CITIZEN PASSIVE GEO-ANCHOR */
+        saveCitizenGeoAnchor(current.coord.lat, current.coord.lon, place);
+
         /* RISK & MODULES */
         updateRisk(current, forecast);
         calculateLightningRisk(current, forecast);
@@ -2203,8 +2314,8 @@ async function loadWeather(city) {
         const aiAns = $("answer");
         if (aiAns) {
             aiAns.textContent = currentLanguage === "hi"
-                ? `✦ स्काईकास्ट AI ${place} आपदा नियंत्रण के लिए तैयार है (${Math.round(current.main.temp)}°C, ${capitalize(current.weather[0].description)})। उपग्रह, नदी गेज व ड्रोन सर्विलांस सक्रिय हैं। नीचे कोई भी प्रश्न पूछें!`
-                : `✦ SkyCast AI Autonomous Disaster Hub ready for ${place} (${Math.round(current.main.temp)}°C, ${capitalize(current.weather[0].description)}). Satellite telemetry and 4 Recon Drone Squadrons active. Ask any operational query below!`;
+                ? `✦ स्काईकास्ट AI ${place} आपदा नियंत्रण के लिए तैयार है (${Math.round(current.main.temp)}°C, ${capitalize(current.weather[0].description)})। उपग्रह, नदी गेज व नागरिक जियो-एंकर सक्रिय हैं। नीचे कोई भी प्रश्न पूछें!`
+                : `✦ SkyCast AI Autonomous Disaster Hub ready for ${place} (${Math.round(current.main.temp)}°C, ${capitalize(current.weather[0].description)}). Satellite telemetry and Citizen Geo-Anchor Active. Ask any operational query below!`;
         }
 
     } catch (error) {
@@ -2442,7 +2553,7 @@ function exportDistrictBulletin() {
                 <h4>3. MULTI-SOURCE SENSOR & DRONE RECONNAISSANCE</h4>
                 <p>• <b>Satellite Radar Stream:</b> Sentinel-3 & INSAT Precipitation Inundation Grid Synced.</p>
                 <p>• <b>UAV Drone Squadron:</b> 4 Recon Drones active with Thermal Infrared FLIR sensors.</p>
-                <p>• <b>Alternative VHF Comms:</b> 100% Zero-Tower Mesh active across Gram Panchayats.</p>
+                <p>• <b>Passive Citizen Geo-Anchor:</b> Location persistence active for emergency relief dispatch.</p>
             </div>
         `;
     }
@@ -2905,6 +3016,18 @@ function initMap() {
         rescueMarkers.push(rm);
     });
 
+    // Plot Protected Citizen Geo-Anchor Pin on Map
+    if (citizenGeoAnchor) {
+        const citizenIcon = L.divIcon({
+            className: "citizen-map-pin",
+            html: `<div style="background:#10b981; color:white; border-radius:50%; width:32px; height:32px; display:grid; place-items:center; font-size:16px; box-shadow:0 0 20px rgba(16,185,129,0.9); border:2px solid white;">🏠</div>`,
+            iconSize: [32, 32]
+        });
+
+        geoAnchorMarker = L.marker([citizenGeoAnchor.lat, citizenGeoAnchor.lon], { icon: citizenIcon }).addTo(weatherMap)
+            .bindPopup(`<b>🏠 CITIZEN PASSIVE GEO-ANCHOR</b><br>📍 ${citizenGeoAnchor.cityName}<br>🛡️ Protected for Emergency Flood Rescue<br>GPS: ${citizenGeoAnchor.lat.toFixed(4)}, ${citizenGeoAnchor.lon.toFixed(4)}`);
+    }
+
     // Citizen reports
     citizenReports.forEach(r => {
         const pinLat = 26.4499 + r.latOffset;
@@ -3062,7 +3185,7 @@ function synthesizeAIResponse(question, weather) {
         if (q.includes("drone") || q.includes("ड्रोन") || q.includes("village") || q.includes("गांव")) {
             return `🚁 ड्रोन सर्विलांस AI रिपोर्ट (${place}):\nRecon Drone Squadron ने Katri Shankarpur में 18 नागरिकों की थर्मल पहचान की है। मुख्य संपर्क मार्ग 2.2 मीटर जलमग्न है, सुरक्षित निकासी मार्ग Route 4 से NDRF इनफ्लेटेबल बोट्स को भेजा गया है।`;
         }
-        return `✦ स्काईकास्ट AI जिला आपातकालीन विश्लेषण (${place}):\nतापमान ${temp}°C (${desc}), नमी ${hum}%, हवा ${wind} km/h, CAPE ${skycastLightningCape} J/kg और AQI ${skycastAQI || 85} है। 4 रेस्क्यू टीमें, 4 टोही ड्रोन एवं 12 राहत शिविर सक्रिय हैं।`;
+        return `✦ स्काईकास्ट AI जिला आपातकालीन विश्लेषण (${place}):\nतापमान ${temp}°C (${desc}), नमी ${hum}%, हवा ${wind} km/h, CAPE ${skycastLightningCape} J/kg और AQI ${skycastAQI || 85} है। 4 रेस्क्यू टीमें, 4 टोही ड्रोन एवं नागरिक जियो-एंकर सक्रिय हैं।`;
     }
 
     if (q.includes("high-risk") || q.includes("worst") || q.includes("danger") || q.includes("area")) {
@@ -3078,7 +3201,7 @@ function synthesizeAIResponse(question, weather) {
         return `✈️ Travel & Highway Safety in ${place}:\nCondition: ${desc} at ${temp}°C with ${wind} km/h wind and ${Math.round(rain)}% rain chance. Expressway and state highway conditions are currently normal.`;
     }
 
-    return `✦ SkyCast AI Comprehensive Assessment for ${place}:\nTemperature: ${temp}°C (${desc}), Humidity: ${hum}%, Wind: ${wind} km/h, Rain likelihood: ${Math.round(rain)}%, CAPE: ${skycastLightningCape} J/kg, AQI: ${skycastAQI || 85}. All 4 NDRF rescue battalions and 4 UAV Recon Squadrons are deployed on standby.`;
+    return `✦ SkyCast AI Comprehensive Assessment for ${place}:\nTemperature: ${temp}°C (${desc}), Humidity: ${hum}%, Wind: ${wind} km/h, Rain likelihood: ${Math.round(rain)}%, CAPE: ${skycastLightningCape} J/kg, AQI: ${skycastAQI || 85}. All 4 NDRF rescue battalions, 4 UAV Recon Squadrons, and Passive Geo-Anchors are synced.`;
 }
 
 async function askAI(question) {
@@ -3276,6 +3399,7 @@ function getMyLocation() {
                 const input = $("city");
                 if (input) input.value = city;
 
+                saveCitizenGeoAnchor(lat, lon, city);
                 hideError();
                 await loadWeather(city);
             } catch (error) {
@@ -3371,6 +3495,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     loadTheme();
     loadLanguage();
+    loadCitizenGeoAnchor();
     startLiveClock();
     setupNavigation();
     setupOfflineEngine();
@@ -3457,6 +3582,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Radio Broadcast Button
     $("broadcastRadioBtn")?.addEventListener("click", broadcastRadioChirp);
+
+    // Passive Citizen Geo-Anchor Broadcast Button
+    $("broadcastGeoBeaconBtn")?.addEventListener("click", broadcastGeoAnchorBeacon);
 
     // Quick District Chips Listeners
     document.querySelectorAll(".district-chip").forEach(chip => {

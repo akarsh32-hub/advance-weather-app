@@ -1837,6 +1837,97 @@ body.light .sim-select { background: #ffffff; }
 
 
 /* =========================================================
+   PASSIVE CITIZEN DISASTER GEO-ANCHOR & BEACON
+========================================================= */
+
+.geo-anchor-card {
+    padding: 20px 24px;
+    margin-bottom: 22px;
+    border-radius: var(--radius-md);
+    background: linear-gradient(135deg, rgba(13, 20, 36, 0.95), rgba(15, 23, 42, 0.90));
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.geo-anchor-card.alert {
+    border-color: rgba(244, 63, 94, 0.6);
+    background: linear-gradient(135deg, rgba(225, 29, 72, 0.15), rgba(15, 23, 42, 0.90));
+    box-shadow: 0 0 25px rgba(225, 29, 72, 0.3);
+}
+
+.geo-anchor-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-card);
+}
+
+.geo-beacon-indicator {
+    position: relative;
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid var(--emerald);
+}
+
+.beacon-pulse {
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    border: 2px solid var(--emerald);
+    animation: beaconRing 2s infinite ease-out;
+}
+
+@keyframes beaconRing {
+    0% { transform: scale(0.9); opacity: 1; }
+    100% { transform: scale(1.6); opacity: 0; }
+}
+
+.beacon-icon { font-size: 20px; }
+
+.geo-anchor-info strong { font-size: 13.5px; font-weight: 800; letter-spacing: 0.5px; }
+.geo-anchor-info small { display: block; color: var(--text-secondary); font-size: 11.5px; margin-top: 3px; }
+
+.geo-anchor-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    align-items: center;
+}
+
+.geo-stat-pill {
+    padding: 12px 14px;
+    border-radius: var(--radius-sm);
+    background: var(--bg-card-inner);
+    border: 1px solid var(--border-card);
+}
+.geo-stat-pill small { color: var(--text-muted); font-size: 10px; font-weight: 700; display: block; }
+.geo-stat-pill strong { font-size: 13px; font-weight: 800; display: block; margin-top: 3px; }
+.geo-stat-pill strong.green { color: var(--emerald); }
+.geo-stat-pill strong.red { color: var(--rose); }
+
+.geo-stat-action {
+    display: flex;
+}
+
+@media (max-width: 900px) {
+    .geo-anchor-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+@media (max-width: 600px) {
+    .geo-anchor-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* =========================================================
    SMART SOS & FORMS
 ========================================================= */
 

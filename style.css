@@ -1744,35 +1744,96 @@ body.light .sim-select { background: #ffffff; }
 
 
 /* =========================================================
-   MANDI PRICE AI & PMFBY
+   MULTI-SOURCE DETECTION, DRONE RECON & TACTICAL RADIO COMMS
 ========================================================= */
 
-.mandi-price-box {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
+.drone-console-card {
+    padding: 24px;
 }
 
-.mandi-item {
+.drone-hud-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.drone-feed-box {
+    position: relative;
+    width: 100%;
+    height: 240px;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px solid rgba(0, 242, 254, 0.4);
+    background: #020712;
+    box-shadow: 0 0 30px rgba(0, 242, 254, 0.15);
+}
+
+.drone-recon-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.drone-telemetry-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 10px 14px;
+    background: linear-gradient(180deg, transparent, rgba(5, 8, 17, 0.95) 40%);
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+    font-size: 11.5px;
+}
+.drone-telemetry-overlay small { color: var(--text-muted); font-size: 10px; font-weight: 700; display: block; }
+.drone-telemetry-overlay b { color: #ffffff; }
+
+.drone-action-bar {
+    display: flex;
+    gap: 12px;
+    margin-top: 14px;
+    align-items: center;
+}
+
+.radio-comms-terminal {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.radio-channel-item {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px;
+    padding: 14px 16px;
     border-radius: var(--radius-md);
-    border: 1px solid var(--border-card);
     background: var(--bg-card-inner);
+    border: 1px solid var(--border-card);
+    gap: 12px;
 }
-.mandi-item strong { font-size: 13.5px; font-weight: 700; display: block; }
-.mandi-item small { color: var(--text-muted); font-size: 11.5px; }
 
-.pmfby-box {
-    padding: 18px;
-    border-radius: var(--radius-md);
-    border: 1px dashed rgba(16, 185, 129, 0.5);
-    background: rgba(16, 185, 129, 0.05);
+.radio-freq-badge {
+    padding: 6px 12px;
+    border-radius: var(--radius-xs);
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    font-weight: 800;
+    white-space: nowrap;
 }
-.pmfby-box strong { color: var(--emerald); font-size: 13px; font-weight: 800; display: block; margin-bottom: 5px; }
-.pmfby-box p { color: var(--text-secondary); font-size: 12px; line-height: 1.65; }
+
+.radio-details strong { font-size: 13px; font-weight: 700; display: block; }
+.radio-details small { color: var(--text-muted); font-size: 11px; }
+
+.radio-broadcast-box {
+    margin-top: 6px;
+    padding: 14px;
+    border-radius: var(--radius-md);
+    background: rgba(0, 242, 254, 0.05);
+    border: 1px dashed rgba(0, 242, 254, 0.35);
+}
 
 
 /* =========================================================

@@ -116,10 +116,10 @@
 
             <div class="nav-section-title">🌾 SECTORS & CIVIC ANALYTICS</div>
 
-            <button class="nav-btn" data-screen="farmerScreen">
-                <span class="nav-icon">🌱</span>
-                <b data-i18n="navFarmer">Kisan Mode & Mandi AI</b>
-                <span class="nav-badge green">KRISHI</span>
+            <button class="nav-btn" data-screen="detectionScreen">
+                <span class="nav-icon">🛰️</span>
+                <b data-i18n="navDetection">Multi-Source Detection & Drones</b>
+                <span class="nav-badge red">AI SENSORS</span>
             </button>
 
             <button class="nav-btn" data-screen="citizenScreen">
@@ -1325,91 +1325,170 @@
 
 
         <!-- =================================================
-             SCREEN 9: KISAN SMART ADVISORY & MANDI AI
+             SCREEN 9: MULTI-SOURCE DETECTION & DRONE RECON AI
         ================================================== -->
-        <section id="farmerScreen" class="screen">
+        <section id="detectionScreen" class="screen">
             <div class="page-title-group">
-                <small data-i18n="farmerSub">AGRICULTURE INTELLIGENCE & KRISHI COPILOT</small>
-                <h1 data-i18n="farmerTitle">Kisan Smart Advisor & Mandi Price AI (किसान मित्र)</h1>
-                <p data-i18n="farmerDesc">
-                    Crop-specific weather intelligence, soil moisture modeling, spraying viability, wholesale Mandi price predictions, and PMFBY crop loss claim readiness.
+                <small data-i18n="detectionSub">MULTI-SOURCE TELEMETRY & AERIAL RECONNAISSANCE</small>
+                <h1 data-i18n="detectionTitle">Multi-Source Disaster Detection & Drone Reconnaissance AI</h1>
+                <p data-i18n="detectionDesc">
+                    Automated data fusion combining Satellite Inundation Imagery, IoT River Gauges, Pre-Registered Village Risk Database, UAV Drone Reconnaissance, and Zero-Network Alternative Comms to compute real-time AI Village Rescue Priority Scores.
                 </p>
             </div>
 
-            <div class="crop-selection-bar">
-                <span class="crop-bar-label" data-i18n="selectCrop">Select Crop (फसल चुनें):</span>
-                <div class="crop-pill-group">
-                    <button class="crop-pill active" data-crop="wheat">🌾 <span data-i18n="cropWheat">Wheat (गेहूं)</span></button>
-                    <button class="crop-pill" data-crop="rice">🌱 <span data-i18n="cropRice">Paddy (धान)</span></button>
-                    <button class="crop-pill" data-crop="mustard">🌼 <span data-i18n="cropMustard">Mustard (सरसों)</span></button>
-                    <button class="crop-pill" data-crop="sugarcane">🎋 <span data-i18n="cropSugarcane">Sugarcane (गन्ना)</span></button>
-                    <button class="crop-pill" data-crop="vegetables">🥦 <span data-i18n="cropVegetables">Vegetables (सब्जियां)</span></button>
+            <!-- 4 Multi-Source Sensor Gauges -->
+            <div class="grid-4-col">
+                <div class="ui-card kpi-card">
+                    <span class="kpi-icon blue">🛰️</span>
+                    <div>
+                        <small data-i18n="sensorSat">SATELLITE RADAR</small>
+                        <strong id="satTelemetryStatus">INSAT / Sentinel-3</strong>
+                        <span class="kpi-sub blue" id="satRainTelemetry">+85mm Inundation Risk</span>
+                    </div>
+                </div>
+
+                <div class="ui-card kpi-card">
+                    <span class="kpi-icon cyan">🌊</span>
+                    <div>
+                        <small data-i18n="sensorRiver">RIVER WATER GAUGES</small>
+                        <strong id="riverGaugeStatus">Ganga Basin +3.2m</strong>
+                        <span class="kpi-sub red" id="riverGaugeWarning">Rising 12cm/hour</span>
+                    </div>
+                </div>
+
+                <div class="ui-card kpi-card">
+                    <span class="kpi-icon purple">🚁</span>
+                    <div>
+                        <small data-i18n="sensorDrone">DRONE RECON FLEET</small>
+                        <strong id="droneFleetStatus">4 UAVs Airborne</strong>
+                        <span class="kpi-sub green">Thermal FLIR Optics</span>
+                    </div>
+                </div>
+
+                <div class="ui-card kpi-card">
+                    <span class="kpi-icon yellow">📻</span>
+                    <div>
+                        <small data-i18n="sensorRadio">ALT RADIO & SAT-COM</small>
+                        <strong>VHF / HF Mesh 100%</strong>
+                        <span class="kpi-sub green">Zero-Tower Mesh Active</span>
+                    </div>
                 </div>
             </div>
 
+            <!-- Village Risk Database & AI Rescue Priority Scoring Matrix -->
+            <div class="ui-card">
+                <div class="card-header">
+                    <div>
+                        <small class="card-subtitle" data-i18n="villageRiskSub">PRE-REGISTERED ASSET INVENTORY & VULNERABILITY MAPPING</small>
+                        <h3 class="card-title" data-i18n="villageRiskHeading">Pre-Registered Village Risk Database & AI Priority Score</h3>
+                    </div>
+                    <span class="badge-live">● REAL-TIME AI FUSION SCORING</span>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="data-table" id="villageRiskTable">
+                        <thead>
+                            <tr>
+                                <th data-i18n="thVillage">Village & Block</th>
+                                <th data-i18n="thPop">Population & Vulnerable</th>
+                                <th data-i18n="thRiver">River & Rain Threat</th>
+                                <th data-i18n="thAssets">Critical Assets & Shelters</th>
+                                <th data-i18n="thDroneStatus">Drone Recon Status</th>
+                                <th data-i18n="thPriorityScore">AI Rescue Priority</th>
+                                <th data-i18n="thAction">Tactical Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="villageTableBody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Drone Reconnaissance Tactical Live Console & Alternative Comms Terminal -->
             <div class="grid-2-col">
-                <div class="ui-card">
+                <!-- Autonomous Drone Recon Console -->
+                <div class="ui-card drone-console-card">
                     <div class="card-header">
                         <div>
-                            <small class="card-subtitle" data-i18n="cropAdvisorySub">CROP-SPECIFIC AI GUIDANCE</small>
-                            <h3 class="card-title" id="cropTitle">Wheat (गेहूं) Agriculture Advisory</h3>
+                            <small class="card-subtitle">UAV TACTICAL RECONNAISSANCE HUD</small>
+                            <h3 class="card-title">Autonomous Drone Aerial Reconnaissance</h3>
                         </div>
-                        <div class="header-action-btns">
-                            <button class="topbar-icon-btn" id="readFarmerAudio" title="Listen in Hindi" type="button">🔊</button>
-                            <button class="topbar-icon-btn wa-pill" id="shareFarmerWaBtn" title="Share on WhatsApp" type="button">💬</button>
+                        <div class="drone-hud-controls">
+                            <button id="toggleThermalBtn" class="btn-map-tool active" type="button">🔥 Thermal FLIR</button>
+                            <button id="toggleRgbBtn" class="btn-map-tool" type="button">📹 HD RGB</button>
                         </div>
                     </div>
 
-                    <div id="farmerAdvice" class="kisan-advice-box">
-                        Search a district to receive customized farming recommendations.
+                    <div class="drone-feed-box">
+                        <canvas id="droneReconCanvas" class="drone-recon-canvas"></canvas>
+                        <div class="drone-telemetry-overlay">
+                            <div><small>MISSION TARGET:</small> <b id="droneTargetVillage">Village Katri Shankarpur (River Low-Lying)</b></div>
+                            <div><small>ALTITUDE / BATTERY:</small> <b>120m • 84% LiPo</b></div>
+                            <div><small>DETECTED ROOFTOP CITIZENS:</small> <b style="color: #fb7185;">18 Persons Stranded</b></div>
+                            <div><small>SUBMERGED CORRIDOR:</small> <b style="color: #fbbf24;">Main Access Submerged (Use Route 4)</b></div>
+                        </div>
                     </div>
 
-                    <div class="kisan-badges-grid">
-                        <div class="kisan-badge-card">
-                            <small data-i18n="sprayWindow">Spray Window (स्प्रे का सही समय)</small>
-                            <strong id="sprayStatus">✅ IDEAL</strong>
-                        </div>
-                        <div class="kisan-badge-card">
-                            <small data-i18n="irrigationNeed">Irrigation Need (सिंचाई की जरूरत)</small>
-                            <strong id="irrigationStatus">MODERATE</strong>
-                        </div>
-                        <div class="kisan-badge-card">
-                            <small data-i18n="diseaseRisk">Pest & Fungus Risk (रोग खतरा)</small>
-                            <strong id="diseaseStatus">LOW RISK</strong>
-                        </div>
+                    <div class="drone-action-bar">
+                        <select id="droneTargetSelect" class="form-control" style="flex: 1;">
+                            <option value="katri">Village Katri Shankarpur (River Low-Lying)</option>
+                            <option value="bithoor">Village Bithoor Khurd (Old Ghat Sector)</option>
+                            <option value="shivraj">Village Shivrajpur (North Tehsil Basin)</option>
+                            <option value="sarsaul">Village Sarsaul (East Ward #7)</option>
+                        </select>
+                        <button id="dispatchDroneBtn" class="btn btn-primary" type="button">
+                            🚁 Dispatch Recon Drone
+                        </button>
                     </div>
                 </div>
 
-                <!-- Mandi Price AI & PMFBY Calculator -->
+                <!-- Alternative Tactical Radio & Satellite Comms Grid -->
                 <div class="ui-card">
                     <div class="card-header">
                         <div>
-                            <small class="card-subtitle">MANDI ECONOMIC IMPACT & PMFBY</small>
-                            <h3 class="card-title">Mandi Price Surge & Crop Insurance AI</h3>
+                            <small class="card-subtitle">ZERO-NETWORK TACTICAL COMMS GRID</small>
+                            <h3 class="card-title">Alternative VHF & Satellite Emergency Grid</h3>
                         </div>
+                        <span class="status-pill safe">RADIO MESH ONLINE</span>
                     </div>
 
-                    <div class="mandi-price-box">
-                        <div class="mandi-item">
-                            <div>
-                                <strong>Wheat (गेहूं) Mandi Forecast</strong>
-                                <small>Base: ₹ 2,375 / Qtl • Trend: Stable</small>
+                    <div class="radio-comms-terminal">
+                        <div class="radio-channel-item">
+                            <span class="radio-freq-badge">📻 VHF CH-16 (156.800 MHz)</span>
+                            <div class="radio-details">
+                                <strong>DDMA Master Command Frequency</strong>
+                                <small>Linked to District Magistrate & NDRF Field Command Post.</small>
                             </div>
-                            <span class="status-pill safe">STABLE (₹2,410)</span>
+                            <span class="status-pill safe">ENCRYPTED ACTIVE</span>
                         </div>
 
-                        <div class="mandi-item">
-                            <div>
-                                <strong>Vegetables / Tomato (टमाटर) Volatility</strong>
-                                <small>Heavy rain damage risk on supply corridor</small>
+                        <div class="radio-channel-item">
+                            <span class="radio-freq-badge">📡 SAT-LINK INMARSAT</span>
+                            <div class="radio-details">
+                                <strong>Gram Pradhan & Volunteer Handhelds</strong>
+                                <small>18 Direct Satellite PTT Handsets deployed in remote flood-risk villages.</small>
                             </div>
-                            <span class="status-pill danger">+28% SURGE (₹48/kg)</span>
+                            <span class="status-pill safe">UPLINK 98%</span>
                         </div>
 
-                        <div class="pmfby-box">
-                            <strong>🌾 PM FASAL BIMA YOJANA (PMFBY) READINESS:</strong>
-                            <p>Automated crop damage eligibility threshold: Active if rainfall exceeds 75mm within 24h. Lekhpal geotagged survey checklist generated.</p>
-                            <button class="btn btn-secondary" style="margin-top: 8px; font-size: 11.5px;" onclick="alert('✅ PMFBY Claim Eligibility Dossier Generated for District Agriculture Officer!')">📋 Generate Claim Readiness Dossier</button>
+                        <div class="radio-channel-item">
+                            <span class="radio-freq-badge">🎙️ HAM RADIO REPEATER (144.200 MHz)</span>
+                            <div class="radio-details">
+                                <strong>Civil Defense & Aapda Mitra Mesh Network</strong>
+                                <small>Relays citizen distress signals when cellular towers lose power.</small>
+                            </div>
+                            <span class="status-pill safe">32 NODES SYNCED</span>
+                        </div>
+
+                        <div class="radio-broadcast-box">
+                            <label style="font-weight: 700; font-size: 12px; margin-bottom: 6px; display: block;">Emergency Radio Chirp Dispatch:</label>
+                            <div class="input-with-btn">
+                                <input id="radioMsgInput" class="form-control" placeholder="Type urgent radio dispatch message..." value="URGENT: Flood surge +1.2m detected at River Gauge. Move to Village Concrete Shelter.">
+                                <button id="broadcastRadioBtn" class="btn btn-primary" type="button">
+                                    🎙️ Transmit Radio Chirp
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

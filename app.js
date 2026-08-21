@@ -7,8 +7,9 @@
 
 let W = null;
 let currentLanguage = "en"; // "en" or "hi"
-let currentCrop = "wheat";
 let activeSimulation = "live";
+let droneVisionMode = "thermal"; // "thermal" or "rgb"
+let selectedDroneTarget = "katri";
 
 let weatherMap = null;
 let weatherMarker = null;
@@ -144,6 +145,66 @@ let activeIncidents = [
     }
 ];
 
+// Pre-Registered Village Risk Database (Pillar 2)
+let preRegisteredVillages = [
+    {
+        id: "katri",
+        name: "Village Katri Shankarpur",
+        block: "Sadar Tehsil (Riverbank Sector)",
+        population: 4800,
+        vulnerable: 720,
+        floodHistory: "Severe Inundation (2019, 2023 Flooded)",
+        riverProximity: "Riverbank (0.2 km)",
+        riverSurgeBase: 3.4,
+        assets: "2 Primary Schools, 1 High Concrete Shelter",
+        droneStatus: "Thermal Active (18 on Rooftops)",
+        baseScore: 94,
+        droneTargetName: "Village Katri Shankarpur (River Low-Lying)"
+    },
+    {
+        id: "bithoor",
+        name: "Village Bithoor Khurd",
+        block: "Bithoor Sector (Old Ghats)",
+        population: 3200,
+        vulnerable: 450,
+        floodHistory: "Moderate Waterlogging (2021)",
+        riverProximity: "Low-Lying Basin (0.8 km)",
+        riverSurgeBase: 2.1,
+        assets: "1 Inter College, 1 Primary Health Center",
+        droneStatus: "Recon Patrol Assigned",
+        baseScore: 82,
+        droneTargetName: "Village Bithoor Khurd (Old Ghat Sector)"
+    },
+    {
+        id: "shivraj",
+        name: "Village Shivrajpur",
+        block: "North Tehsil (Canal Basin)",
+        population: 5400,
+        vulnerable: 850,
+        floodHistory: "Flash Flood Zone (2017)",
+        riverProximity: "Canal Overflow (1.2 km)",
+        riverSurgeBase: 1.8,
+        assets: "3 Schools, 1 High Elevation Temple",
+        droneStatus: "Standby at Base",
+        baseScore: 74,
+        droneTargetName: "Village Shivrajpur (North Tehsil Basin)"
+    },
+    {
+        id: "sarsaul",
+        name: "Village Sarsaul",
+        block: "East Tehsil (High Ground)",
+        population: 2900,
+        vulnerable: 310,
+        floodHistory: "Low Risk (Dry Terrain)",
+        riverProximity: "Elevated Ridge (3.5 km)",
+        riverSurgeBase: 0.4,
+        assets: "1 Panchayat Bhawan, 1 CHC Hospital",
+        droneStatus: "Routine Orbit",
+        baseScore: 32,
+        droneTargetName: "Village Sarsaul (East Ward #7)"
+    }
+];
+
 // Verified Lightning Safe Shelters
 const LIGHTNING_SHELTERS = [
     {
@@ -214,7 +275,7 @@ const I18N = {
         navSOS: "Smart SOS & Offline Hub",
         navResources: "Resource Inventory",
         navLeaderboard: "District Health Ranking",
-        navFarmer: "Kisan Mode & Mandi AI",
+        navDetection: "Multi-Source Detection & Drones",
         navCitizen: "Citizen Incident Reports",
         navAnalytics: "Meteorological Trends",
         navMap: "Hazard & Rescue Map",
@@ -223,13 +284,13 @@ const I18N = {
         navCompare: "District Compare",
         navTravel: "Highway Route Safety",
         systemTitle: "DDMA Command Cell",
-        systemDesc: "Autonomous disaster prediction, rescue ops dispatch & climate intelligence.",
+        systemDesc: "Autonomous disaster prediction, rescue ops dispatch & multi-source drone recon.",
         searchBtn: "Search District",
         myLocation: "GPS",
         heroTag: "✦ DISTRICT DISASTER INTELLIGENCE & CRISIS COMMAND SYSTEM",
         heroTitle1: "District Command &",
         heroTitle2: "Disaster AI.",
-        heroDesc: "Hyperlocal risk modeling, District Digital Twins, Lightning Strike Prediction, Smart SOS dispatch, and autonomous Rescue Team coordination for District Magistrates and Emergency Responders.",
+        heroDesc: "Hyperlocal risk modeling, District Digital Twins, Multi-Source Flood Detection, Autonomous Drone Reconnaissance, Smart SOS dispatch, and NDRF Rescue Team coordination.",
         exploreBtn: "Explore Meteorology →",
         rescueOpsBtn: "NDRF Rescue Ops",
         quickSos: "Emergency SOS",
@@ -294,19 +355,22 @@ const I18N = {
         safestDistrict: "LOWEST FLOOD RISK",
         rankingTableSub: "REGIONAL SCORECARD",
         rankingTableTitle: "Regional Districts Live Health Index",
-        farmerSub: "AGRICULTURE INTELLIGENCE & KRISHI COPILOT",
-        farmerTitle: "Kisan Smart Advisor & Mandi Price AI (किसान मित्र)",
-        farmerDesc: "Crop-specific weather intelligence, soil moisture modeling, spraying viability, wholesale Mandi price predictions, and PMFBY crop loss claim readiness.",
-        selectCrop: "Select Crop (फसल चुनें):",
-        cropWheat: "Wheat (गेहूं)",
-        cropRice: "Paddy (धान)",
-        cropMustard: "Mustard (सरसों)",
-        cropSugarcane: "Sugarcane (गन्ना)",
-        cropVegetables: "Vegetables (सब्जियां)",
-        cropAdvisorySub: "CROP-SPECIFIC AI GUIDANCE",
-        sprayWindow: "Spray Window (स्प्रे का सही समय)",
-        irrigationNeed: "Irrigation Need (सिंचाई की जरूरत)",
-        diseaseRisk: "Pest & Fungus Risk (रोग खतरा)",
+        detectionSub: "MULTI-SOURCE TELEMETRY & AERIAL RECONNAISSANCE",
+        detectionTitle: "Multi-Source Disaster Detection & Drone Reconnaissance AI",
+        detectionDesc: "Automated data fusion combining Satellite Inundation Imagery, IoT River Gauges, Pre-Registered Village Risk Database, UAV Drone Reconnaissance, and Zero-Network Alternative Comms to compute real-time AI Village Rescue Priority Scores.",
+        sensorSat: "SATELLITE RADAR",
+        sensorRiver: "RIVER WATER GAUGES",
+        sensorDrone: "DRONE RECON FLEET",
+        sensorRadio: "ALT RADIO & SAT-COM",
+        villageRiskSub: "PRE-REGISTERED ASSET INVENTORY & VULNERABILITY MAPPING",
+        villageRiskHeading: "Pre-Registered Village Risk Database & AI Priority Score",
+        thVillage: "Village & Block",
+        thPop: "Population & Vulnerable",
+        thRiver: "River & Rain Threat",
+        thAssets: "Critical Assets & Shelters",
+        thDroneStatus: "Drone Recon Status",
+        thPriorityScore: "AI Rescue Priority",
+        thAction: "Tactical Action",
         citizenSub: "CIVIC DISASTER CROWDSOURCING",
         citizenTitle: "Citizen Weather & Hazard Report",
         citizenDesc: "Report real-time local hazards (Waterlogging, Fallen Trees, Hail, Power Outages) to alert district teams.",
@@ -343,21 +407,21 @@ const I18N = {
         currentAlerts: "Current Hazard Bulletins",
         aiSub: "ARTIFICIAL INTELLIGENCE",
         aiTitle: "SkyCast AI Disaster Copilot (DM Executive Advisory)",
-        aiDesc: "Ask intelligent questions about disaster triage, high-risk zones, rescue deployment priorities, travel viability, and agriculture.",
+        aiDesc: "Ask intelligent questions about disaster triage, high-risk zones, rescue deployment priorities, travel viability, and drone reconnaissance.",
         copilotTitle: "Disaster & Weather Copilot",
         copilotSub: "Powered by SkyCast Intelligence Engine",
         askBtn: "Ask AI",
         qHighRisk: "Highest Risk Area?",
         qRescuePriority: "Rescue Priority?",
         qLightningShelter: "Lightning Shelter?",
-        quickKisan: "Krishi Guide",
+        quickKisan: "Village Risk Score",
         quickTravel: "Travel Safety",
         aiHeading: "Autonomous disaster reasoning.",
-        aiParagraph: "SkyCast AI synthesizes thermodynamic atmospheric modeling with geospatial rescue logistics to deliver instant operational clarity to District Magistrates and field commanders.",
-        feat1: "Autonomous incident triage by lives at risk",
-        feat2: "Weather-aware safe evacuation route generation",
-        feat3: "Thermodynamic CAPE lightning strike prediction",
-        feat4: "Bilingual natural speech response in English & Hindi",
+        aiParagraph: "SkyCast AI synthesizes thermodynamic atmospheric modeling with multi-source drone reconnaissance to deliver instant operational clarity to District Magistrates and field commanders.",
+        feat1: "Multi-Source Satellite + River IoT + Drone fusion",
+        feat2: "Pre-registered village risk registry & asset mapping",
+        feat3: "Autonomous Drone Reconnaissance (Thermal FLIR)",
+        feat4: "Zero-Network VHF/Satellite tactical radio comms",
         compareSub: "WEATHER COMPARISON",
         compareTitle: "Compare Regional Districts",
         compareDesc: "Head-to-head comparison of temperature, humidity, wind, and overall atmospheric comfort.",
@@ -378,7 +442,7 @@ const I18N = {
         tip4: "Visibility and smog conditions on expressway",
         tip5: "Ask SkyCast AI for custom route guidance",
         waModalTitle: "DISTRICT EMERGENCY BROADCAST DISPATCH",
-        waModalSub: "Gram Pradhan & Farmer Community Early Warning",
+        waModalSub: "Gram Pradhan & Community Early Warning",
         waModalNote: "Pre-formatted bilingual emergency message for WhatsApp groups and SMS gateway.",
         broadcastMsgLabel: "Broadcast Alert Message (प्रसारण संदेश):",
         openWhatsApp: "Send on WhatsApp",
@@ -394,7 +458,7 @@ const I18N = {
         navSOS: "स्मार्ट SOS व ऑफलाइन",
         navResources: "संसाधन इन्वेंटरी",
         navLeaderboard: "जिला स्वास्थ्य रैंकिंग",
-        navFarmer: "किसान मित्र व मंडी AI",
+        navDetection: "मल्टी-सोर्स आपदा पहचान व ड्रोन",
         navCitizen: "नागरिक आपदा रिपोर्टिंग",
         navAnalytics: "मौसम विश्लेषण चार्ट्स",
         navMap: "मौसम व रेस्क्यू मानचित्र",
@@ -403,13 +467,13 @@ const I18N = {
         navCompare: "जिलों की तुलना",
         navTravel: "हाईवे यात्रा योजना",
         systemTitle: "डीडीएमए कमांड सेल",
-        systemDesc: "स्वचालित आपदा पूर्वानुमान, रेस्क्यू टीम समन्वय एवं जल संरक्षण मॉडल।",
+        systemDesc: "स्वचालित आपदा पूर्वानुमान, रेस्क्यू टीम समन्वय एवं मल्टी-सोर्स ड्रोन सर्विलांस।",
         searchBtn: "जिला खोजें",
         myLocation: "जीपीएस",
         heroTag: "✦ जिला आपदा इंटेलिजेंस एवं आपातकालीन कमांड सिस्टम",
         heroTitle1: "जिला आपदा प्रबंधन,",
         heroTitle2: "AI संचालित।",
-        heroDesc: "हाइपरलोकल जोखिम मॉडलिंग, डिजिटल ट्विन, आकाशीय बिजली पूर्वानुमान, स्मार्ट SOS और स्वचालित रेस्क्यू टीम समन्वय।",
+        heroDesc: "हाइपरलोकल जोखिम मॉडलिंग, डिजिटल ट्विन, उपग्रह व नदी गेज सेंसर, स्वायत्त ड्रोन सर्वेक्षण और स्मार्ट SOS रेस्क्यू समन्वय।",
         exploreBtn: "मौसम देखें →",
         rescueOpsBtn: "एनडीआरएफ रेस्क्यू",
         quickSos: "आपातकालीन SOS",
@@ -474,19 +538,22 @@ const I18N = {
         safestDistrict: "न्यूनतम बाढ़/आपदा जोखिम",
         rankingTableSub: "क्षेत्रीय स्कोरकार्ड",
         rankingTableTitle: "क्षेत्रीय जिलों का लाइव स्वास्थ्य सूचकांक",
-        farmerSub: "स्मार्ट कृषि प्रणाली एवं कृषक कोपायलट",
-        farmerTitle: "किसान स्मार्ट मित्र एवं मंडी भाव AI",
-        farmerDesc: "फसल-विशिष्ट मौसम पूर्वानुमान, मिट्टी की नमी, कीटनाशक स्प्रे का सही समय, मंडी भाव रुझान और पीएमएफबीवाई फसल बीमा क्लेम सलाह।",
-        selectCrop: "अपनी फसल चुनें:",
-        cropWheat: "गेहूं (Wheat)",
-        cropRice: "धान (Paddy)",
-        cropMustard: "सरसों (Mustard)",
-        cropSugarcane: "गन्ना (Sugarcane)",
-        cropVegetables: "सब्जियां (Vegetables)",
-        cropAdvisorySub: "फसल-विशिष्ट AI सलाह",
-        sprayWindow: "कीटनाशक स्प्रे का सही समय",
-        irrigationNeed: "सिंचाई की आवश्यकता",
-        diseaseRisk: "कीट एवं फफूंद रोग खतरा",
+        detectionSub: "मल्टी-सोर्स टेलीमेट्री एवं हवाई ड्रोन सर्वेक्षण",
+        detectionTitle: "मल्टी-सोर्स आपदा पहचान एवं ड्रोन सर्वेक्षण AI",
+        detectionDesc: "उपग्रह डेटा, नदी जल स्तर सेंसर, पंजीकृत गांव डेटाबेस, ड्रोन थर्मल कैमरे और शून्य-नेटवर्क रेडियो संचार का उपयोग करके AI रेस्क्यू स्कोर की गणना।",
+        sensorSat: "उपग्रह रडार",
+        sensorRiver: "नदी जल स्तर सेंसर",
+        sensorDrone: "ड्रोन सर्विलांस बेड़ा",
+        sensorRadio: "वैकल्पिक रेडियो व सैटकॉम",
+        villageRiskSub: "पंजीकृत संपत्ति सूची एवं संवेदनशीलता मैपिंग",
+        villageRiskHeading: "पंजीकृत गांव जोखिम डेटाबेस एवं AI रेस्क्यू प्राथमिकता",
+        thVillage: "गांव व ब्लॉक",
+        thPop: "कुल व संवेदनशील आबादी",
+        thRiver: "नदी व वर्षा खतरा",
+        thAssets: "महत्वपूर्ण स्थल व आश्रय",
+        thDroneStatus: "ड्रोन सर्वेक्षण स्थिति",
+        thPriorityScore: "AI रेस्क्यू प्राथमिकता",
+        thAction: "प्रशासनिक कार्रवाई",
         citizenSub: "नागरिक आपदा क्राउडसोर्सिंग",
         citizenTitle: "नागरिक मौसम एवं आपदा रिपोर्टिंग",
         citizenDesc: "जलभराव, गिरे पेड़, टूटे बिजली के तार और ओलावृष्टि की तुरंत रिपोर्ट दर्ज करें।",
@@ -523,21 +590,21 @@ const I18N = {
         currentAlerts: "वर्तमान आपदा बुलेटिन",
         aiSub: "आर्टिफिशियल इंटेलिजेंस",
         aiTitle: "स्काईकास्ट AI आपदा कोपायलट (डीएम सलाहकार)",
-        aiDesc: "आपदा प्राथमिकता, उच्च-जोखिम क्षेत्र, रेस्क्यू तैनाती और कृषि सलाह के बारे में पूछें।",
+        aiDesc: "आपदा प्राथमिकता, उच्च-जोखिम क्षेत्र, रेस्क्यू तैनाती और ड्रोन सर्वेक्षण के बारे में पूछें।",
         copilotTitle: "आपदा एवं मौसम कोपायलट",
         copilotSub: "स्काईकास्ट इंटेलिजेंस द्वारा संचालित",
         askBtn: "AI से पूछें",
         qHighRisk: "सबसे खतरनाक क्षेत्र?",
         qRescuePriority: "रेस्क्यू प्राथमिकता?",
         qLightningShelter: "सुरक्षित बिजली आश्रय?",
-        quickKisan: "कृषि सलाह",
+        quickKisan: "गांव रेस्क्यू स्कोर",
         quickTravel: "यात्रा सुरक्षा",
         aiHeading: "सटीक और स्वचालित आपदा निर्णय।",
-        aiParagraph: "स्काईकास्ट AI वातावरणीय डेटा और रेस्क्यू लॉजिस्टिक्स का विश्लेषण कर तुरंत व्यावहारिक निर्देश देता है।",
-        feat1: "जीवन जोखिम के आधार पर स्वचालित घटना प्राथमिकता",
-        feat2: "मौसम-अनुकूल सुरक्षित निकासी मार्ग निर्माण",
-        feat3: "थर्मोडायनामिक CAPE वज्रपात पूर्वानुमान",
-        feat4: "हिंदी एवं अंग्रेजी में बोलकर जवाब",
+        aiParagraph: "स्काईकास्ट AI वातावरणीय डेटा, उपग्रह रडार और ड्रोन कैमरों का विश्लेषण कर तुरंत व्यावहारिक निर्देश देता है।",
+        feat1: "उपग्रह + नदी IoT + ड्रोन डेटा फ्यूजन",
+        feat2: "पंजीकृत गांव जोखिम रजिस्ट्री व संपत्ति मैपिंग",
+        feat3: "स्वायत्त ड्रोन सर्वेक्षण (थर्मल FLIR कैमरा)",
+        feat4: "शून्य-नेटवर्क VHF/सैटेलाइट रेडियो संचार",
         compareSub: "मौसम तुलना",
         compareTitle: "जिलों और शहरों की तुलना",
         compareDesc: "दो शहरों के तापमान, नमी, हवा और मौसम की आमने-सामने तुलना करें।",
@@ -623,9 +690,9 @@ function updateLanguageUI() {
     }
 
     if (W?.current) {
-        updateFarmer(W.current, W.forecast);
         updateCommandCenter(W.current, W.forecast);
         updateFiveDayForecast(W.forecast, W.daily);
+        renderVillageRiskMatrix();
     }
 
     renderRescueOps();
@@ -876,6 +943,244 @@ function drawDigitalTwinCanvas(rainfallMm = 120) {
 
 
 /* =========================================================
+   FEATURE: AUTONOMOUS DRONE RECONNAISSANCE CANVAS ENGINE
+========================================================= */
+
+let droneCanvas = null;
+let droneCtx = null;
+let droneScanY = 0;
+let droneAnimId = null;
+
+function drawDroneReconCanvas() {
+    droneCanvas = $("droneReconCanvas");
+    if (!droneCanvas) return;
+    droneCtx = droneCanvas.getContext("2d");
+
+    const w = droneCanvas.clientWidth || 450;
+    const h = 240;
+    const dpr = window.devicePixelRatio || 1;
+    droneCanvas.width = w * dpr;
+    droneCanvas.height = h * dpr;
+    droneCtx.scale(dpr, dpr);
+
+    const draw = () => {
+        if (!droneCtx) return;
+        droneCtx.clearRect(0, 0, w, h);
+
+        if (droneVisionMode === "thermal") {
+            // Thermal FLIR dark purple background
+            const bgGrad = droneCtx.createLinearGradient(0, 0, w, h);
+            bgGrad.addColorStop(0, "#0b0518");
+            bgGrad.addColorStop(1, "#180628");
+            droneCtx.fillStyle = bgGrad;
+            droneCtx.fillRect(0, 0, w, h);
+
+            // Cold water area (dark blue/purple)
+            droneCtx.fillStyle = "rgba(26, 43, 107, 0.75)";
+            droneCtx.fillRect(0, h * 0.45, w, h * 0.55);
+
+            // Submerged building rooftops (warm orange)
+            droneCtx.fillStyle = "#f97316";
+            droneCtx.fillRect(w * 0.18, h * 0.32, 60, 40);
+            droneCtx.fillRect(w * 0.62, h * 0.28, 75, 45);
+
+            // Heat signature of stranded citizens (bright yellow/white FLIR heat spots)
+            droneCtx.fillStyle = "#fde047";
+            for (let i = 0; i < 4; i++) {
+                droneCtx.beginPath();
+                droneCtx.arc(w * 0.22 + (i * 12), h * 0.36, 4, 0, Math.PI * 2);
+                droneCtx.fill();
+            }
+            for (let i = 0; i < 5; i++) {
+                droneCtx.beginPath();
+                droneCtx.arc(w * 0.66 + (i * 11), h * 0.33, 4, 0, Math.PI * 2);
+                droneCtx.fill();
+            }
+
+            // FLIR Thermal HUD text
+            droneCtx.fillStyle = "#fb7185";
+            droneCtx.font = "bold 11px JetBrains Mono, monospace";
+            droneCtx.fillText("● FLIR THERMAL SENSOR: 18 HUMAN HEAT SIGNATURES DETECTED", 14, 24);
+        } else {
+            // HD RGB Daylight Camera View
+            const bgGrad = droneCtx.createLinearGradient(0, 0, w, h);
+            bgGrad.addColorStop(0, "#1e293b");
+            bgGrad.addColorStop(1, "#0f172a");
+            droneCtx.fillStyle = bgGrad;
+            droneCtx.fillRect(0, 0, w, h);
+
+            // Floodwater stream (muddy brown/blue)
+            droneCtx.fillStyle = "rgba(40, 70, 95, 0.85)";
+            droneCtx.fillRect(0, h * 0.45, w, h * 0.55);
+
+            // Rooftops
+            droneCtx.fillStyle = "#64748b";
+            droneCtx.fillRect(w * 0.18, h * 0.32, 60, 40);
+            droneCtx.fillRect(w * 0.62, h * 0.28, 75, 45);
+
+            // Stranded citizens (Red markers)
+            droneCtx.fillStyle = "#e11d48";
+            for (let i = 0; i < 4; i++) {
+                droneCtx.beginPath();
+                droneCtx.arc(w * 0.22 + (i * 12), h * 0.36, 4, 0, Math.PI * 2);
+                droneCtx.fill();
+            }
+
+            droneCtx.fillStyle = "#38bdf8";
+            droneCtx.font = "bold 11px JetBrains Mono, monospace";
+            droneCtx.fillText("● HD RGB CAMERA: 4K OPTICAL STREAM ACTIVE", 14, 24);
+        }
+
+        // Drone Target Crosshairs
+        droneCtx.strokeStyle = "rgba(0, 242, 254, 0.7)";
+        droneCtx.lineWidth = 1.5;
+
+        // Center reticle
+        const cx = w / 2;
+        const cy = h / 2;
+        droneCtx.beginPath();
+        droneCtx.arc(cx, cy, 28, 0, Math.PI * 2);
+        droneCtx.moveTo(cx - 40, cy); droneCtx.lineTo(cx - 10, cy);
+        droneCtx.moveTo(cx + 10, cy); droneCtx.lineTo(cx + 40, cy);
+        droneCtx.moveTo(cx, cy - 40); droneCtx.lineTo(cx, cy - 10);
+        droneCtx.moveTo(cx, cy + 10); droneCtx.lineTo(cx, cy + 40);
+        droneCtx.stroke();
+
+        // Moving UAV Scan line
+        droneCtx.strokeStyle = "rgba(0, 242, 254, 0.45)";
+        droneCtx.lineWidth = 2;
+        droneCtx.beginPath();
+        droneCtx.moveTo(0, droneScanY);
+        droneCtx.lineTo(w, droneScanY);
+        droneCtx.stroke();
+
+        droneScanY += 1.8;
+        if (droneScanY > h) droneScanY = 0;
+
+        droneAnimId = requestAnimationFrame(draw);
+    };
+
+    if (droneAnimId) cancelAnimationFrame(droneAnimId);
+    draw();
+}
+
+
+/* =========================================================
+   FEATURE: MULTI-SOURCE DISASTER DETECTION & VILLAGE RISK
+========================================================= */
+
+function calculateAiRescuePriorityScore(v, currentRainMm = 80, riverSurgeMeters = 3.2) {
+    // Formula combining: Flood Severity + Population Vulnerability + River Surge + History
+    let score = v.baseScore;
+
+    if (currentRainMm >= 120) score += 5;
+    else if (currentRainMm <= 30) score -= 15;
+
+    if (riverSurgeMeters >= 3.0) score += 4;
+
+    return Math.max(15, Math.min(99, Math.round(score)));
+}
+
+function renderVillageRiskMatrix() {
+    const tbody = $("villageTableBody");
+    if (!tbody) return;
+
+    const rainMm = Number($("twinRainSlider")?.value || 80);
+    const riverSurge = activeSimulation === "flood" ? 4.6 : activeSimulation === "storm" ? 3.8 : 2.2;
+
+    setText("satRainTelemetry", `+${rainMm}mm Inundation Risk`);
+    setText("riverGaugeStatus", `Ganga Basin +${riverSurge}m`);
+    setText("riverGaugeWarning", riverSurge >= 3.0 ? "CRITICAL (Above Danger Mark)" : "Normal River Discharge");
+
+    const scored = preRegisteredVillages.map(v => {
+        const priority = calculateAiRescuePriorityScore(v, rainMm, riverSurge);
+        return { ...v, dynamicScore: priority };
+    });
+
+    scored.sort((a, b) => b.dynamicScore - a.dynamicScore);
+
+    tbody.innerHTML = scored.map(v => {
+        const pClass = v.dynamicScore >= 85 ? "danger" : v.dynamicScore >= 70 ? "warning" : "safe";
+        const pLabel = v.dynamicScore >= 85 ? `🚨 P1 CRITICAL (${v.dynamicScore}/100)` : v.dynamicScore >= 70 ? `⚠️ P2 HIGH (${v.dynamicScore}/100)` : `🟢 P3 ROUTINE (${v.dynamicScore}/100)`;
+
+        return `
+            <tr>
+                <td>
+                    <strong>📍 ${v.name}</strong>
+                    <small style="display:block; color:var(--text-muted); font-size:11px;">${v.block}</small>
+                </td>
+                <td>
+                    <b>${v.population.toLocaleString()}</b>
+                    <small style="display:block; color:var(--rose); font-size:11px;">(${v.vulnerable} Elderly / Children)</small>
+                </td>
+                <td>
+                    <b>${v.riverProximity}</b>
+                    <small style="display:block; color:var(--amber); font-size:11px;">${v.floodHistory}</small>
+                </td>
+                <td>
+                    <span style="font-size:12px; color:var(--text-secondary);">${v.assets}</span>
+                </td>
+                <td>
+                    <span class="status-pill ${v.droneStatus.includes('Active') ? 'danger' : 'warning'}">${v.droneStatus}</span>
+                </td>
+                <td>
+                    <span class="status-pill ${pClass}">${pLabel}</span>
+                </td>
+                <td>
+                    <button class="btn btn-primary" style="padding:6px 12px; font-size:11.5px;" onclick="dispatchReconDrone('${v.id}')">
+                        🚁 Recon Drone →
+                    </button>
+                </td>
+            </tr>
+        `;
+    }).join("");
+}
+
+function dispatchReconDrone(villageId) {
+    const v = preRegisteredVillages.find(x => x.id === villageId) || preRegisteredVillages[0];
+    selectedDroneTarget = villageId;
+
+    setText("droneTargetVillage", v.droneTargetName);
+    const select = $("droneTargetSelect");
+    if (select) select.value = villageId;
+
+    drawDroneReconCanvas();
+    triggerEmergencySiren(1.5);
+
+    alert(currentLanguage === "hi"
+        ? `🚁 टोही ड्रोन (Recon Drone #4) को ${v.name} के लिए रवाना किया गया! 4K थर्मल FLIR कैमरा सक्रिय।`
+        : `🚁 Reconnaissance Drone Squadron deployed to ${v.name}! Live Thermal FLIR aerial feed streaming to DDMA console.`);
+}
+
+function broadcastRadioChirp() {
+    const msg = $("radioMsgInput")?.value?.trim() || "Emergency radio broadcast to all Gram Panchayats.";
+
+    // Play quick radio transmission beep
+    try {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) {
+            const ctx = new AudioContextClass();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(880, ctx.currentTime);
+            osc.frequency.setValueAtTime(1760, ctx.currentTime + 0.1);
+            gain.gain.setValueAtTime(0.2, ctx.currentTime);
+            gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.35);
+        }
+    } catch (e) {}
+
+    alert(currentLanguage === "hi"
+        ? `📻 आपातकालीन रेडियो संदेश VHF CH-16 एवं सैटकॉम हैंडहेल्ड्स पर प्रसारित किया गया:\n\n"${msg}"`
+        : `📻 EMERGENCY RADIO TRANSMISSION BROADCASTED on VHF CH-16 and Satellite PTT Handsets:\n\n"${msg}"`);
+}
+
+
+/* =========================================================
    PWA & SERVICE WORKER ENGINE
 ========================================================= */
 
@@ -1045,6 +1350,7 @@ function updateDigitalTwin(rainfallMm) {
     }
 
     drawDigitalTwinCanvas(rainfallMm);
+    renderVillageRiskMatrix();
 
     // Update Digital Twin overlay on Leaflet Map
     if (weatherMap && W?.current) {
@@ -1366,10 +1672,10 @@ function generateEmergencyBroadcastText() {
     const dateStr = new Date().toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 
     if (currentLanguage === "hi") {
-        return `🚨 *स्काईकास्ट जिला आपदा एवं मौसम अलर्ट* 🚨\n📍 *जिला:* ${place} (${dateStr})\n\n🌡️ *वर्तमान तापमान:* ${temp}°C\n🌧️ *बारिश की संभावना:* ${Math.round(rain)}%\n⚡ *वज्रपात (Lightning) CAPE:* ${skycastLightningCape} J/kg (${skycastLightningRisk}% खतरा)\n💨 *हवा की गति:* ${Math.round(cur.wind.speed * 3.6)} km/h\n🌫️ *वायु गुणवत्ता (AQI):* ${aqi}\n\n⚠️ *प्रशासनिक एवं किसान एडवाइजरी:*\n• ${rain >= 60 ? "भारी वर्षा की चेतावनी! निचले इलाकों में जलभराव से सतर्क रहें।" : "मौसम सामान्य है, नियमित गतिविधियां जारी रखें।"}\n• ${skycastLightningRisk >= 60 ? "आकाशीय बिजली का खतरा! तुरंत पक्के मकान में शरण लें।" : "बिजली का खतरा कम है।"}\n• ${cur.main.temp >= 40 ? "भीषण लू का अलर्ट! दोपहर में धूप से बचें और ओआरएस लें।" : "तापमान अनुकूल बना हुआ है।"}\n• किसान भाई कीटनाशक स्प्रे एवं सिंचाई स्काईकास्ट किसान मॉडल अनुसार ही करें।\n\n- *जिला आपदा प्रबंधन प्राधिकरण (DDMA)*\n🌐 लाइव पोर्टल: SkyCast AI`;
+        return `🚨 *स्काईकास्ट जिला आपदा एवं मौसम अलर्ट* 🚨\n📍 *जिला:* ${place} (${dateStr})\n\n🌡️ *वर्तमान तापमान:* ${temp}°C\n🌧️ *बारिश की संभावना:* ${Math.round(rain)}%\n⚡ *वज्रपात (Lightning) CAPE:* ${skycastLightningCape} J/kg (${skycastLightningRisk}% खतरा)\n💨 *हवा की गति:* ${Math.round(cur.wind.speed * 3.6)} km/h\n🌫️ *वायु गुणवत्ता (AQI):* ${aqi}\n\n⚠️ *प्रशासनिक एवं ग्राम पंचायत एडवाइजरी:*\n• ${rain >= 60 ? "भारी वर्षा की चेतावनी! निचले इलाकों में जलभराव से सतर्क रहें।" : "मौसम सामान्य है, नियमित गतिविधियां जारी रखें।"}\n• ${skycastLightningRisk >= 60 ? "आकाशीय बिजली का खतरा! तुरंत पक्के मकान में शरण लें।" : "बिजली का खतरा कम है।"}\n• ${cur.main.temp >= 40 ? "भीषण लू का अलर्ट! दोपहर में धूप से बचें और ओआरएस लें।" : "तापमान अनुकूल बना हुआ है।"}\n• ड्रोन सर्विलांस एवं NDRF टीमें हाई अलर्ट पर हैं।\n\n- *जिला आपदा प्रबंधन प्राधिकरण (DDMA)*\n🌐 लाइव पोर्टल: SkyCast AI`;
     }
 
-    return `🚨 *SKYCAST DISTRICT DISASTER & WEATHER ALERT* 🚨\n📍 *District:* ${place} (${dateStr})\n\n🌡️ *Temperature:* ${temp}°C (Feels like ${Math.round(cur.main.feels_like)}°C)\n🌧️ *Precipitation Risk:* ${Math.round(rain)}%\n⚡ *Lightning Instability CAPE:* ${skycastLightningCape} J/kg (${skycastLightningRisk}% Risk)\n💨 *Wind Speed:* ${Math.round(cur.wind.speed * 3.6)} km/h\n🌫️ *Air Quality Index:* ${aqi}\n\n⚠️ *DDMA ADVISORY FOR GRAM PANCHAYATS:*\n• ${rain >= 60 ? "HEAVY DOWNPOUR ALERT! Keep dewatering pumps and drain paths cleared." : "Weather stable. Normal agricultural & public operations permitted."}\n• ${skycastLightningRisk >= 60 ? "SEVERE LIGHTNING RISK! Seek shelter in concrete structures immediately." : "Low lightning risk."}\n• ${cur.main.temp >= 40 ? "SEVERE HEATWAVE! Maintain hydration and cooling wards." : "Moderate thermal conditions."}\n• Farmers are advised to consult Kisan AI for pesticide spray timings.\n\n- *Office of District Disaster Management Authority*\n🌐 Portal: SkyCast AI Intelligence`;
+    return `🚨 *SKYCAST DISTRICT DISASTER & WEATHER ALERT* 🚨\n📍 *District:* ${place} (${dateStr})\n\n🌡️ *Temperature:* ${temp}°C (Feels like ${Math.round(cur.main.feels_like)}°C)\n🌧️ *Precipitation Risk:* ${Math.round(rain)}%\n⚡ *Lightning Instability CAPE:* ${skycastLightningCape} J/kg (${skycastLightningRisk}% Risk)\n💨 *Wind Speed:* ${Math.round(cur.wind.speed * 3.6)} km/h\n🌫️ *Air Quality Index:* ${aqi}\n\n⚠️ *DDMA ADVISORY FOR GRAM PANCHAYATS:*\n• ${rain >= 60 ? "HEAVY DOWNPOUR ALERT! Keep dewatering pumps and drain paths cleared." : "Weather stable. Normal operations permitted."}\n• ${skycastLightningRisk >= 60 ? "SEVERE LIGHTNING RISK! Seek shelter in concrete structures immediately." : "Low lightning risk."}\n• ${cur.main.temp >= 40 ? "SEVERE HEATWAVE! Maintain hydration and cooling wards." : "Moderate thermal conditions."}\n• Autonomous Recon Drones and NDRF Boats on active standby.\n\n- *Office of District Disaster Management Authority*\n🌐 Portal: SkyCast AI Intelligence`;
 }
 
 function openWhatsAppDispatch() {
@@ -1430,7 +1736,7 @@ function renderDistrictLeaderboard() {
     setText("cleanestDistrictAqi", `AQI ${cleanest.aqi} (${getAQIStatus(cleanest.aqi)})`);
 
     setText("bestFarmDistrictName", bestAgri.name);
-    setText("bestFarmDistrictScore", currentLanguage === "hi" ? `कृषि स्कोर: ${bestAgri.agriScore}/100` : `Agri Score: ${bestAgri.agriScore}/100`);
+    setText("bestFarmDistrictScore", currentLanguage === "hi" ? `सुरक्षा स्कोर: ${bestAgri.agriScore}/100` : `Safety Score: ${bestAgri.agriScore}/100`);
 
     setText("safestDistrictName", safest.name);
     setText("safestDistrictRisk", currentLanguage === "hi" ? `बाढ़ जोखिम: ${safest.rainRisk}%` : `Flood Risk: ${safest.rainRisk}%`);
@@ -1497,9 +1803,9 @@ function playVoiceBulletin(textToSpeak = null) {
         const rain = getRainProbability(W.forecast);
 
         if (currentLanguage === "hi") {
-            message = `स्काईकास्ट जिला आपदा एवं मौसम बुलेटिन। ${place} में वर्तमान तापमान ${temp} डिग्री सेल्सियस है, जो महसूस ${feel} डिग्री जैसा हो रहा है। बारिश की संभावना ${Math.round(rain)} प्रतिशत है। वज्रपात अस्थिरता स्कोर ${skycastLightningCape} जूल प्रति किलोग्राम है। सभी रेस्क्यू टीमें अलर्ट पर हैं।`;
+            message = `स्काईकास्ट जिला आपदा एवं मौसम बुलेटिन। ${place} में वर्तमान तापमान ${temp} डिग्री सेल्सियस है, जो महसूस ${feel} डिग्री जैसा हो रहा है। बारिश की संभावना ${Math.round(rain)} प्रतिशत है। उपग्रह एवं ड्रोन सर्विलांस सक्रिय है। सभी रेस्क्यू टीमें अलर्ट पर हैं।`;
         } else {
-            message = `SkyCast District Weather and Disaster Bulletin. In ${place}, the current temperature is ${temp} degrees Celsius, feeling like ${feel} degrees. Rain probability is ${Math.round(rain)} percent with wind speeds of ${Math.round(cur.wind.speed * 3.6)} kilometers per hour. Lightning threat level is ${skycastLightningRisk} percent.`;
+            message = `SkyCast District Weather and Disaster Bulletin. In ${place}, the current temperature is ${temp} degrees Celsius, feeling like ${feel} degrees. Rain probability is ${Math.round(rain)} percent with wind speeds of ${Math.round(cur.wind.speed * 3.6)} kilometers per hour. Multi-source satellite and drone recon fleet active.`;
         }
     }
 
@@ -1858,11 +2164,12 @@ async function loadWeather(city) {
         updateFiveDayForecast(forecast, data.daily);
         updateHourlyForecast(forecast);
         updateAnalyticsCharts(forecast);
-        updateFarmer(current, forecast);
         updateAlerts(current, forecast);
         updateCommandCenter(current, forecast);
         renderRescueOps();
         renderDistrictLeaderboard();
+        renderVillageRiskMatrix();
+        drawDroneReconCanvas();
         updateDigitalTwin(Number($("twinRainSlider")?.value || 120));
 
         updateWeatherMap(current.coord.lat, current.coord.lon, place, current);
@@ -1896,8 +2203,8 @@ async function loadWeather(city) {
         const aiAns = $("answer");
         if (aiAns) {
             aiAns.textContent = currentLanguage === "hi"
-                ? `✦ स्काईकास्ट AI ${place} आपदा नियंत्रण के लिए तैयार है (${Math.round(current.main.temp)}°C, ${capitalize(current.weather[0].description)})। 4 रेस्क्यू टीमें स्टैंडबाय पर हैं। नीचे कोई भी प्रश्न पूछें!`
-                : `✦ SkyCast AI Autonomous Disaster Hub ready for ${place} (${Math.round(current.main.temp)}°C, ${capitalize(current.weather[0].description)}). 4 Rescue Units ready on standby. Ask any operational query below!`;
+                ? `✦ स्काईकास्ट AI ${place} आपदा नियंत्रण के लिए तैयार है (${Math.round(current.main.temp)}°C, ${capitalize(current.weather[0].description)})। उपग्रह, नदी गेज व ड्रोन सर्विलांस सक्रिय हैं। नीचे कोई भी प्रश्न पूछें!`
+                : `✦ SkyCast AI Autonomous Disaster Hub ready for ${place} (${Math.round(current.main.temp)}°C, ${capitalize(current.weather[0].description)}). Satellite telemetry and 4 Recon Drone Squadrons active. Ask any operational query below!`;
         }
 
     } catch (error) {
@@ -2132,99 +2439,15 @@ function exportDistrictBulletin() {
             </div>
 
             <div class="bulletin-section">
-                <h4>3. SECTORAL & KRISHI DIRECTIVES</h4>
-                <p>• <b>Education:</b> Schools permitted normal operation with compulsory hydration stations.</p>
-                <p>• <b>Agriculture:</b> Farmers advised to align pesticide spraying windows with SkyCast Kisan AI.</p>
+                <h4>3. MULTI-SOURCE SENSOR & DRONE RECONNAISSANCE</h4>
+                <p>• <b>Satellite Radar Stream:</b> Sentinel-3 & INSAT Precipitation Inundation Grid Synced.</p>
+                <p>• <b>UAV Drone Squadron:</b> 4 Recon Drones active with Thermal Infrared FLIR sensors.</p>
+                <p>• <b>Alternative VHF Comms:</b> 100% Zero-Tower Mesh active across Gram Panchayats.</p>
             </div>
         `;
     }
 
     $("printBulletinModal")?.classList.remove("hidden");
-}
-
-
-/* =========================================================
-   FARMER / KISAN SMART ADVISORY
-========================================================= */
-
-const CROP_GUIDANCE = {
-    wheat: {
-        nameEn: "Wheat (गेहूं)",
-        nameHi: "गेहूं (Wheat)",
-        idealTemp: "15°C - 25°C",
-        adviceEn: "🌾 Wheat Advisory: Maintain light irrigation during flowering stage. Inspect leaf undersides for Yellow Rust if humidity exceeds 80%. Postpone pesticide spray if rain probability > 40%.",
-        adviceHi: "🌾 गेहूं फसल सलाह: कल्ले निकलते समय हल्की सिंचाई करें। यदि हवा में नमी 80% से अधिक है तो 'पीला रतुआ' (Yellow Rust) की निगरानी करें। 40% से अधिक बारिश की संभावना होने पर कीटनाशक स्प्रे टालें।"
-    },
-    rice: {
-        nameEn: "Paddy / Rice (धान)",
-        nameHi: "धान (Paddy/Rice)",
-        idealTemp: "24°C - 35°C",
-        adviceEn: "🌱 Paddy Advisory: Maintain 2-3 cm standing water in field. Avoid nitrogen top-dressing during heavy rain forecasts to prevent leaching.",
-        adviceHi: "🌱 धान फसल सलाह: खेत में 2-3 सेमी पानी बनाए रखें। भारी बारिश के पूर्वानुमान के दौरान यूरिया/नाइट्रोजन डालने से बचें ताकि खाद बहने से बचे।"
-    },
-    mustard: {
-        nameEn: "Mustard (सरसों)",
-        nameHi: "सरसों (Mustard)",
-        idealTemp: "15°C - 25°C",
-        adviceEn: "🌼 Mustard Advisory: Cloudy and humid weather increases Aphid (माहू) infestation risk. Apply spray only when wind speed is under 15 km/h.",
-        adviceHi: "🌼 सरसों फसल सलाह: बादलयुक्त और नम मौसम में 'माहू' कीट का प्रकोप बढ़ सकता है। जब हवा की गति 15 km/h से कम हो तभी कीटनाशक का छिड़काव करें।"
-    },
-    sugarcane: {
-        nameEn: "Sugarcane (गन्ना)",
-        nameHi: "गन्ना (Sugarcane)",
-        idealTemp: "25°C - 38°C",
-        adviceEn: "🎋 Sugarcane Advisory: Ensure proper soil earthing up before high wind storms to prevent lodging. Provide regular irrigation during high heat.",
-        adviceHi: "🎋 गन्ना फसल सलाह: तेज आंधी से पहले गन्ने की बंधाई और मिट्टी चढ़ाने का कार्य पूरा करें ताकि फसल गिरे नहीं। तेज गर्मी में नियमित सिंचाई करें।"
-    },
-    vegetables: {
-        nameEn: "Vegetables (सब्जियां)",
-        nameHi: "सब्जियां (Vegetables)",
-        idealTemp: "18°C - 30°C",
-        adviceEn: "🥦 Vegetable Advisory: High humidity causes fungal fruit rot and damping off. Ensure excellent drainage and harvest mature vegetables prior to rain.",
-        adviceHi: "🥦 सब्जी फसल सलाह: अधिक नमी के कारण फफूंद एवं गलन रोग का खतरा रहता है। जल निकासी की समुचित व्यवस्था रखें और बारिश से पहले पकी सब्जियों की तुड़ाई कर लें।"
-    }
-};
-
-function updateFarmer(current, forecast) {
-    const rain = getRainProbability(forecast);
-    const temp = Math.round(current.main.temp);
-    const hum = current.main.humidity;
-    const wind = Math.round(current.wind.speed * 3.6);
-
-    const cropData = CROP_GUIDANCE[currentCrop] || CROP_GUIDANCE.wheat;
-    const titleText = currentLanguage === "hi" ? `${cropData.nameHi} कृषि सलाह` : `${cropData.nameEn} Agriculture Advisory`;
-    setText("cropTitle", titleText);
-
-    let specificAdvice = currentLanguage === "hi" ? cropData.adviceHi : cropData.adviceEn;
-
-    let sprayStatusText = currentLanguage === "hi" ? "✅ उपयुक्त समय (IDEAL)" : "✅ IDEAL";
-    if (rain >= 50 || wind >= 22) {
-        sprayStatusText = currentLanguage === "hi" ? "❌ छिड़काव न करें (UNFAVORABLE)" : "❌ UNFAVORABLE";
-    } else if (rain >= 25 || wind >= 15) {
-        sprayStatusText = currentLanguage === "hi" ? "⚠️ सावधानीपूर्वक (CAUTION)" : "⚠️ CAUTION";
-    }
-    setText("sprayStatus", sprayStatusText);
-
-    let irrText = currentLanguage === "hi" ? "मध्यम आवश्यकता" : "MODERATE";
-    if (rain >= 60) {
-        irrText = currentLanguage === "hi" ? "🚫 सिंचाई रोकें (NO NEED)" : "🚫 POSTPONE";
-    } else if (temp >= 38 || hum <= 30) {
-        irrText = currentLanguage === "hi" ? "⚡ तुरंत सिंचाई करें (HIGH)" : "⚡ HIGH NEED";
-    }
-    setText("irrigationStatus", irrText);
-
-    let disText = currentLanguage === "hi" ? "कम जोखिम" : "LOW RISK";
-    if (hum >= 85 && temp >= 22) {
-        disText = currentLanguage === "hi" ? "⚠️ फफूंद/कीट चेतावनी (HIGH)" : "⚠️ HIGH (FUNGAL)";
-    }
-    setText("diseaseStatus", disText);
-
-    setText("farmer", specificAdvice);
-    setText("farmerAdvice", specificAdvice);
-    setText("farmTemp", temp + "°C");
-    setText("farmHumidity", hum + "%");
-    setText("farmRain", Math.round(rain) + "%");
-    setText("farmWind", wind + " km/h");
 }
 
 
@@ -2828,25 +3051,25 @@ function synthesizeAIResponse(question, weather) {
 
     if (currentLanguage === "hi") {
         if (q.includes("high-risk") || q.includes("खतरनाक") || q.includes("area") || q.includes("क्षेत्र")) {
-            return `🚨 AI जिला जोखिम विश्लेषण (${place}):\nसबसे संवेदनशील क्षेत्र **River Basin Low-Lying Ward** और **North Tehsil** हैं जहाँ बारिश की संभावना ${Math.round(rain)}% है। इन क्षेत्रों में Team Alpha (नाव एवं गोताखोर) को अलर्ट पर रखा गया है।`;
+            return `🚨 AI जिला जोखिम विश्लेषण (${place}):\nसबसे संवेदनशील क्षेत्र **Village Katri Shankarpur** (River Low-Lying Sector) और **River Basin Ward** हैं जहाँ बारिश की संभावना ${Math.round(rain)}% है। इन क्षेत्रों में Recon Drone और NDRF Team Alpha (नाव एवं गोताखोर) सक्रिय हैं।`;
         }
         if (q.includes("rescue") || q.includes("pehle") || q.includes("priority") || q.includes("कहाँ")) {
-            return `🧭 AI रेस्क्यू प्राथमिकता सिफारिश:\n1. **Priority 1**: Incident #INC-101 (River Basin Low-Lying Drainage)। NDRF Team Alpha स्टैंडबाय पर है।\n2. **Priority 2**: Labor Colony एवं सिविल लाइन्स में मेडिकल एम्बुलेंस (Team Bravo)।\n3. **Priority 3**: Collectorate Road पर गिरे पेड़ की निकासी (Team Charlie)।`;
+            return `🧭 AI रेस्क्यू प्राथमिकता सिफारिश:\n1. **Priority 1 (Score 94/100)**: Village Katri Shankarpur — छत पर 18 नागरिक फंसे (NDRF Team Alpha).\n2. **Priority 2 (Score 82/100)**: Village Bithoor Khurd — प्राथमिक स्वास्थ्य केंद्र जलभराव (Team Bravo).\n3. **Priority 3 (Score 74/100)**: Village Shivrajpur नहर उफान निगरानी (Team Charlie)।`;
         }
         if (q.includes("lightning") || q.includes("बिजली") || q.includes("shelter") || q.includes("आश्रय")) {
             return `⚡ वज्रपात सुरक्षा AI सलाह:\nवर्तमान में CAPE सूचकांक **${skycastLightningCape} J/kg** है (${skycastLightningRisk}% जोखिम)।\nनिकटतम पक्का सुरक्षित आश्रय: **राजकीय इंटर कॉलेज (0.6 km)** और **ग्रीन पार्क इंडोर स्टेडियम (1.2 km)**। दोनों में तड़ित चालक (Lightning Arrestor) सक्रिय हैं।`;
         }
-        if (q.includes("kisan") || q.includes("खेती") || q.includes("फसल") || q.includes("irrigation")) {
-            return `🌾 किसान AI सलाह (${place}):\nखेत का तापमान ${temp}°C, नमी ${hum}% और बारिश की संभावना ${Math.round(rain)}% है। ${rain >= 50 ? "सिंचाई और कीटनाशक छिड़काव स्थगित रखें।" : "कीटनाशक स्प्रे और सामान्य कृषि कार्यों के लिए मौसम अनुकूल है।"}`;
+        if (q.includes("drone") || q.includes("ड्रोन") || q.includes("village") || q.includes("गांव")) {
+            return `🚁 ड्रोन सर्विलांस AI रिपोर्ट (${place}):\nRecon Drone Squadron ने Katri Shankarpur में 18 नागरिकों की थर्मल पहचान की है। मुख्य संपर्क मार्ग 2.2 मीटर जलमग्न है, सुरक्षित निकासी मार्ग Route 4 से NDRF इनफ्लेटेबल बोट्स को भेजा गया है।`;
         }
-        return `✦ स्काईकास्ट AI जिला आपातकालीन विश्लेषण (${place}):\nतापमान ${temp}°C (${desc}), नमी ${hum}%, हवा ${wind} km/h, CAPE ${skycastLightningCape} J/kg और AQI ${skycastAQI || 85} है। 4 रेस्क्यू टीमें एवं 12 राहत शिविर सक्रिय हैं।`;
+        return `✦ स्काईकास्ट AI जिला आपातकालीन विश्लेषण (${place}):\nतापमान ${temp}°C (${desc}), नमी ${hum}%, हवा ${wind} km/h, CAPE ${skycastLightningCape} J/kg और AQI ${skycastAQI || 85} है। 4 रेस्क्यू टीमें, 4 टोही ड्रोन एवं 12 राहत शिविर सक्रिय हैं।`;
     }
 
     if (q.includes("high-risk") || q.includes("worst") || q.includes("danger") || q.includes("area")) {
-        return `🚨 AI District Vulnerability Assessment for ${place}:\nThe monitored sector is **River Basin Low-Lying Ward** and **North Tehsil** with a ${Math.round(rain)}% rain likelihood. NDRF Team Alpha (Inflatable Boats) is pre-positioned on standby.`;
+        return `🚨 AI District Vulnerability Assessment for ${place}:\nThe monitored sector is **Village Katri Shankarpur** and **River Basin Low-Lying Ward** with a ${Math.round(rain)}% rain likelihood. Recon Drone Squadron #4 and NDRF Team Alpha (Inflatable Boats) are deployed on active standby.`;
     }
     if (q.includes("rescue") || q.includes("priority") || q.includes("dispatch") || q.includes("team")) {
-        return `🧭 AI Autonomous Rescue Triage Plan:\n1. **Priority 1 (Standard)**: River Basin Sector Drainage Monitoring (NDRF Team Alpha).\n2. **Priority 2 (Medical)**: Civil Lines Hospital Corridor Mobile ICUs (SDRF Team Bravo).\n3. **Priority 3 (Debris)**: Highway clearance units on standby (Civil Defense Team Charlie).`;
+        return `🧭 AI Autonomous Rescue Triage Plan:\n1. **Priority 1 (Score 94/100)**: Village Katri Shankarpur — 18 rooftop stranded citizens (NDRF Team Alpha).\n2. **Priority 2 (Score 82/100)**: Village Bithoor Khurd — Mobile trauma & ICU unit (SDRF Team Bravo).\n3. **Priority 3 (Score 74/100)**: Village Shivrajpur — Canal floodgate & tree clearance (Civil Defense Team Charlie).`;
     }
     if (q.includes("lightning") || q.includes("shelter") || q.includes("thunder")) {
         return `⚡ Lightning Safety & Shelter Finder:\nCurrent Convective CAPE is **${skycastLightningCape} J/kg** (${skycastLightningRisk}% strike likelihood).\nNearest verified Grade-A concrete shelters:\n1. **Govt. Senior Secondary Inter College (0.6 km)**\n2. **Green Park Indoor Sports Complex (1.2 km)**\nBoth facilities feature active lightning grounding grids.`;
@@ -2855,7 +3078,7 @@ function synthesizeAIResponse(question, weather) {
         return `✈️ Travel & Highway Safety in ${place}:\nCondition: ${desc} at ${temp}°C with ${wind} km/h wind and ${Math.round(rain)}% rain chance. Expressway and state highway conditions are currently normal.`;
     }
 
-    return `✦ SkyCast AI Comprehensive Assessment for ${place}:\nTemperature: ${temp}°C (${desc}), Humidity: ${hum}%, Wind: ${wind} km/h, Rain likelihood: ${Math.round(rain)}%, CAPE: ${skycastLightningCape} J/kg, AQI: ${skycastAQI || 85}. All 4 NDRF/Civil Defense rescue battalions are deployed on standby.`;
+    return `✦ SkyCast AI Comprehensive Assessment for ${place}:\nTemperature: ${temp}°C (${desc}), Humidity: ${hum}%, Wind: ${wind} km/h, Rain likelihood: ${Math.round(rain)}%, CAPE: ${skycastLightningCape} J/kg, AQI: ${skycastAQI || 85}. All 4 NDRF rescue battalions and 4 UAV Recon Squadrons are deployed on standby.`;
 }
 
 async function askAI(question) {
@@ -2866,7 +3089,7 @@ async function askAI(question) {
         return;
     }
 
-    setText("answer", currentLanguage === "hi" ? "✦ स्काईकास्ट AI जिला आपदा एवं रेस्क्यू डेटा का विश्लेषण कर रहा है..." : "✦ SkyCast AI is computing autonomous disaster dispatch decisions...");
+    setText("answer", currentLanguage === "hi" ? "✦ स्काईकास्ट AI उपग्रह, नदी गेज व ड्रोन डेटा का विश्लेषण कर रहा है..." : "✦ SkyCast AI is computing autonomous disaster dispatch & drone reconnaissance decisions...");
 
     try {
         await new Promise(r => setTimeout(r, 350));
@@ -3129,6 +3352,11 @@ function setupNavigation() {
             if (screenId === "digitalTwinScreen") {
                 drawDigitalTwinCanvas(Number($("twinRainSlider")?.value || 120));
             }
+
+            if (screenId === "detectionScreen") {
+                renderVillageRiskMatrix();
+                drawDroneReconCanvas();
+            }
         });
     });
 }
@@ -3152,6 +3380,8 @@ document.addEventListener("DOMContentLoaded", () => {
     renderRescueOps();
     renderDistrictLeaderboard();
     renderLightningShelters();
+    renderVillageRiskMatrix();
+    drawDroneReconCanvas();
 
     // Language Toggle
     $("langToggle")?.addEventListener("click", toggleLanguage);
@@ -3159,10 +3389,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // Audio Bulletin Buttons
     $("audioBtn")?.addEventListener("click", () => playVoiceBulletin());
     $("heroAudioBtn")?.addEventListener("click", () => playVoiceBulletin());
-    $("readFarmerAudio")?.addEventListener("click", () => {
-        const advice = $("farmerAdvice")?.textContent;
-        playVoiceBulletin(advice);
-    });
 
     // Siren Buttons (WOW Factor)
     $("sirenBtn")?.addEventListener("click", () => triggerEmergencySiren(4));
@@ -3205,6 +3431,33 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+    // Drone Recon Controls
+    $("toggleThermalBtn")?.addEventListener("click", () => {
+        $("toggleThermalBtn")?.classList.add("active");
+        $("toggleRgbBtn")?.classList.remove("active");
+        droneVisionMode = "thermal";
+        drawDroneReconCanvas();
+    });
+
+    $("toggleRgbBtn")?.addEventListener("click", () => {
+        $("toggleRgbBtn")?.classList.add("active");
+        $("toggleThermalBtn")?.classList.remove("active");
+        droneVisionMode = "rgb";
+        drawDroneReconCanvas();
+    });
+
+    $("droneTargetSelect")?.addEventListener("change", (e) => {
+        dispatchReconDrone(e.target.value);
+    });
+
+    $("dispatchDroneBtn")?.addEventListener("click", () => {
+        const targetVal = $("droneTargetSelect")?.value || "katri";
+        dispatchReconDrone(targetVal);
+    });
+
+    // Radio Broadcast Button
+    $("broadcastRadioBtn")?.addEventListener("click", broadcastRadioChirp);
+
     // Quick District Chips Listeners
     document.querySelectorAll(".district-chip").forEach(chip => {
         chip.addEventListener("click", () => {
@@ -3228,7 +3481,6 @@ document.addEventListener("DOMContentLoaded", () => {
     $("heroWaBtn")?.addEventListener("click", openWhatsAppDispatch);
     $("bannerWaBtn")?.addEventListener("click", openWhatsAppDispatch);
     $("cmdWaBtn")?.addEventListener("click", openWhatsAppDispatch);
-    $("shareFarmerWaBtn")?.addEventListener("click", openWhatsAppDispatch);
 
     $("sendWhatsAppBtn")?.addEventListener("click", sendViaWhatsApp);
     $("copySmsBtn")?.addEventListener("click", copySmsText);
@@ -3276,16 +3528,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Export Official Bulletin
     $("exportBulletinBtn")?.addEventListener("click", exportDistrictBulletin);
-
-    // Crop Selector Buttons
-    document.querySelectorAll(".crop-pill").forEach(btn => {
-        btn.addEventListener("click", () => {
-            document.querySelectorAll(".crop-pill").forEach(b => b.classList.remove("active"));
-            btn.classList.add("active");
-            currentCrop = btn.dataset.crop;
-            if (W?.current) updateFarmer(W.current, W.forecast);
-        });
-    });
 
     // Citizen Hazard Form
     $("hazardForm")?.addEventListener("submit", handleCitizenHazardSubmit);
@@ -3337,6 +3579,6 @@ document.addEventListener("DOMContentLoaded", () => {
     $("compareBtn")?.addEventListener("click", compareCities);
     $("travel")?.addEventListener("click", checkTravel);
 
-    // Initial Load (Default District: Varanasi / Kanpur)
+    // Initial Load (Default District: Kanpur)
     loadWeather("Kanpur");
 });
